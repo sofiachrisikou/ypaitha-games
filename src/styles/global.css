@@ -1,0 +1,636 @@
+/* ---------- Reset & base ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --hero-a: #2ec4f1; /* γαλάζιο */
+  --hero-b: #34c759; /* πράσινο */
+  --evz-a: #ff9f2e; /* πορτοκαλί */
+  --evz-b: #34c759; /* πράσινο */
+  --ink: #1f2a44;
+  --paper: #ffffff;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: 'Baloo 2', 'Nunito', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  overflow: hidden;
+  background: #0b1020;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+/* ---------- Stage (καμβάς 1080x1920 που κλιμακώνεται) ---------- */
+.stage-viewport {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #0b1020;
+}
+
+.stage {
+  width: 1080px;
+  height: 1920px;
+  transform-origin: center center;
+  position: relative;
+  overflow: hidden;
+  background: #eef6ff;
+}
+
+/* ---------- Γενικές οθόνες ---------- */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* ---------- Μεγάλα κουμπιά ---------- */
+.big-button {
+  font-size: 52px;
+  font-weight: 800;
+  padding: 34px 70px;
+  border-radius: 44px;
+  color: #fff;
+  box-shadow: 0 12px 0 rgba(0, 0, 0, 0.18), 0 18px 40px rgba(0, 0, 0, 0.18);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  min-height: 120px;
+}
+.big-button:active {
+  transform: translateY(8px);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18), 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+.big-button--primary {
+  background: linear-gradient(180deg, var(--hero-a), var(--hero-b));
+}
+.big-button--neutral {
+  background: linear-gradient(180deg, #8a94a6, #6b7688);
+}
+
+/* ---------- Homepage ---------- */
+.home {
+  padding: 90px 60px 60px;
+  background: radial-gradient(circle at 50% 0%, #dff3ff, #eef6ff 60%);
+  justify-content: flex-start;
+}
+.home__header {
+  text-align: center;
+  margin-bottom: 70px;
+}
+.home__title {
+  font-size: 96px;
+  font-weight: 900;
+  color: var(--ink);
+}
+.home__subtitle {
+  font-size: 46px;
+  color: #5b6b86;
+  margin-top: 16px;
+}
+.home__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+  width: 100%;
+  flex: 1;
+}
+.game-card {
+  flex: 1;
+  border-radius: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  color: #fff;
+  text-align: center;
+  padding: 50px;
+  box-shadow: 0 20px 0 rgba(0, 0, 0, 0.15), 0 30px 60px rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s ease;
+}
+.game-card:active {
+  transform: scale(0.97);
+}
+.game-card--hero {
+  background: linear-gradient(160deg, var(--hero-a), var(--hero-b));
+}
+.game-card--evzoulis {
+  background: linear-gradient(160deg, var(--evz-a), var(--evz-b));
+}
+.game-card__emoji {
+  font-size: 200px;
+  line-height: 1;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.2));
+}
+.game-card__title {
+  font-size: 88px;
+  font-weight: 900;
+}
+.game-card__desc {
+  font-size: 40px;
+  opacity: 0.95;
+}
+.game-card__cta {
+  margin-top: 12px;
+  font-size: 44px;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 16px 48px;
+  border-radius: 999px;
+}
+.game-card__cta--soon {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Κρυφό hotspot για /stats (κάτω αριστερή γωνία) */
+.stats-hotspot {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 130px;
+  height: 130px;
+  opacity: 0;
+}
+
+/* ---------- Intro παιχνιδιού ---------- */
+.intro {
+  justify-content: center;
+  gap: 40px;
+  padding: 80px;
+  text-align: center;
+}
+.intro--hero {
+  background: radial-gradient(circle at 50% 30%, #d6f3ff, #cdeffd 70%);
+}
+.intro__emoji {
+  font-size: 260px;
+  animation: bob 2.2s ease-in-out infinite;
+}
+.intro__title {
+  font-size: 120px;
+  font-weight: 900;
+  color: var(--ink);
+}
+.intro__subtitle {
+  font-size: 54px;
+  color: #3a4a66;
+  margin-bottom: 40px;
+}
+
+/* ---------- Coming soon ---------- */
+.coming-soon {
+  justify-content: center;
+  gap: 40px;
+  text-align: center;
+  padding: 80px;
+}
+.coming-soon--evzoulis {
+  background: radial-gradient(circle at 50% 30%, #ffe9cf, #ffd9a8 70%);
+}
+.coming-soon__emoji {
+  font-size: 260px;
+  animation: bob 2.2s ease-in-out infinite;
+}
+.coming-soon__title {
+  font-size: 110px;
+  font-weight: 900;
+}
+.coming-soon__text {
+  font-size: 60px;
+  color: #6b4e1e;
+  margin-bottom: 40px;
+}
+
+/* ---------- Μπάρα σκορ ---------- */
+.score-bar {
+  width: 100%;
+  height: 140px;
+  flex: 0 0 140px;
+  background: linear-gradient(180deg, #ffffff, #eaf4ff);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 60px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  z-index: 20;
+}
+.score-bar__title {
+  font-size: 56px;
+  font-weight: 900;
+  color: var(--ink);
+}
+.score-bar__right {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+}
+.score-bar__progress,
+.score-bar__score {
+  font-size: 52px;
+  font-weight: 800;
+  background: #fff;
+  padding: 12px 36px;
+  border-radius: 999px;
+  box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.06);
+}
+.score-bar__score {
+  color: #f4a500;
+}
+
+/* ---------- Game body ---------- */
+.game {
+  justify-content: flex-start;
+}
+.game--hero {
+  background: radial-gradient(circle at 50% 40%, #e8fbe9, #d7f4ff);
+}
+.game__body {
+  position: relative;
+  flex: 1;
+  width: 100%;
+}
+
+/* ---------- Mission 1: πιάτο & τρόφιμα ---------- */
+.mission {
+  position: absolute;
+  inset: 0;
+}
+.mission1__title {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 66px;
+  font-weight: 900;
+  color: var(--ink);
+}
+.mission1__hint {
+  position: absolute;
+  top: 120px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 40px;
+  color: #4a6b52;
+}
+
+.plate {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #ffffff, #eef2f6);
+  border: 14px dashed #b9c6d3;
+  box-shadow: inset 0 8px 24px rgba(0, 0, 0, 0.08), 0 16px 40px rgba(0, 0, 0, 0.12);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.plate--glow {
+  border-color: #34c759;
+  box-shadow: inset 0 0 40px rgba(52, 199, 89, 0.4), 0 0 60px 12px rgba(52, 199, 89, 0.6);
+  animation: plate-pulse 0.6s ease;
+}
+.plate__placeholder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 180px;
+  opacity: 0.25;
+}
+.plate__food {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 110px;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+  animation: pop-centered 0.35s ease;
+}
+
+.food {
+  position: absolute;
+  width: 170px;
+  height: 170px;
+  transform: translate(-50%, -50%);
+  border-radius: 40px;
+  background: #ffffff;
+  box-shadow: 0 10px 0 rgba(0, 0, 0, 0.1), 0 14px 30px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  transition: box-shadow 0.15s ease;
+}
+.food__emoji {
+  font-size: 108px;
+  pointer-events: none;
+}
+.food--dragging {
+  z-index: 100;
+  transform: translate(-50%, -50%) scale(1.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+.food--reject {
+  background: #ffdad6;
+  animation: shake 0.4s ease;
+}
+
+/* ---------- Feedback toast ---------- */
+.feedback-toast {
+  position: absolute;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ff6b5e;
+  color: #fff;
+  font-size: 48px;
+  font-weight: 800;
+  padding: 28px 60px;
+  border-radius: 999px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  animation: pop-x 0.25s ease;
+  z-index: 120;
+  white-space: nowrap;
+}
+
+/* ---------- Reward overlay ---------- */
+.reward-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 16, 32, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: fade-in 0.3s ease;
+}
+.reward-overlay__card {
+  background: #fff;
+  border-radius: 56px;
+  padding: 80px 70px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+  width: 80%;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+  animation: pop-plain 0.4s ease;
+}
+.reward-overlay__emoji {
+  font-size: 200px;
+  animation: bob 1.8s ease-in-out infinite;
+}
+.reward-overlay__title {
+  font-size: 90px;
+  font-weight: 900;
+  color: var(--hero-b);
+}
+.reward-overlay__text {
+  font-size: 48px;
+  color: #3a4a66;
+}
+.reward-overlay__score {
+  font-size: 52px;
+  font-weight: 800;
+  color: #f4a500;
+  margin-bottom: 20px;
+}
+
+/* ---------- Mission placeholder ---------- */
+.mission--soon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  text-align: center;
+  padding: 80px;
+}
+.mission--soon__emoji {
+  font-size: 240px;
+  animation: bob 2.2s ease-in-out infinite;
+}
+.mission--soon__title {
+  font-size: 84px;
+  font-weight: 900;
+}
+.mission--soon__text {
+  font-size: 54px;
+  color: #4a6b52;
+  margin-bottom: 30px;
+}
+
+/* ---------- RatingScreen ---------- */
+.rating {
+  justify-content: center;
+  gap: 90px;
+  padding: 80px;
+  background: radial-gradient(circle at 50% 30%, #fff6da, #ffe9c9 70%);
+}
+.rating__title {
+  font-size: 84px;
+  font-weight: 900;
+  text-align: center;
+  color: var(--ink);
+}
+.rating__faces {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  width: 100%;
+}
+.rating__face {
+  background: #fff;
+  border-radius: 48px;
+  padding: 50px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 14px 0 rgba(0, 0, 0, 0.1), 0 20px 40px rgba(0, 0, 0, 0.15);
+  transition: transform 0.1s ease;
+}
+.rating__face:active {
+  transform: scale(0.94);
+}
+.rating__face-emoji {
+  font-size: 190px;
+  line-height: 1;
+}
+.rating__face-label {
+  font-size: 38px;
+  font-weight: 800;
+  color: #3a4a66;
+  text-align: center;
+}
+.rating--thanks {
+  gap: 40px;
+}
+.rating__thanks-emoji {
+  font-size: 280px;
+  animation: bob 1.6s ease-in-out infinite;
+}
+.rating__thanks-title {
+  font-size: 110px;
+  font-weight: 900;
+  color: var(--hero-b);
+}
+.rating__thanks-sub {
+  font-size: 50px;
+  color: #3a4a66;
+}
+
+/* ---------- Stats ---------- */
+.stats {
+  padding: 90px 70px;
+  gap: 50px;
+  background: #eef6ff;
+  justify-content: flex-start;
+}
+.stats__title {
+  font-size: 84px;
+  font-weight: 900;
+}
+.stats__total {
+  font-size: 52px;
+}
+.stats__loading,
+.stats__empty {
+  font-size: 48px;
+  color: #5b6b86;
+}
+.stats__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  width: 100%;
+  flex: 1;
+}
+.stats__card {
+  background: #fff;
+  border-radius: 44px;
+  padding: 50px 60px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+.stats__game {
+  font-size: 60px;
+  font-weight: 900;
+}
+.stats__avg {
+  font-size: 90px;
+  font-weight: 900;
+  color: #f4a500;
+}
+.stats__count {
+  font-size: 42px;
+  color: #5b6b86;
+  margin-bottom: 20px;
+}
+.stats__breakdown {
+  display: flex;
+  gap: 40px;
+  font-size: 46px;
+  font-weight: 800;
+}
+
+/* ---------- Animations ---------- */
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-24px);
+  }
+}
+@keyframes shake {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) rotate(0);
+  }
+  20% {
+    transform: translate(-58%, -50%) rotate(-8deg);
+  }
+  40% {
+    transform: translate(-42%, -50%) rotate(8deg);
+  }
+  60% {
+    transform: translate(-56%, -50%) rotate(-6deg);
+  }
+  80% {
+    transform: translate(-44%, -50%) rotate(6deg);
+  }
+}
+@keyframes pop-centered {
+  0% {
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes pop-x {
+  0% {
+    transform: translateX(-50%) scale(0.4);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes pop-plain {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes plate-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
