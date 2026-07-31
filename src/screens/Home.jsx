@@ -30,8 +30,8 @@ export default function Home() {
         >
           <span className="game-card__emoji">🎖️</span>
           <span className="game-card__title">Ευζούλης</span>
-          <span className="game-card__desc">Η περιπέτεια ξεκινά σύντομα…</span>
-          <span className="game-card__cta game-card__cta--soon">Σύντομα</span>
+          <span className="game-card__desc">Μια περιπέτεια γεμάτη μάθηση!</span>
+          <span className="game-card__cta">Παίξε ▶</span>
         </button>
       </div>
 

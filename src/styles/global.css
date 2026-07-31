@@ -177,6 +177,19 @@ button {
   opacity: 0;
 }
 
+/* ---------- Ευζούλης (Phaser σε iframe) ---------- */
+.evzoulis-frame {
+  position: absolute;
+  inset: 0;
+  background: #000;
+}
+.evzoulis-iframe {
+  width: 1080px;
+  height: 1920px;
+  border: 0;
+  display: block;
+}
+
 /* ---------- Intro παιχνιδιού ---------- */
 .intro {
   justify-content: center;
