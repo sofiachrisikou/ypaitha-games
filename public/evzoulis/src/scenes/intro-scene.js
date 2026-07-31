@@ -1,13 +1,14 @@
 import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from '../common/scene-keys.js';
 import { ASSET_KEYS } from '../common/assets.js';
+import { TEXT_STYLES } from '../common/sharedGameSettings.js';
 
-const speechBubbleTextStyleConfig = {
-  fontSize: '32px',
-  color: '#043D8C',
-  align: 'center',
-  wordWrap: { width: 260, useAdvancedWrap: true },
-};
+// const speechBubbleTextStyleConfig = {
+//   fontSize: '32px',
+//   color: '#043D8C',
+//   align: 'center',
+//   wordWrap: { width: 260, useAdvancedWrap: true },
+// };
 
 const CLOUD_ANIM_KEY = 'introCloudGrow';
 
@@ -254,7 +255,7 @@ export class IntroScene extends Phaser.Scene {
 
     // TODO: swap ASSET_KEYS.SPEECH_BUBBLE for your real speech-bubble art
     const bubbleImage = this.add.image(0, 0, ASSET_KEYS.SPEECH_BUBBLE).setScale(0.35);
-    const bubbleText = this.add.text(0, 0, 'ΘΑ ΜΕ ΒΟΗΘΗΣΕΙΣ ;', speechBubbleTextStyleConfig).setOrigin(0.5);
+    const bubbleText = this.add.text(0, 0, 'ΘΑ ΜΕ ΒΟΗΘΗΣΕΙΣ ;', TEXT_STYLES.SPEECH_BUBBLE).setOrigin(0.5);
     this.add.container(characterX - 330, bubbleY, [bubbleImage, bubbleText]);
 
     const levelButtonX = characterX - this.#characterGO.displayWidth / 2 - 240;

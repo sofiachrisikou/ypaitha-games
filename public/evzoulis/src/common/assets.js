@@ -3,6 +3,7 @@ export const ASSET_KEYS = Object.freeze({
   PROGRESSBAR_FG: 'PROGRESSBAR_FG',
   PROGRESSBAR_BG: 'PROGRESSBAR_BG',
   BACKGROUND_Stg1: 'BACKGROUND_Stg1',
+  FONT1:'FONT1',
   BTN1: 'BTN1',
   SPEECH_BUBBLE: 'SPEECH_BUBBLE',
   //INTRO
@@ -36,6 +37,14 @@ export const ASSET_KEYS = Object.freeze({
   CHARACTER_OUTRO: 'CHARACTER_OUTRO',
   BACKGROUND_OUTRO: 'BACKGROUND_OUTRO',
 });
+
+export const FONT_ASSETS = 
+[
+   {
+    assetKey: ASSET_KEYS.FONT1,
+    path: 'assets/fonts/Comic Sans MS Bold.ttf',
+  },
+];
 
 export const IMAGE_ASSETS = [
   //SHARED
@@ -130,11 +139,11 @@ export const IMAGE_ASSETS = [
   },
   {
     assetKey: ASSET_KEYS.BUBBLE,
-    path: 'assets/images/thoughtcloud4.png',
+    path: 'assets/images/thoughtCloud4.png',
   },
   {
     assetKey: ASSET_KEYS.BUBBLE_POPPED,
-    path: 'assets/images/thoughtcloud5.png',
+    path: 'assets/images/thoughtCloud5.png',
   },
   {
     assetKey: ASSET_KEYS.BEAR_BODY,

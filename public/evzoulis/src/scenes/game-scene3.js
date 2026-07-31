@@ -2,13 +2,13 @@ import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from '../common/scene-keys.js';
 import { ASSET_KEYS } from '../common/assets.js';
 import { ProgressBar } from '../common/progress-bar.js';
-
-const textStyleConfig = {
-  fontSize: '40px',
-  color: '#043D8C',
-  stroke: '#ffffff',
-  strokeThickness: 6,
-};
+import { TEXT_STYLES } from '../common/sharedGameSettings.js';
+// const textStyleConfig = {
+//   fontSize: '40px',
+//   color: '#043D8C',
+//   stroke: '#ffffff',
+//   strokeThickness: 6,
+// };
 
 const LIMB_COLOR = 0xf4c98a;
 const LIMB_DONE_COLOR = 0x4caf50;
@@ -130,20 +130,20 @@ export class GameScene3 extends Phaser.Scene {
       }),
     ];
 
-    const progressTextLabel = this.add.text(10, 10, 'Διατάσεις:', textStyleConfig);
+    const progressTextLabel = this.add.text(10, 10, 'Διατάσεις:',TEXT_STYLES.DEFAULT);
     this.#progressTextGO = this.add.text(
       progressTextLabel.x + progressTextLabel.width,
       progressTextLabel.y,
       `0 / ${this.#totalLimbsRequired}`,
-      textStyleConfig,
+      TEXT_STYLES.DEFAULT,
     );
 
-    const timerTextLabel = this.add.text(10, 50, 'Χρόνος:', textStyleConfig);
+    const timerTextLabel = this.add.text(10, 50, 'Χρόνος:', TEXT_STYLES.DEFAULT);
     this.#timerTextGO = this.add.text(
       timerTextLabel.x + timerTextLabel.width,
       timerTextLabel.y,
       `${this.#remainingSeconds}`,
-      textStyleConfig,
+      TEXT_STYLES.DEFAULT,
     );
 
     this.#countdownTimerEvent = this.time.addEvent({
@@ -549,10 +549,10 @@ export class GameScene3 extends Phaser.Scene {
   #showEndMessage(title, subtitle) {
     const { width, height } = this.scale;
     this.add.rectangle(0, 0, width, height, 0x000000, 0.6).setOrigin(0);
-    this.add.text(width / 2, height / 2 - 60, title, textStyleConfig).setOrigin(0.5);
-    this.add.text(width / 2, height / 2 + 40, subtitle, textStyleConfig).setOrigin(0.5);
+    this.add.text(width / 2, height / 2 - 60, title, TEXT_STYLES.DEFAULT).setOrigin(0.5);
+    this.add.text(width / 2, height / 2 + 40, subtitle, TEXT_STYLES.DEFAULT).setOrigin(0.5);
 
-    const helloButton = this.add.text(width / 2, height / 2 + 140, 'Επόμενο Επίπεδο', textStyleConfig).setOrigin(0.5);
+    const helloButton = this.add.text(width / 2, height / 2 + 140, 'Επόμενο Επίπεδο', TEXT_STYLES.DEFAULT).setOrigin(0.5);
     helloButton.setInteractive();
     helloButton.on('pointerdown', () => this.#goToNextLevel());
   }

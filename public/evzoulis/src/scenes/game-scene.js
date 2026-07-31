@@ -4,12 +4,12 @@ import { ASSET_KEYS } from '../common/assets.js';
 import { ProgressBar } from '../common/progress-bar.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
 
-const textStyleConfig = {
-  fontSize: '40px',
-  color: '#043D8C',
-  stroke: '#ffffff',
-  strokeThickness: 6,
-};
+// const textStyleConfig = {
+//   fontSize: '40px',
+//   color: '#043D8C',
+//   stroke: '#ffffff',
+//   strokeThickness: 6,
+// };
 
 const SWIPE_STATE = {
   WAITING: 'WAITING',
@@ -130,7 +130,7 @@ export class GameScene extends Phaser.Scene {
       breathsTextLabel.x + breathsTextLabel.width,
       breathsTextLabel.y,
       `0 / ${this.#requiredBreaths}`,
-      textStyleConfig,
+      TEXT_STYLES.DEFAULT,
     );
 
     if (this.#debug) {
@@ -439,10 +439,10 @@ export class GameScene extends Phaser.Scene {
   #showEndMessage(title, subtitle) {
     const { width, height } = this.scale;
     this.add.rectangle(0, 0, width, height, 0x000000, 0.6).setOrigin(0);
-    this.add.text(width / 2, height / 2 - 60, title, textStyleConfig).setOrigin(0.5);
-    this.add.text(width / 2, height / 2 + 40, subtitle, textStyleConfig).setOrigin(0.5);
+    this.add.text(width / 2, height / 2 - 60, title, TEXT_STYLES.DEFAULT).setOrigin(0.5);
+    this.add.text(width / 2, height / 2 + 40, subtitle, TEXT_STYLES.DEFAULT).setOrigin(0.5);
 
-    const helloButton = this.add.text(width / 2, height / 2 + 140, 'Επόμενο Επίπεδο', textStyleConfig).setOrigin(0.5);
+    const helloButton = this.add.text(width / 2, height / 2 + 140, 'Επόμενο Επίπεδο', TEXT_STYLES.DEFAULT).setOrigin(0.5);
     helloButton.setInteractive();
     helloButton.on('pointerdown', () => this.#goToNextLevel());
   }

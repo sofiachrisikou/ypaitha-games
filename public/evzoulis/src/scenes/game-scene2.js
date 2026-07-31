@@ -3,27 +3,28 @@ import { SCENE_KEYS } from '../common/scene-keys.js';
 import { ASSET_KEYS } from '../common/assets.js';
 import { THOUGHT_CLOUD_LIST } from '../common/thought-cloud-data.js';
 import { ProgressBar } from '../common/progress-bar.js';
+import { TEXT_STYLES } from '../common/sharedGameSettings.js';
 
-const textStyleConfig = {
-  fontSize: '40px',
-  color: '#043D8C',
-  stroke: '#ffffff',
-  strokeThickness: 6,
-};
+// const textStyleConfig = {
+//   fontSize: '40px',
+//   color: '#043D8C',
+//   stroke: '#ffffff',
+//   strokeThickness: 6,
+// };
 
-const bubbleTextStyleConfig = {
-  fontSize: '30px',
-  color: '#000000',
-  align: 'center',
-  wordWrap: { width: 220, useAdvancedWrap: true },
-};
+// const bubbleTextStyleConfig = {
+//   fontSize: '30px',
+//   color: '#000000',
+//   align: 'center',
+//   wordWrap: { width: 220, useAdvancedWrap: true },
+// };
 
-const bubblePoppedTextStyleConfig = {
-  fontSize: '30px',
-  color: '#2EB000',
-  align: 'center',
-  wordWrap: { width: 220, useAdvancedWrap: true },
-};
+// const bubblePoppedTextStyleConfig = {
+//   fontSize: '30px',
+//   color: '#2EB000',
+//   align: 'center',
+//   wordWrap: { width: 220, useAdvancedWrap: true },
+// };
 
 const BUBBLE_STATE = {
   BAD: 'BAD',
@@ -101,28 +102,28 @@ export class GameScene2 extends Phaser.Scene {
 
     const labelsTop = this.#levelProgressBar.getBounds().bottom + 20;
 
-    const scoreTextLabel = this.add.text(10, labelsTop, 'Σκορ:', textStyleConfig);
+    const scoreTextLabel = this.add.text(10, labelsTop, 'Σκορ:', TEXT_STYLES.DEFAULT);
     this.#scoreTextGO = this.add.text(
       scoreTextLabel.x + scoreTextLabel.width,
       labelsTop,
       `${this.#score}`,
-      textStyleConfig,
+      TEXT_STYLES.DEFAULT,
     );
 
-    const timerTextLabel = this.add.text(10, labelsTop + 40, 'Χρόνος:', textStyleConfig);
+    const timerTextLabel = this.add.text(10, labelsTop + 40, 'Χρόνος:', TEXT_STYLES.DEFAULT);
     this.#timerTextGO = this.add.text(
       timerTextLabel.x + timerTextLabel.width,
       labelsTop + 40,
       `${this.#remainingSeconds}`,
-      textStyleConfig,
+      TEXT_STYLES.DEFAULT,
     );
 
-    const progressTextLabel = this.add.text(10, labelsTop + 80, 'Pops:', textStyleConfig);
+    const progressTextLabel = this.add.text(10, labelsTop + 80, 'Pops:', TEXT_STYLES.DEFAULT);
     this.#progressTextGO = this.add.text(
       progressTextLabel.x + progressTextLabel.width,
       labelsTop + 80,
       `0 / ${this.#totalBubbles}`,
-      textStyleConfig,
+      TEXT_STYLES.DEFAULT,
     );
 
     this.#countdownTimerEvent = this.time.addEvent({
@@ -207,7 +208,7 @@ export class GameScene2 extends Phaser.Scene {
     const bubbleImage = this.add.image(0, 0, ASSET_KEYS.BUBBLE).setOrigin(0.5);
     this.#scaleImageToWidth(bubbleImage, this.#bubbleDiameter);
 
-    const bubbleText = this.add.text(0, 0, thoughtData.bad, bubbleTextStyleConfig).setOrigin(0.5);
+    const bubbleText = this.add.text(0, 0, thoughtData.bad, TEXT_STYLES.BUBBLE).setOrigin(0.5);
     const bubbleContainer = this.add.container(x, y, [bubbleImage, bubbleText]).setScale(0);
 
     const radius = this.#bubbleDiameter / 2;
@@ -241,7 +242,7 @@ export class GameScene2 extends Phaser.Scene {
     bubbleData.state = BUBBLE_STATE.POPPED;
     bubbleData.container.disableInteractive();
 
-    bubbleData.text.setStyle(bubblePoppedTextStyleConfig);
+    bubbleData.text.setStyle(TEXT_STYLES.SPEECH_BUBBLE_POPPED);
 
     bubbleData.text.setText(bubbleData.thoughtData.good);
 
@@ -338,10 +339,10 @@ export class GameScene2 extends Phaser.Scene {
     const { width, height } = this.scale;
 
     this.add.rectangle(0, 0, width, height, 0x000000, 0.6).setOrigin(0);
-    this.add.text(width / 2, height / 2 - 60, title, textStyleConfig).setOrigin(0.5);
-    this.add.text(width / 2, height / 2 + 40, subtitle, textStyleConfig).setOrigin(0.5);
+    this.add.text(width / 2, height / 2 - 60, title, TEXT_STYLES.DEFAULT).setOrigin(0.5);
+    this.add.text(width / 2, height / 2 + 40, subtitle, TEXT_STYLES.DEFAULT).setOrigin(0.5);
 
-    const helloButton = this.add.text(width / 2, height / 2 + 140, 'Επόμενο Επίπεδο', textStyleConfig).setOrigin(0.5);
+    const helloButton = this.add.text(width / 2, height / 2 + 140, 'Επόμενο Επίπεδο', TEXT_STYLES.DEFAULT).setOrigin(0.5);
     helloButton.setInteractive();
     helloButton.on('pointerdown', () => this.#goToNextLevel());
     return;
