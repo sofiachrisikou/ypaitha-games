@@ -33,6 +33,10 @@ export const ASSET_KEYS = Object.freeze({
   //LEVEL 3
   BACKGROUND_Stg3: 'BACKGROUND_Stg3',
   BEAR_BODY: 'BEAR_BODY',
+  CHAR_ARM_R: 'CHAR_ARM_R',
+  CHAR_ARM_L: 'CHAR_ARM_L',
+  CHAR_LEG_R: 'CHAR_LEG_R',
+  CHAR_LEG_L: 'CHAR_LEG_L',
   //OUTRO
   CHARACTER_OUTRO: 'CHARACTER_OUTRO',
   BACKGROUND_OUTRO: 'BACKGROUND_OUTRO',
@@ -145,14 +149,30 @@ export const IMAGE_ASSETS = [
     assetKey: ASSET_KEYS.BUBBLE_POPPED,
     path: 'assets/images/thoughtCloud5.png',
   },
-  {
-    assetKey: ASSET_KEYS.BEAR_BODY,
-    path: 'assets/images/BearBody.png',
-  },
   //LEVEL 3
   {
     assetKey: ASSET_KEYS.BACKGROUND_Stg3,
     path: 'assets/images/Stage03_BG.png',
+  },
+  {
+    assetKey: ASSET_KEYS.BEAR_BODY,
+    path: 'assets/images/Body_Head.png',
+  },
+  {
+    assetKey: ASSET_KEYS.CHAR_ARM_R,
+    path: 'assets/images/Arm_R.png',
+  },
+  {
+    assetKey: ASSET_KEYS.CHAR_ARM_L,
+    path: 'assets/images/Arm_L.png',
+  },
+   {
+    assetKey: ASSET_KEYS.CHAR_LEG_R,
+    path: 'assets/images/Leg_R.png',
+  },
+  {
+    assetKey: ASSET_KEYS.CHAR_LEG_L,
+    path: 'assets/images/Leg_L.png',
   },
   //OUTRO
   {

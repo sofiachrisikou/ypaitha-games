@@ -262,6 +262,8 @@ export class GameScene3 extends Phaser.Scene {
     const restAngleRad = Phaser.Math.DegToRad(config.restAngleDeg);
 
     const rectangleGO = this.add
+    // .image(config.pivotX, config.pivotY,ASSET_KEYS.CHAR_ARM_R).setOrigin(0, 0.5)
+    //   .setRotation(restAngleRad);
       .rectangle(config.pivotX, config.pivotY, config.length, this.#limbThickness, LIMB_COLOR)
       .setOrigin(0, 0.5)
       .setRotation(restAngleRad);
