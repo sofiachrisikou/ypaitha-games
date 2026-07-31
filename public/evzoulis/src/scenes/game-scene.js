@@ -2,6 +2,7 @@ import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from '../common/scene-keys.js';
 import { ASSET_KEYS } from '../common/assets.js';
 import { ProgressBar } from '../common/progress-bar.js';
+import { TEXT_STYLES } from '../common/sharedGameSettings.js';
 
 const textStyleConfig = {
   fontSize: '40px',
@@ -124,7 +125,7 @@ export class GameScene extends Phaser.Scene {
     this.#createSwipeGestureBar();
     this.#createLevelProgressBar();
 
-    const breathsTextLabel = this.add.text(10, 10, 'Αναπνοές:', textStyleConfig);
+    const breathsTextLabel = this.add.text(10, 10, 'Αναπνοές:', TEXT_STYLES.DEFAULT);
     this.#breathsTextGO = this.add.text(
       breathsTextLabel.x + breathsTextLabel.width,
       breathsTextLabel.y,
