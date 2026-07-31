@@ -1,9 +1,19 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import RatingScreen from '../../components/RatingScreen.jsx'
 import Mission1Plate from './missions/Mission1Plate.jsx'
 import Mission2LunchBox from './missions/Mission2LunchBox.jsx'
 import Mission3Traps from './missions/Mission3Traps.jsx'
+import { playWin } from '../../services/sound.js'
+
+// Confetti (σταθερές θέσεις — χωρίς τυχαιότητα)
+const CONFETTI_COLORS = ['#34c759', '#ff9f2e', '#2ec4f1', '#e5442e', '#ffd23f', '#ffffff']
+const CONFETTI = Array.from({ length: 28 }, (_, i) => ({
+  left: (i * 37) % 100,
+  delay: ((i * 13) % 20) / 10,
+  dur: 2.6 + ((i * 7) % 12) / 10,
+  color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+}))
 
 const S = '/hh/start'
 const E = '/hh/end'
@@ -25,6 +35,11 @@ export default function HealthyHero() {
   const addScore = useCallback((delta) => setScore((s) => s + delta), [])
   const goHome = useCallback(() => navigate('/'), [navigate])
   const noop = useCallback(() => {}, [])
+
+  // Φανφάρα στην τελική κάρτα.
+  useEffect(() => {
+    if (stage === 'finale') playWin()
+  }, [stage])
 
   if (stage === 'intro') {
     return (
@@ -50,6 +65,19 @@ export default function HealthyHero() {
   if (stage === 'finale') {
     return (
       <div className="screen hh-finale" style={{ backgroundImage: `url(${E}/Background.png)` }}>
+        <div className="confetti" aria-hidden="true">
+          {CONFETTI.map((c, i) => (
+            <i
+              key={i}
+              style={{
+                left: `${c.left}%`,
+                background: c.color,
+                animationDuration: `${c.dur}s`,
+                animationDelay: `${c.delay}s`,
+              }}
+            />
+          ))}
+        </div>
         <img src={`${E}/Trophy.png`} alt="" className="hh-finale__trophy" draggable="false" />
         <img src={`${E}/Ribon.png`} alt="Συγχαρητήρια! Έγινες Super Healthy Hero!" className="hh-finale__ribbon" draggable="false" />
         <img src={`${E}/Hero.png`} alt="" className="hh-finale__hero" draggable="false" />

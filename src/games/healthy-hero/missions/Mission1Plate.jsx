@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { FOODS, PLATE_IMG, BG_IMG, GOAL } from '../data/foods.js'
 import { STAGE_W } from '../../../components/Stage.jsx'
+import { playCorrect, playWrong, playWin } from '../../../services/sound.js'
 
 // Γεωμετρία (συντεταγμένες stage 1080x1920)
 const CX = 540
@@ -67,10 +68,16 @@ export default function Mission1Plate({ addScore, onProgress, onComplete }) {
       setPlaced((pl) => {
         const next = [...pl, food]
         if (onProgress) onProgress(next.length)
-        if (next.length >= GOAL) setTimeout(() => setWon(true), 500)
+        if (next.length >= GOAL) {
+          setTimeout(() => {
+            setWon(true)
+            playWin()
+          }, 500)
+        }
         return next
       })
       addScore(10)
+      playCorrect()
       setGlow(true)
       setTimeout(() => setGlow(false), 600)
       dragRef.current = null
@@ -82,6 +89,7 @@ export default function Mission1Plate({ addScore, onProgress, onComplete }) {
       const rd = { ...d, rejecting: true }
       dragRef.current = rd
       setDrag(rd)
+      playWrong()
       setFeedback('Δοκίμασε κάτι πιο θρεπτικό!')
       setTimeout(() => {
         dragRef.current = null

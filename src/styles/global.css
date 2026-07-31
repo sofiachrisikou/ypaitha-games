@@ -967,6 +967,7 @@ button {
   width: 560px;
   height: auto;
   display: block;
+  animation: start-pulse 1.6s ease-in-out infinite;
 }
 .hh-start-btn:active {
   transform: translateX(-50%) translateY(6px) scale(0.98);
@@ -1024,6 +1025,41 @@ button {
 }
 .hh-finale__btn:active {
   transform: translateX(-50%) translateY(8px);
+}
+
+/* Confetti (τελική κάρτα) */
+.confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.confetti i {
+  position: absolute;
+  top: -60px;
+  width: 20px;
+  height: 28px;
+  border-radius: 4px;
+  animation-name: confetti-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-60px) rotate(0deg);
+  }
+  100% {
+    transform: translateY(2020px) rotate(720deg);
+  }
+}
+@keyframes start-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 /* ---------- Animations ---------- */
