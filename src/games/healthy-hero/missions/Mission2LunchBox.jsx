@@ -1,25 +1,30 @@
 import { useRef, useState } from 'react'
-import { LUNCHBOX_ITEMS, LUNCHBOX_GOAL as GOAL } from '../data/lunchbox.js'
+import { LUNCHBOX_ITEMS, LUNCHBOX_IMG, BG_IMG, LOGO_IMG, LUNCHBOX_GOAL as GOAL } from '../data/lunchbox.js'
 import { STAGE_W } from '../../../components/Stage.jsx'
 
-// Γεωμετρία lunch box (συντεταγμένες stage 1080x1920)
-const BOX = { x: 540, y: 940, w: 620, h: 560 } // κέντρο + διαστάσεις
-const RX = 400
-const RY = 640
+// Γεωμετρία (συντεταγμένες stage 1080x1920)
+const CX = 540
+const CY = 1080
+const BOX_W = 640
+const BOX_H = Math.round((BOX_W * 2000) / 1274) // αναλογία Lunch_Box.png
+const HIT_DX = 280
+const HIT_DY = 430
+const RX = 430
+const RY = 660
 
 function slotPos(i, total) {
   const angle = (-90 + i * (360 / total)) * (Math.PI / 180)
-  return { x: BOX.x + RX * Math.cos(angle), y: BOX.y + RY * Math.sin(angle) }
+  return { x: CX + RX * Math.cos(angle), y: CY + RY * Math.sin(angle) }
 }
 
-// Θέση φαγητού μέσα στο κουτί (πλέγμα 2x2).
+// Θέσεις στο κάτω μέρος του κουτιού (2x2).
 function boxSlot(j) {
   const col = j % 2
   const row = Math.floor(j / 2)
-  return { x: BOX.x - 130 + col * 260, y: BOX.y - 110 + row * 220 }
+  return { x: CX - 115 + col * 230, y: CY + 120 + row * 200 }
 }
 
-export default function Mission2LunchBox({ score, addScore, onProgress, onNext }) {
+export default function Mission2LunchBox({ addScore, onProgress, onNext }) {
   const rootRef = useRef(null)
   const dragRef = useRef(null)
   const [tray, setTray] = useState(() =>
@@ -29,7 +34,7 @@ export default function Mission2LunchBox({ score, addScore, onProgress, onNext }
   const [drag, setDrag] = useState(null)
   const [feedback, setFeedback] = useState(null)
   const [glow, setGlow] = useState(false)
-  const [closed, setClosed] = useState(false)
+  const [done, setDone] = useState(false)
 
   const toLocal = (clientX, clientY) => {
     const r = rootRef.current.getBoundingClientRect()
@@ -37,8 +42,7 @@ export default function Mission2LunchBox({ score, addScore, onProgress, onNext }
     return { x: (clientX - r.left) / scale, y: (clientY - r.top) / scale }
   }
 
-  const overBox = (x, y) =>
-    Math.abs(x - BOX.x) < BOX.w / 2 && Math.abs(y - BOX.y) < BOX.h / 2
+  const overBox = (x, y) => Math.abs(x - CX) < HIT_DX && Math.abs(y - CY) < HIT_DY
 
   const onMove = (e) => {
     const d = dragRef.current
@@ -68,8 +72,8 @@ export default function Mission2LunchBox({ score, addScore, onProgress, onNext }
         const next = [...pl, food]
         if (onProgress) onProgress(next.length)
         if (next.length >= GOAL) {
-          setTimeout(() => setClosed(true), 400)
-          setTimeout(() => onNext && onNext(), 1900)
+          setTimeout(() => setDone(true), 400)
+          setTimeout(() => onNext && onNext(), 2100)
         }
         return next
       })
@@ -99,7 +103,7 @@ export default function Mission2LunchBox({ score, addScore, onProgress, onNext }
   }
 
   const onPointerDown = (e, food) => {
-    if (dragRef.current || closed) return
+    if (dragRef.current || done) return
     e.preventDefault()
     const p = toLocal(e.clientX, e.clientY)
     dragRef.current = {
@@ -117,66 +121,60 @@ export default function Mission2LunchBox({ score, addScore, onProgress, onNext }
   }
 
   return (
-    <div className="mission mission2" ref={rootRef}>
-      <h2 className="mission1__title">Ετοίμασε το Lunch Box</h2>
-      <p className="mission1__hint">Βάλε {GOAL} υγιεινές επιλογές στο κουτί!</p>
+    <div className="mission hh-mission" ref={rootRef} style={{ backgroundImage: `url(${BG_IMG})` }}>
+      {/* Lunch box + badge */}
+      <img
+        src={LUNCHBOX_IMG}
+        alt=""
+        className={`lunchbox-img ${glow ? 'lunchbox-img--glow' : ''} ${done ? 'lunchbox-img--done' : ''}`}
+        style={{ left: CX, top: CY, width: BOX_W, height: BOX_H }}
+        draggable="false"
+      />
+      <img src={LOGO_IMG} alt="Αποστολή 2" className="mission-logo" style={{ left: CX, top: 250 }} draggable="false" />
 
-      {/* Lunch box */}
-      <div
-        className={`lunchbox ${glow ? 'lunchbox--glow' : ''} ${closed ? 'lunchbox--closed' : ''}`}
-        style={{ left: BOX.x, top: BOX.y, width: BOX.w, height: BOX.h }}
-      >
-        {placed.length === 0 && !closed && <span className="lunchbox__placeholder">🍱</span>}
-        {!closed &&
-          placed.map((f, j) => {
-            const pos = boxSlot(j)
-            return (
-              <span
-                key={f.id}
-                className="lunchbox__food"
-                style={{ left: pos.x - (BOX.x - BOX.w / 2), top: pos.y - (BOX.y - BOX.h / 2) }}
-              >
-                {f.image}
-              </span>
-            )
-          })}
-        <div className="lunchbox__lid" />
-      </div>
-
-      {closed && (
-        <div className="lunchbox__done">
-          <div className="lunchbox__done-emoji">🎉</div>
-          <p className="lunchbox__done-text">Το κολατσιό είναι έτοιμο!</p>
-        </div>
-      )}
+      {/* Τρόφιμα μέσα στο κουτί */}
+      {placed.map((f, j) => {
+        const pos = boxSlot(j)
+        return (
+          <img
+            key={f.id}
+            src={f.img}
+            alt={f.name}
+            className="food-img food-img--placed"
+            style={{ left: pos.x, top: pos.y }}
+            draggable="false"
+          />
+        )
+      })}
 
       {/* Επιλογές γύρω */}
       {tray.map((food) => {
         const isDragging = drag && drag.id === food.id
+        const rejecting = isDragging && drag.rejecting
         const x = isDragging ? drag.x : food.pos.x
         const y = isDragging ? drag.y : food.pos.y
-        const cls = [
-          'food',
-          isDragging ? 'food--dragging' : '',
-          isDragging && drag.rejecting ? 'food--reject' : '',
-        ]
-          .join(' ')
-          .trim()
         return (
           <button
             key={food.id}
             type="button"
-            className={cls}
+            className={`food ${isDragging ? 'food--dragging' : ''} ${rejecting ? 'food--reject' : ''}`}
             style={{ left: x, top: y }}
             onPointerDown={(e) => onPointerDown(e, food)}
             aria-label={food.name}
           >
-            <span className="food__emoji">{food.image}</span>
+            <img src={food.img} alt="" className="food-img" draggable="false" />
           </button>
         )
       })}
 
       {feedback && <div className="feedback-toast">{feedback}</div>}
+
+      {done && (
+        <div className="lunchbox-done">
+          <div className="lunchbox-done__emoji">🎉</div>
+          <p className="lunchbox-done__text">Το κολατσιό είναι έτοιμο!</p>
+        </div>
+      )}
     </div>
   )
 }

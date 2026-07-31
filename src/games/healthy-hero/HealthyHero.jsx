@@ -1,65 +1,64 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import ScoreBar from '../../components/ScoreBar.jsx'
-import BigButton from '../../components/BigButton.jsx'
 import RatingScreen from '../../components/RatingScreen.jsx'
 import Mission1Plate from './missions/Mission1Plate.jsx'
 import Mission2LunchBox from './missions/Mission2LunchBox.jsx'
 import Mission3Traps from './missions/Mission3Traps.jsx'
-import { LUNCHBOX_GOAL } from './data/lunchbox.js'
-import { TRAP_ITEMS } from './data/traps.js'
 
-const TRAPS_TOTAL = TRAP_ITEMS.filter((f) => !f.healthy).length
+const S = '/hh/start'
+// Διακοσμητικά τρόφιμα που «επιπλέουν» στην αρχική (θέσεις κατά το σχέδιο).
+const FLOAT_FOODS = [
+  { src: `${S}/apple.png`, x: 210, y: 900, w: 170, d: 0 },
+  { src: `${S}/Sandwich.png`, x: 200, y: 1180, w: 220, d: 0.6 },
+  { src: `${S}/Cheese.png`, x: 380, y: 1120, w: 180, d: 1.1 },
+  { src: `${S}/Yoghurt.png`, x: 250, y: 1420, w: 170, d: 0.3 },
+  { src: `${S}/Broccoli.png`, x: 150, y: 1560, w: 180, d: 0.9 },
+]
 
-// Ρυθμίσεις μπάρας σκορ ανά αποστολή (goal + εικονίδιο προόδου).
-const STAGE_META = {
-  m1: { goal: 5, icon: '🍽️' },
-  m2: { goal: LUNCHBOX_GOAL, icon: '🍱' },
-  m3: { goal: TRAPS_TOTAL, icon: '🎯' },
-}
-
-// Ροή του παιχνιδιού: intro -> m1 -> m2 -> m3 -> finale -> rating -> homepage
+// Ροή: intro -> m1 -> m2 -> m3 -> finale -> rating -> homepage
 export default function HealthyHero() {
   const navigate = useNavigate()
   const [stage, setStage] = useState('intro')
   const [score, setScore] = useState(0)
-  const [progress, setProgress] = useState(0)
 
   const addScore = useCallback((delta) => setScore((s) => s + delta), [])
   const goHome = useCallback(() => navigate('/'), [navigate])
-
-  // Μετάβαση σε νέα αποστολή με μηδενισμό της προόδου.
-  const advance = useCallback((next) => {
-    setProgress(0)
-    setStage(next)
-  }, [])
+  const noop = useCallback(() => {}, [])
 
   if (stage === 'intro') {
     return (
-      <div className="screen intro intro--hero">
-        <div className="intro__emoji">🦸</div>
-        <h1 className="intro__title">Healthy Hero</h1>
-        <p className="intro__subtitle">Γίνε κι εσύ Σούπερ Ήρωας της Διατροφής!</p>
-        <BigButton variant="primary" onClick={() => advance('m1')}>
-          Ξεκίνα την αποστολή ▶
-        </BigButton>
+      <div className="screen hh-intro" style={{ backgroundImage: `url(${S}/Background.png)` }}>
+        {FLOAT_FOODS.map((f, i) => (
+          <img
+            key={i}
+            src={f.src}
+            alt=""
+            className="hh-float"
+            style={{ left: f.x, top: f.y, width: f.w, animationDelay: `${f.d}s` }}
+            draggable="false"
+          />
+        ))}
+        <img src={`${S}/Hero.png`} alt="" className="hh-intro__hero" draggable="false" />
+        <button type="button" className="hh-start-btn" onClick={() => setStage('m1')} aria-label="Έναρξη">
+          <img src={`${S}/Start_Button.png`} alt="Έναρξη" draggable="false" />
+        </button>
       </div>
     )
   }
 
   if (stage === 'finale') {
     return (
-      <div className="screen finale">
-        <div className="finale__badge">
-          <div className="finale__hero">🦸</div>
-          <div className="finale__stars">⭐️⭐️⭐️</div>
-          <h1 className="finale__title">Super Healthy Hero!</h1>
-          <p className="finale__text">Τα κατάφερες σε όλες τις αποστολές!</p>
-          <p className="finale__score">Σκορ: ⭐ {score}</p>
+      <div className="screen hh-finale">
+        <div className="hh-finale__trophy">🏆</div>
+        <div className="hh-finale__banner">
+          <div className="hh-finale__congrats">ΣΥΓΧΑΡΗΤΗΡΙΑ!</div>
+          <div className="hh-finale__sub">ΕΓΙΝΕΣ SUPER HEALTHY HERO!</div>
         </div>
-        <BigButton variant="primary" onClick={() => setStage('rating')}>
+        <img src={`${S}/Hero.png`} alt="" className="hh-finale__hero" draggable="false" />
+        <div className="hh-finale__score">Σκορ: ⭐ {score}</div>
+        <button type="button" className="big-button big-button--primary" onClick={() => setStage('rating')}>
           Συνέχεια →
-        </BigButton>
+        </button>
       </div>
     )
   }
@@ -68,42 +67,17 @@ export default function HealthyHero() {
     return <RatingScreen game="healthy-hero" onDone={goHome} />
   }
 
-  // Αποστολές — με μπάρα σκορ στο πάνω μέρος.
-  const meta = STAGE_META[stage]
   return (
-    <div className="screen game game--hero">
-      <ScoreBar
-        score={score}
-        title="Healthy Hero"
-        goal={meta?.goal}
-        progress={meta ? progress : null}
-        progressIcon={meta?.icon}
-      />
-      <div className="game__body">
-        {stage === 'm1' && (
-          <Mission1Plate
-            score={score}
-            addScore={addScore}
-            onProgress={setProgress}
-            onComplete={() => advance('m2')}
-          />
-        )}
-        {stage === 'm2' && (
-          <Mission2LunchBox
-            score={score}
-            addScore={addScore}
-            onProgress={setProgress}
-            onNext={() => advance('m3')}
-          />
-        )}
-        {stage === 'm3' && (
-          <Mission3Traps
-            addScore={addScore}
-            onProgress={setProgress}
-            onNext={() => advance('finale')}
-          />
-        )}
-      </div>
+    <div className="screen hh-game">
+      {stage === 'm1' && (
+        <Mission1Plate addScore={addScore} onProgress={noop} onComplete={() => setStage('m2')} />
+      )}
+      {stage === 'm2' && (
+        <Mission2LunchBox addScore={addScore} onProgress={noop} onNext={() => setStage('m3')} />
+      )}
+      {stage === 'm3' && (
+        <Mission3Traps addScore={addScore} onProgress={noop} onNext={() => setStage('finale')} />
+      )}
     </div>
   )
 }

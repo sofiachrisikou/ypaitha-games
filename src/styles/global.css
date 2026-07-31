@@ -717,6 +717,257 @@ button {
   color: #f4a500;
 }
 
+/* =========================================================
+   HEALTHY HERO — εικονογραφήσεις Αριστοτέλη (public/hh)
+   ========================================================= */
+@font-face {
+  font-family: 'Slackey';
+  src: url('/hh/m3/Font/Slackey-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+.hh-mission {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+/* Τρόφιμα ως εικόνες (override του παλιού emoji-card στυλ) */
+.food {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  transform: translate(-50%, -50%);
+  background: none;
+  border: 0;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+}
+.food-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.25));
+}
+.food--dragging {
+  z-index: 100;
+  transform: translate(-50%, -50%) scale(1.16);
+}
+.food--dragging .food-img {
+  filter: drop-shadow(0 16px 18px rgba(0, 0, 0, 0.35));
+}
+.food--reject {
+  animation: shake 0.4s ease;
+}
+.food--tap {
+  transition: transform 0.1s ease;
+}
+.food--tap:active {
+  transform: translate(-50%, -50%) scale(0.9);
+}
+.food--found {
+  animation: pop-out 0.35s ease forwards;
+  pointer-events: none;
+}
+.food-img--placed {
+  position: absolute;
+  width: 175px;
+  height: 175px;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.25));
+  animation: pop-centered 0.35s ease;
+}
+
+/* Πιάτο (Αποστολή 1) */
+.plate-img {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.18));
+  transition: filter 0.3s ease;
+}
+.plate-img--glow {
+  filter: drop-shadow(0 0 26px rgba(52, 199, 89, 0.9));
+}
+
+/* Lunch box (Αποστολή 2) */
+.lunchbox-img {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.22));
+  transition: filter 0.3s ease;
+}
+.lunchbox-img--glow {
+  filter: drop-shadow(0 0 26px rgba(52, 199, 89, 0.9));
+}
+.lunchbox-img--done {
+  animation: box-pop 0.5s ease;
+}
+.mission-logo {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: auto;
+  z-index: 5;
+  pointer-events: none;
+}
+.lunchbox-done {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 210px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  z-index: 150;
+  animation: fade-in 0.3s ease;
+}
+.lunchbox-done__emoji {
+  font-size: 150px;
+  animation: bob 1.6s ease-in-out infinite;
+}
+.lunchbox-done__text {
+  font-size: 52px;
+  font-weight: 800;
+  color: #12603a;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 12px 44px;
+  border-radius: 999px;
+}
+
+/* Αποστολή 3 — αριθμοί ΧΡΟΝΟΣ/ΣΚΟΡ πάνω στους κύκλους του background */
+.hh-num {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-family: 'Slackey', system-ui, sans-serif;
+  font-size: 84px;
+  line-height: 1;
+  color: #ffffff;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.18);
+  z-index: 30;
+  pointer-events: none;
+}
+.hh-num--low {
+  color: #fff0a6;
+}
+.score-float {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-family: 'Slackey', system-ui, sans-serif;
+  font-size: 84px;
+  color: #34c759;
+  -webkit-text-stroke: 3px #fff;
+  paint-order: stroke fill;
+  pointer-events: none;
+  z-index: 120;
+  animation: float-up 0.9s ease forwards;
+}
+
+/* Αρχική οθόνη (intro) */
+.hh-intro {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+.hh-intro__hero {
+  position: absolute;
+  right: -10px;
+  bottom: 250px;
+  width: 620px;
+  height: auto;
+  filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.2));
+  animation: bob 2.6s ease-in-out infinite;
+}
+.hh-float {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  height: auto;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.15));
+  animation: bob 3s ease-in-out infinite;
+}
+.hh-start-btn {
+  position: absolute;
+  left: 50%;
+  bottom: 100px;
+  transform: translateX(-50%);
+  background: none;
+  border: 0;
+  padding: 0;
+}
+.hh-start-btn img {
+  width: 560px;
+  height: auto;
+  display: block;
+}
+.hh-start-btn:active {
+  transform: translateX(-50%) translateY(6px) scale(0.98);
+}
+
+/* Τελική κάρτα */
+.hh-finale {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 70px 60px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 32%, #ffd23f, #f7b500);
+}
+.hh-finale__trophy {
+  font-size: 250px;
+  line-height: 1;
+  filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.15));
+  animation: bob 2.2s ease-in-out infinite;
+}
+.hh-finale__banner {
+  background: #4aa72e;
+  border: 8px solid #2f7d18;
+  border-radius: 30px;
+  padding: 22px 54px;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  transform: rotate(-1.5deg);
+}
+.hh-finale__congrats {
+  font-size: 84px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+}
+.hh-finale__sub {
+  font-size: 44px;
+  font-weight: 800;
+  color: #eaffd6;
+}
+.hh-finale__hero {
+  width: 360px;
+  height: auto;
+}
+.hh-finale__score {
+  font-size: 56px;
+  font-weight: 800;
+  color: #8a4b00;
+}
+
 /* ---------- Animations ---------- */
 @keyframes bob {
   0%,
@@ -806,5 +1057,30 @@ button {
   100% {
     transform: translate(-50%, -50%) scale(0);
     opacity: 0;
+  }
+}
+@keyframes float-up {
+  0% {
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 0;
+  }
+  30% {
+    transform: translate(-50%, -80%) scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -170%) scale(1);
+    opacity: 0;
+  }
+}
+@keyframes box-pop {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  45% {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
   }
 }

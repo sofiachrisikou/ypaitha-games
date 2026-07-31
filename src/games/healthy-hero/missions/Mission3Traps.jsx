@@ -1,35 +1,35 @@
 import { useEffect, useRef, useState } from 'react'
-import { TRAP_ITEMS, TRAP_TIME } from '../data/traps.js'
+import { TRAP_ITEMS, BG_IMG, TRAP_TIME, TRAP_POINTS } from '../data/traps.js'
 
 const TRAPS_TOTAL = TRAP_ITEMS.filter((f) => !f.healthy).length
+const COLS = [250, 540, 830]
+const ROWS = [480, 730, 980, 1230, 1470]
 
-// Πλέγμα 3 στηλών x 4 γραμμών (συντεταγμένες stage, μέσα στο game__body).
 function gridPos(i) {
-  const cols = 3
-  const col = i % cols
-  const row = Math.floor(i / cols)
-  const xs = [240, 540, 840]
-  const y0 = 470
-  const stepY = 300
-  return { x: xs[col], y: y0 + row * stepY }
+  const col = i % 3
+  const row = Math.floor(i / 3)
+  const jitter = ((i * 37) % 50) - 25
+  return { x: COLS[col] + jitter, y: ROWS[row] }
 }
 
 export default function Mission3Traps({ addScore, onProgress, onNext }) {
   const [found, setFound] = useState(() => new Set())
   const [wrongId, setWrongId] = useState(null)
   const [feedback, setFeedback] = useState(null)
+  const [floats, setFloats] = useState([])
+  const [pts, setPts] = useState(0)
   const [timeLeft, setTimeLeft] = useState(TRAP_TIME)
   const [finished, setFinished] = useState(null) // null | 'win' | 'timeout'
   const finishedRef = useRef(false)
+  const floatId = useRef(0)
 
   const finish = (kind) => {
     if (finishedRef.current) return
     finishedRef.current = true
     setFinished(kind)
-    setTimeout(() => onNext && onNext(), 1800)
+    setTimeout(() => onNext && onNext(), 1900)
   }
 
-  // Χρονόμετρο
   useEffect(() => {
     const t = setInterval(() => {
       setTimeLeft((s) => {
@@ -45,11 +45,10 @@ export default function Mission3Traps({ addScore, onProgress, onNext }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const tap = (item) => {
+  const tap = (item, pos) => {
     if (finishedRef.current || found.has(item.id)) return
 
     if (!item.healthy) {
-      // Σωστή παγίδα -> εξαφανίζεται + πόντοι
       setFound((prev) => {
         const next = new Set(prev)
         next.add(item.id)
@@ -57,9 +56,12 @@ export default function Mission3Traps({ addScore, onProgress, onNext }) {
         if (next.size >= TRAPS_TOTAL) finish('win')
         return next
       })
-      addScore(10)
+      addScore(TRAP_POINTS)
+      setPts((p) => p + TRAP_POINTS)
+      const id = ++floatId.current
+      setFloats((f) => [...f, { id, x: pos.x, y: pos.y }])
+      setTimeout(() => setFloats((f) => f.filter((x) => x.id !== id)), 900)
     } else {
-      // Υγιεινό -> ενθάρρυνση, χωρίς πόντους
       setWrongId(item.id)
       setFeedback('Αυτό κάνει καλό — άφησέ το!')
       setTimeout(() => {
@@ -69,52 +71,43 @@ export default function Mission3Traps({ addScore, onProgress, onNext }) {
     }
   }
 
-  const pct = Math.max(0, (timeLeft / TRAP_TIME) * 100)
-
   return (
-    <div className="mission mission3">
-      <h2 className="mission1__title">Βρες τις διατροφικές παγίδες</h2>
-      <p className="mission1__hint">Άγγιξε όσα δεν τρώμε συχνά, πριν τελειώσει ο χρόνος!</p>
-
-      {/* Χρονόμετρο */}
-      <div className="timer">
-        <div className="timer__label">⏱️ {timeLeft}s</div>
-        <div className="timer__track">
-          <div
-            className={`timer__fill ${timeLeft <= 5 ? 'timer__fill--low' : ''}`}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-      </div>
-
+    <div className="mission hh-mission hh-mission--traps" style={{ backgroundImage: `url(${BG_IMG})` }}>
       {/* Τρόφιμα στο τραπέζι */}
       {TRAP_ITEMS.map((item, i) => {
         const pos = gridPos(i)
         const isFound = found.has(item.id)
-        const cls = [
-          'food',
-          'food--tap',
-          isFound ? 'food--found' : '',
-          wrongId === item.id ? 'food--reject' : '',
-        ]
-          .join(' ')
-          .trim()
         return (
           <button
             key={item.id}
             type="button"
-            className={cls}
+            className={`food food--tap ${isFound ? 'food--found' : ''} ${wrongId === item.id ? 'food--reject' : ''}`}
             style={{ left: pos.x, top: pos.y }}
-            onPointerDown={() => tap(item)}
+            onPointerDown={() => tap(item, pos)}
             aria-label={item.name}
             disabled={isFound}
           >
-            <span className="food__emoji">{item.image}</span>
+            <img src={item.img} alt="" className="food-img" draggable="false" />
           </button>
         )
       })}
 
+      {/* Floating +πόντοι */}
+      {floats.map((f) => (
+        <div key={f.id} className="score-float" style={{ left: f.x, top: f.y }}>
+          +{TRAP_POINTS}
+        </div>
+      ))}
+
       {feedback && <div className="feedback-toast feedback-toast--soft">{feedback}</div>}
+
+      {/* ΧΡΟΝΟΣ / ΣΚΟΡ — αριθμοί πάνω στους baked-in κύκλους του background */}
+      <div className={`hh-num ${timeLeft <= 5 ? 'hh-num--low' : ''}`} style={{ left: 470, top: 1852 }}>
+        {timeLeft}
+      </div>
+      <div className="hh-num" style={{ left: 702, top: 1806 }}>
+        {pts}
+      </div>
 
       {finished && (
         <div className="reward-overlay">
