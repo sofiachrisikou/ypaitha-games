@@ -8,11 +8,11 @@ import Mission3Traps from './missions/Mission3Traps.jsx'
 const S = '/hh/start'
 // Διακοσμητικά τρόφιμα που «επιπλέουν» στην αρχική (θέσεις κατά το σχέδιο).
 const FLOAT_FOODS = [
-  { src: `${S}/apple.png`, x: 210, y: 900, w: 170, d: 0 },
-  { src: `${S}/Sandwich.png`, x: 200, y: 1180, w: 220, d: 0.6 },
-  { src: `${S}/Cheese.png`, x: 380, y: 1120, w: 180, d: 1.1 },
-  { src: `${S}/Yoghurt.png`, x: 250, y: 1420, w: 170, d: 0.3 },
-  { src: `${S}/Broccoli.png`, x: 150, y: 1560, w: 180, d: 0.9 },
+  { src: `${S}/apple.png`, x: 205, y: 930, w: 155, d: 0 },
+  { src: `${S}/Sandwich.png`, x: 245, y: 1090, w: 195, d: 0.6 },
+  { src: `${S}/Cheese.png`, x: 170, y: 1250, w: 155, d: 1.1 },
+  { src: `${S}/Yoghurt.png`, x: 240, y: 1410, w: 150, d: 0.3 },
+  { src: `${S}/Broccoli.png`, x: 165, y: 1555, w: 155, d: 0.9 },
 ]
 
 // Ροή: intro -> m1 -> m2 -> m3 -> finale -> rating -> homepage

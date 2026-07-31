@@ -11,13 +11,14 @@ export const FOODS = [
   { id: 'pasta', name: 'Μακαρόνια', healthy: true, img: `${B}/Pasta.png`, ok: `${B}/Pasta_Green.png` },
   { id: 'rice', name: 'Ρύζι', healthy: true, img: `${B}/Rice.png`, ok: `${B}/Rice_Green.png` },
   { id: 'salad', name: 'Σαλάτα', healthy: true, img: `${B}/Salad.png`, ok: `${B}/Salad_Green.png` },
-  { id: 'broccoli', name: 'Μπρόκολο', healthy: true, img: `${B}/Broccoli.png`, ok: `${B}/Broccoli_Green.png` },
   { id: 'bananas', name: 'Μπανάνες', healthy: true, img: `${B}/Bananas.png`, ok: `${B}/Bananas_Green.png` },
   { id: 'apple', name: 'Μήλο', healthy: true, img: `${B}/Apple.png`, ok: `${B}/Apple_Green.png` },
   { id: 'soda', name: 'Αναψυκτικό', healthy: false, img: `${B}/Soda.png`, bad: `${B}/Soda_red.png` },
   { id: 'donut', name: 'Ντόνατ', healthy: false, img: `${B}/Donut.png`, bad: `${B}/Donut_red.png` },
   { id: 'sweets', name: 'Γλυκά', healthy: false, img: `${B}/Sweets.png`, bad: `${B}/Sweets_red.png` },
   { id: 'burger', name: 'Μπέργκερ', healthy: false, img: `${B}/Burger.png`, bad: `${B}/Burger_red.png` },
+  { id: 'pizza', name: 'Πίτσα', healthy: false, img: `${B}/Pizza.png`, bad: `${B}/Pizza_red.png` },
+  { id: 'hotdog', name: 'Χοτ ντογκ', healthy: false, img: `${B}/Hot_Dog.png`, bad: `${B}/Hot_Dog_red.png` },
 ]
 
 export const PLATE_IMG = `${B}/Plate.png`
