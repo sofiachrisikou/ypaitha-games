@@ -1,4 +1,5 @@
-export const FONT_FAMILY = 'Arial, sans-serif';
+export const FONT_FAMILY = 'GameFont';
+//export const FONT_FAMILY = 'Arial, sans-serif';
  
 export const TEXT_STYLES = {
   // Score/timer/progress labels — game-scene.js, game-scene2.js, game-scene3.js
@@ -33,5 +34,13 @@ export const TEXT_STYLES = {
     wordWrap: { width: 260, useAdvancedWrap: true },
   },
 
-
 };
+export async function loadFont(fontFamilyName, fontFilePath) {
+  try {
+    const fontFace = new FontFace(fontFamilyName, `url(${fontFilePath})`);
+    await fontFace.load();
+    document.fonts.add(fontFace);
+  } catch (error) {
+    console.warn(`Could not load font "${fontFamilyName}" from ${fontFilePath} — falling back to default font.`, error);
+  }
+}

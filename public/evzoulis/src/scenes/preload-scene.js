@@ -1,6 +1,7 @@
 import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from '../common/scene-keys.js';
 import { IMAGE_ASSETS, TEXTURE_ATLAS_ASSETS, AUDIO_ASSETS } from '../common/assets.js';
+import { loadFont } from '../common/sharedGameSettings.js';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -24,7 +25,9 @@ export class PreloadScene extends Phaser.Scene {
     });
   }
 
-  create() {
-    this.scene.start(SCENE_KEYS.EUZOYLIS_GAME_SCENE3);
+  async create() {
+
+    await loadFont('GameFont', 'assets/fonts/ComicSansMSBold.ttf');
+    this.scene.start(SCENE_KEYS.EUZOYLIS_INTRO_SCENE);
   }
 }

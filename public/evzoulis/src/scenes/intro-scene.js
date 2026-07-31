@@ -3,6 +3,7 @@ import { SCENE_KEYS } from '../common/scene-keys.js';
 import { ASSET_KEYS } from '../common/assets.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
 
+
 // const speechBubbleTextStyleConfig = {
 //   fontSize: '32px',
 //   color: '#043D8C',
