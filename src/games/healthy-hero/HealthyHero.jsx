@@ -39,7 +39,7 @@ export default function HealthyHero() {
             draggable="false"
           />
         ))}
-        <img src={`${S}/Hero.png`} alt="" className="hh-intro__hero" draggable="false" />
+        <img src={`${E}/Hero.png`} alt="" className="hh-intro__hero" draggable="false" />
         <button type="button" className="hh-start-btn" onClick={() => setStage('m1')} aria-label="Έναρξη">
           <img src={`${S}/Start_Button.png`} alt="Έναρξη" draggable="false" />
         </button>
@@ -52,7 +52,7 @@ export default function HealthyHero() {
       <div className="screen hh-finale" style={{ backgroundImage: `url(${E}/Background.png)` }}>
         <img src={`${E}/Trophy.png`} alt="" className="hh-finale__trophy" draggable="false" />
         <img src={`${E}/Ribon.png`} alt="Συγχαρητήρια! Έγινες Super Healthy Hero!" className="hh-finale__ribbon" draggable="false" />
-        <img src={`${S}/Hero.png`} alt="" className="hh-finale__hero" draggable="false" />
+        <img src={`${E}/Hero.png`} alt="" className="hh-finale__hero" draggable="false" />
         <div className="hh-finale__score">Σκορ: ⭐ {score}</div>
         <button type="button" className="big-button big-button--primary hh-finale__btn" onClick={() => setStage('rating')}>
           Συνέχεια →
