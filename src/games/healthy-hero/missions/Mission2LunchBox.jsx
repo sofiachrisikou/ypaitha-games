@@ -1,39 +1,47 @@
 import { useRef, useState } from 'react'
-import { LUNCHBOX_ITEMS, LUNCHBOX_IMG, BG_IMG, LOGO_IMG, LUNCHBOX_GOAL as GOAL } from '../data/lunchbox.js'
+import { LUNCHBOX_ITEMS, BG_IMG, LUNCHBOX_GOAL as GOAL } from '../data/lunchbox.js'
 import { STAGE_W } from '../../../components/Stage.jsx'
 
-// Γεωμετρία (συντεταγμένες stage 1080x1920)
-const CX = 540
-const CY = 1080
-const BOX_W = 640
-const BOX_H = Math.round((BOX_W * 2000) / 1274) // αναλογία Lunch_Box.png
-const HIT_DX = 280
-const HIT_DY = 430
-const RX = 430
-const RY = 660
+// Το κουτί + το badge είναι ήδη ζωγραφισμένα στο Background.png.
+// Εδώ βάζουμε μόνο τα draggable φαγητά και τα ρίχνουμε στις θήκες.
 
-function slotPos(i, total) {
-  const angle = (-90 + i * (360 / total)) * (Math.PI / 180)
-  return { x: CX + RX * Math.cos(angle), y: CY + RY * Math.sin(angle) }
-}
+// Θέσεις επιλογών γύρω από το κουτί (αριστερή στήλη + κάτω, ώστε να μην
+// πέφτουν πάνω στο κουτί που πιάνει το πάνω-κέντρο).
+const POS = [
+  { x: 135, y: 690 },
+  { x: 135, y: 895 },
+  { x: 135, y: 1100 },
+  { x: 135, y: 1305 },
+  { x: 320, y: 1500 },
+  { x: 510, y: 1500 },
+  { x: 700, y: 1500 },
+  { x: 895, y: 1485 },
+  { x: 420, y: 1665 },
+  { x: 615, y: 1665 },
+  { x: 805, y: 1665 },
+]
 
-// Θέσεις στο κάτω μέρος του κουτιού (2x2).
-function boxSlot(j) {
-  const col = j % 2
-  const row = Math.floor(j / 2)
-  return { x: CX - 115 + col * 230, y: CY + 120 + row * 200 }
-}
+// Θέσεις μέσα στις θήκες του κουτιού (κατά το background).
+const SLOTS = [
+  { x: 470, y: 800 },
+  { x: 825, y: 765 },
+  { x: 835, y: 1010 },
+  { x: 470, y: 1035 },
+]
+
+// Περιοχή «μέσα στο κουτί» (θήκες).
+const overBox = (x, y) => x > 340 && x < 985 && y > 640 && y < 1145
 
 export default function Mission2LunchBox({ addScore, onProgress, onNext }) {
   const rootRef = useRef(null)
   const dragRef = useRef(null)
   const [tray, setTray] = useState(() =>
-    LUNCHBOX_ITEMS.map((f, i) => ({ ...f, pos: slotPos(i, LUNCHBOX_ITEMS.length) })),
+    LUNCHBOX_ITEMS.slice(0, POS.length).map((f, i) => ({ ...f, pos: POS[i] })),
   )
   const [placed, setPlaced] = useState([])
   const [drag, setDrag] = useState(null)
   const [feedback, setFeedback] = useState(null)
-  const [glow, setGlow] = useState(false)
+  const [flash, setFlash] = useState(false)
   const [done, setDone] = useState(false)
 
   const toLocal = (clientX, clientY) => {
@@ -41,8 +49,6 @@ export default function Mission2LunchBox({ addScore, onProgress, onNext }) {
     const scale = r.width / STAGE_W
     return { x: (clientX - r.left) / scale, y: (clientY - r.top) / scale }
   }
-
-  const overBox = (x, y) => Math.abs(x - CX) < HIT_DX && Math.abs(y - CY) < HIT_DY
 
   const onMove = (e) => {
     const d = dragRef.current
@@ -78,8 +84,8 @@ export default function Mission2LunchBox({ addScore, onProgress, onNext }) {
         return next
       })
       addScore(10)
-      setGlow(true)
-      setTimeout(() => setGlow(false), 600)
+      setFlash(true)
+      setTimeout(() => setFlash(false), 500)
       dragRef.current = null
       setDrag(null)
       return
@@ -122,19 +128,12 @@ export default function Mission2LunchBox({ addScore, onProgress, onNext }) {
 
   return (
     <div className="mission hh-mission" ref={rootRef} style={{ backgroundImage: `url(${BG_IMG})` }}>
-      {/* Lunch box + badge */}
-      <img
-        src={LUNCHBOX_IMG}
-        alt=""
-        className={`lunchbox-img ${glow ? 'lunchbox-img--glow' : ''} ${done ? 'lunchbox-img--done' : ''}`}
-        style={{ left: CX, top: CY, width: BOX_W, height: BOX_H }}
-        draggable="false"
-      />
-      <img src={LOGO_IMG} alt="Αποστολή 2" className="mission-logo" style={{ left: CX, top: 250 }} draggable="false" />
+      {/* Πράσινη λάμψη πάνω στις θήκες όταν μπαίνει σωστό */}
+      {flash && <div className="box-flash" />}
 
-      {/* Τρόφιμα μέσα στο κουτί */}
+      {/* Φαγητά μέσα στις θήκες */}
       {placed.map((f, j) => {
-        const pos = boxSlot(j)
+        const pos = SLOTS[j] || SLOTS[SLOTS.length - 1]
         return (
           <img
             key={f.id}
@@ -147,7 +146,7 @@ export default function Mission2LunchBox({ addScore, onProgress, onNext }) {
         )
       })}
 
-      {/* Επιλογές γύρω */}
+      {/* Επιλογές */}
       {tray.map((food) => {
         const isDragging = drag && drag.id === food.id
         const rejecting = isDragging && drag.rejecting
