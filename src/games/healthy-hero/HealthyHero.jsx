@@ -6,6 +6,7 @@ import Mission2LunchBox from './missions/Mission2LunchBox.jsx'
 import Mission3Traps from './missions/Mission3Traps.jsx'
 
 const S = '/hh/start'
+const E = '/hh/end'
 // Διακοσμητικά τρόφιμα που «επιπλέουν» στην αρχική (θέσεις κατά το σχέδιο).
 const FLOAT_FOODS = [
   { src: `${S}/apple.png`, x: 205, y: 930, w: 155, d: 0 },
@@ -48,15 +49,12 @@ export default function HealthyHero() {
 
   if (stage === 'finale') {
     return (
-      <div className="screen hh-finale">
-        <div className="hh-finale__trophy">🏆</div>
-        <div className="hh-finale__banner">
-          <div className="hh-finale__congrats">ΣΥΓΧΑΡΗΤΗΡΙΑ!</div>
-          <div className="hh-finale__sub">ΕΓΙΝΕΣ SUPER HEALTHY HERO!</div>
-        </div>
+      <div className="screen hh-finale" style={{ backgroundImage: `url(${E}/Background.png)` }}>
+        <img src={`${E}/Trophy.png`} alt="" className="hh-finale__trophy" draggable="false" />
+        <img src={`${E}/Ribon.png`} alt="Συγχαρητήρια! Έγινες Super Healthy Hero!" className="hh-finale__ribbon" draggable="false" />
         <img src={`${S}/Hero.png`} alt="" className="hh-finale__hero" draggable="false" />
         <div className="hh-finale__score">Σκορ: ⭐ {score}</div>
-        <button type="button" className="big-button big-button--primary" onClick={() => setStage('rating')}>
+        <button type="button" className="big-button big-button--primary hh-finale__btn" onClick={() => setStage('rating')}>
           Συνέχεια →
         </button>
       </div>

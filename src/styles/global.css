@@ -939,53 +939,58 @@ button {
   transform: translateX(-50%) translateY(6px) scale(0.98);
 }
 
-/* Τελική κάρτα */
+/* Τελική κάρτα (assets End_Screen) */
 .hh-finale {
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 28px;
-  padding: 70px 60px;
+  background-size: cover;
+  background-position: center;
   overflow: hidden;
-  background: radial-gradient(circle at 50% 32%, #ffd23f, #f7b500);
 }
 .hh-finale__trophy {
-  font-size: 250px;
-  line-height: 1;
+  position: absolute;
+  left: 540px;
+  top: 470px;
+  transform: translate(-50%, -50%);
+  width: 470px;
+  height: auto;
   filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.15));
   animation: bob 2.2s ease-in-out infinite;
 }
-.hh-finale__banner {
-  background: #4aa72e;
-  border: 8px solid #2f7d18;
-  border-radius: 30px;
-  padding: 22px 54px;
-  text-align: center;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
-  transform: rotate(-1.5deg);
-}
-.hh-finale__congrats {
-  font-size: 84px;
-  font-weight: 900;
-  color: #fff;
-  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
-}
-.hh-finale__sub {
-  font-size: 44px;
-  font-weight: 800;
-  color: #eaffd6;
+.hh-finale__ribbon {
+  position: absolute;
+  left: 540px;
+  top: 935px;
+  transform: translate(-50%, -50%);
+  width: 985px;
+  height: auto;
 }
 .hh-finale__hero {
+  position: absolute;
+  left: 540px;
+  top: 1380px;
+  transform: translate(-50%, -50%);
   width: 360px;
   height: auto;
 }
 .hh-finale__score {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 1615px;
+  text-align: center;
   font-size: 56px;
   font-weight: 800;
   color: #8a4b00;
+}
+.hh-finale__btn {
+  position: absolute;
+  left: 50%;
+  bottom: 80px;
+  transform: translateX(-50%);
+}
+.hh-finale__btn:active {
+  transform: translateX(-50%) translateY(8px);
 }
 
 /* ---------- Animations ---------- */
