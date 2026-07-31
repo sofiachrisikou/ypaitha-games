@@ -173,6 +173,39 @@ button {
   background: rgba(0, 0, 0, 0.2);
 }
 
+/* Homepage με assets (μπλε φόντο + κάρτες-εικόνες) */
+.home2 {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+.home2__card {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: none;
+  border: 0;
+  padding: 0;
+  transition: transform 0.1s ease;
+}
+.home2__card img {
+  display: block;
+  width: 970px;
+  height: auto;
+  filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.28));
+}
+.home2__card--top {
+  top: 320px;
+}
+.home2__card--bottom {
+  top: 1095px;
+}
+.home2__card:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
 /* Κρυφό hotspot για /stats (κάτω αριστερή γωνία) */
 .stats-hotspot {
   position: absolute;
@@ -934,6 +967,7 @@ button {
   width: 560px;
   height: auto;
   display: block;
+  animation: start-pulse 1.6s ease-in-out infinite;
 }
 .hh-start-btn:active {
   transform: translateX(-50%) translateY(6px) scale(0.98);
@@ -991,6 +1025,41 @@ button {
 }
 .hh-finale__btn:active {
   transform: translateX(-50%) translateY(8px);
+}
+
+/* Confetti (τελική κάρτα) */
+.confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.confetti i {
+  position: absolute;
+  top: -60px;
+  width: 20px;
+  height: 28px;
+  border-radius: 4px;
+  animation-name: confetti-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-60px) rotate(0deg);
+  }
+  100% {
+    transform: translateY(2020px) rotate(720deg);
+  }
+}
+@keyframes start-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 /* ---------- Animations ---------- */

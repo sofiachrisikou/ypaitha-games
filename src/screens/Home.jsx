@@ -1,41 +1,33 @@
 import { useNavigate } from 'react-router-dom'
 
-// Homepage: δύο μεγάλες κάρτες-κουμπιά, μία για κάθε παιχνίδι.
+const H = '/home'
+
+// Homepage: μπλε φόντο με τίτλο (baked-in) + δύο κάρτες-εικόνες.
+// Card01 = Ευζούλης (Η Τάξη που Ηρεμεί), Card02 = Healthy Hero.
 export default function Home() {
   const navigate = useNavigate()
 
   return (
-    <div className="screen home">
-      <header className="home__header">
-        <h1 className="home__title">Διάλεξε παιχνίδι</h1>
-        <p className="home__subtitle">Άγγιξε μια κάρτα για να ξεκινήσεις!</p>
-      </header>
+    <div className="screen home2" style={{ backgroundImage: `url(${H}/Background.png)` }}>
+      <button
+        type="button"
+        className="home2__card home2__card--top"
+        onClick={() => navigate('/game/evzoulis')}
+        aria-label="Η Τάξη που Ηρεμεί"
+      >
+        <img src={`${H}/Card01.png`} alt="Η Τάξη που Ηρεμεί" draggable="false" />
+      </button>
 
-      <div className="home__cards">
-        <button
-          type="button"
-          className="game-card game-card--hero"
-          onClick={() => navigate('/game/healthy-hero')}
-        >
-          <span className="game-card__emoji">🥦</span>
-          <span className="game-card__title">Healthy Hero</span>
-          <span className="game-card__desc">Γίνε ήρωας της υγιεινής διατροφής!</span>
-          <span className="game-card__cta">Παίξε ▶</span>
-        </button>
+      <button
+        type="button"
+        className="home2__card home2__card--bottom"
+        onClick={() => navigate('/game/healthy-hero')}
+        aria-label="Healthy Hero"
+      >
+        <img src={`${H}/Card02.png`} alt="Healthy Hero" draggable="false" />
+      </button>
 
-        <button
-          type="button"
-          className="game-card game-card--evzoulis"
-          onClick={() => navigate('/game/evzoulis')}
-        >
-          <span className="game-card__emoji">🎖️</span>
-          <span className="game-card__title">Ευζούλης</span>
-          <span className="game-card__desc">Μια περιπέτεια γεμάτη μάθηση!</span>
-          <span className="game-card__cta">Παίξε ▶</span>
-        </button>
-      </div>
-
-      {/* Κρυφό κουμπί για τη σελίδα στατιστικών (γωνία). */}
+      {/* Κρυφό hotspot για /stats (κάτω αριστερή γωνία). */}
       <button
         type="button"
         className="stats-hotspot"

@@ -1,19 +1,29 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import RatingScreen from '../../components/RatingScreen.jsx'
 import Mission1Plate from './missions/Mission1Plate.jsx'
 import Mission2LunchBox from './missions/Mission2LunchBox.jsx'
 import Mission3Traps from './missions/Mission3Traps.jsx'
+import { playWin } from '../../services/sound.js'
+
+// Confetti (σταθερές θέσεις — χωρίς τυχαιότητα)
+const CONFETTI_COLORS = ['#34c759', '#ff9f2e', '#2ec4f1', '#e5442e', '#ffd23f', '#ffffff']
+const CONFETTI = Array.from({ length: 28 }, (_, i) => ({
+  left: (i * 37) % 100,
+  delay: ((i * 13) % 20) / 10,
+  dur: 2.6 + ((i * 7) % 12) / 10,
+  color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+}))
 
 const S = '/hh/start'
 const E = '/hh/end'
 // Διακοσμητικά τρόφιμα που «επιπλέουν» στην αρχική (θέσεις κατά το σχέδιο).
 const FLOAT_FOODS = [
-  { src: `${S}/apple.png`, x: 205, y: 930, w: 155, d: 0 },
-  { src: `${S}/Sandwich.png`, x: 245, y: 1090, w: 195, d: 0.6 },
-  { src: `${S}/Cheese.png`, x: 170, y: 1250, w: 155, d: 1.1 },
-  { src: `${S}/Yoghurt.png`, x: 240, y: 1410, w: 150, d: 0.3 },
-  { src: `${S}/Broccoli.png`, x: 165, y: 1555, w: 155, d: 0.9 },
+  { src: `${S}/apple.png`, x: 150, y: 760, w: 150, d: 0 },
+  { src: `${S}/Sandwich.png`, x: 195, y: 930, w: 190, d: 0.6 },
+  { src: `${S}/Cheese.png`, x: 135, y: 1100, w: 150, d: 1.1 },
+  { src: `${S}/Yoghurt.png`, x: 190, y: 1265, w: 150, d: 0.3 },
+  { src: `${S}/Broccoli.png`, x: 140, y: 1420, w: 150, d: 0.9 },
 ]
 
 // Ροή: intro -> m1 -> m2 -> m3 -> finale -> rating -> homepage
@@ -25,6 +35,11 @@ export default function HealthyHero() {
   const addScore = useCallback((delta) => setScore((s) => s + delta), [])
   const goHome = useCallback(() => navigate('/'), [navigate])
   const noop = useCallback(() => {}, [])
+
+  // Φανφάρα στην τελική κάρτα.
+  useEffect(() => {
+    if (stage === 'finale') playWin()
+  }, [stage])
 
   if (stage === 'intro') {
     return (
@@ -50,6 +65,19 @@ export default function HealthyHero() {
   if (stage === 'finale') {
     return (
       <div className="screen hh-finale" style={{ backgroundImage: `url(${E}/Background.png)` }}>
+        <div className="confetti" aria-hidden="true">
+          {CONFETTI.map((c, i) => (
+            <i
+              key={i}
+              style={{
+                left: `${c.left}%`,
+                background: c.color,
+                animationDuration: `${c.dur}s`,
+                animationDelay: `${c.delay}s`,
+              }}
+            />
+          ))}
+        </div>
         <img src={`${E}/Trophy.png`} alt="" className="hh-finale__trophy" draggable="false" />
         <img src={`${E}/Ribon.png`} alt="Συγχαρητήρια! Έγινες Super Healthy Hero!" className="hh-finale__ribbon" draggable="false" />
         <img src={`${E}/Hero.png`} alt="" className="hh-finale__hero" draggable="false" />

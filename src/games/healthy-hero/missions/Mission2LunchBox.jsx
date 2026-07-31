@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { LUNCHBOX_ITEMS, BG_IMG, LUNCHBOX_GOAL as GOAL } from '../data/lunchbox.js'
 import { STAGE_W } from '../../../components/Stage.jsx'
+import { playCorrect, playWrong, playWin } from '../../../services/sound.js'
 
 // Το κουτί + το badge είναι ήδη ζωγραφισμένα στο Background.png.
 // Εδώ βάζουμε μόνο τα draggable φαγητά και τα ρίχνουμε στις θήκες.
@@ -78,12 +79,16 @@ export default function Mission2LunchBox({ addScore, onProgress, onNext }) {
         const next = [...pl, food]
         if (onProgress) onProgress(next.length)
         if (next.length >= GOAL) {
-          setTimeout(() => setDone(true), 400)
+          setTimeout(() => {
+            setDone(true)
+            playWin()
+          }, 400)
           setTimeout(() => onNext && onNext(), 2100)
         }
         return next
       })
       addScore(10)
+      playCorrect()
       setFlash(true)
       setTimeout(() => setFlash(false), 500)
       dragRef.current = null
@@ -95,6 +100,7 @@ export default function Mission2LunchBox({ addScore, onProgress, onNext }) {
       const rd = { ...d, rejecting: true }
       dragRef.current = rd
       setDrag(rd)
+      playWrong()
       setFeedback('Αυτό δεν είναι για κάθε μέρα!')
       setTimeout(() => {
         dragRef.current = null

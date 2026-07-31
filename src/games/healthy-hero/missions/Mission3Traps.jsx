@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { TRAP_ITEMS, BG_IMG, TRAP_TIME, TRAP_POINTS } from '../data/traps.js'
+import { playCorrect, playWrong, playWin } from '../../../services/sound.js'
 
 const TRAPS_TOTAL = TRAP_ITEMS.filter((f) => !f.healthy).length
 const COLS = [250, 540, 830]
@@ -27,6 +28,7 @@ export default function Mission3Traps({ addScore, onProgress, onNext }) {
     if (finishedRef.current) return
     finishedRef.current = true
     setFinished(kind)
+    if (kind === 'win') playWin()
     setTimeout(() => onNext && onNext(), 1900)
   }
 
@@ -57,11 +59,13 @@ export default function Mission3Traps({ addScore, onProgress, onNext }) {
         return next
       })
       addScore(TRAP_POINTS)
+      playCorrect()
       setPts((p) => p + TRAP_POINTS)
       const id = ++floatId.current
       setFloats((f) => [...f, { id, x: pos.x, y: pos.y }])
       setTimeout(() => setFloats((f) => f.filter((x) => x.id !== id)), 900)
     } else {
+      playWrong()
       setWrongId(item.id)
       setFeedback('Αυτό κάνει καλό — άφησέ το!')
       setTimeout(() => {
