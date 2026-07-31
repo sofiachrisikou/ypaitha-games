@@ -173,6 +173,39 @@ button {
   background: rgba(0, 0, 0, 0.2);
 }
 
+/* Homepage με assets (μπλε φόντο + κάρτες-εικόνες) */
+.home2 {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+.home2__card {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: none;
+  border: 0;
+  padding: 0;
+  transition: transform 0.1s ease;
+}
+.home2__card img {
+  display: block;
+  width: 970px;
+  height: auto;
+  filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.28));
+}
+.home2__card--top {
+  top: 320px;
+}
+.home2__card--bottom {
+  top: 1095px;
+}
+.home2__card:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
 /* Κρυφό hotspot για /stats (κάτω αριστερή γωνία) */
 .stats-hotspot {
   position: absolute;
