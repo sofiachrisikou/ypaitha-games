@@ -2,7 +2,7 @@ import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from '../common/scene-keys.js';
 import { ASSET_KEYS } from '../common/assets.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
-
+import { spawnRiveAnimation, removeRiveAnimation } from '../common/rive-stage.js';
 
 // const speechBubbleTextStyleConfig = {
 //   fontSize: '32px',
@@ -30,6 +30,7 @@ export class IntroScene extends Phaser.Scene {
   #startButtonGO;
   #characterGO;
   #levelButtonGO;
+  #riveInstance;
 
   constructor() {
     super({
@@ -88,6 +89,9 @@ export class IntroScene extends Phaser.Scene {
     this.#startButtonGO.on(Phaser.Input.Events.POINTER_DOWN, this.#handleStartButtonPressed, this);
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
+
+    
+
   }
 
   update(time, delta) {
@@ -238,11 +242,12 @@ export class IntroScene extends Phaser.Scene {
     this.#logoGO.destroy();
     this.#startButtonGO.destroy();
     this.#showCharacterPrompt();
+      
   }
 
   #showCharacterPrompt() {
     const { width, height } = this.scale;
-
+     this.#createIntroCharacterAnimation();
     const characterX = width - 300;
     const characterY = height + 100;
     //const characterY = height * 0.92;
@@ -262,6 +267,7 @@ export class IntroScene extends Phaser.Scene {
     const levelButtonX = characterX - this.#characterGO.displayWidth / 2 - 240;
     const levelButtonY = characterY - this.#characterGO.displayHeight / 2;
 
+
     // TODO: swap ASSET_KEYS.BUTTON for your real "go to level 1" button art
     this.#levelButtonGO = this.add
       .image(levelButtonX, levelButtonY, ASSET_KEYS.BTN1)
@@ -271,6 +277,9 @@ export class IntroScene extends Phaser.Scene {
   }
 
   #handleLevelButtonPressed() {
+     //this.#riveInstance.stop();
+     //document.getElementById('rive-stage--intro').remove();
+     this.#riveInstance?.cleanup();
     this.scene.start(SCENE_KEYS.EUZOYLIS_GAME_SCENE1);
   }
 
@@ -283,5 +292,19 @@ export class IntroScene extends Phaser.Scene {
     if (this.#levelButtonGO) {
       this.#levelButtonGO.off(Phaser.Input.Events.POINTER_DOWN, this.#handleLevelButtonPressed, this);
     }
+
+     removeRiveAnimation(this.#riveInstance, 'rive-stage--intro'); // remove
+  this.#riveInstance = null;
+  }
+
+  //rive
+
+  #createIntroCharacterAnimation()
+  {
+    this.#riveInstance = spawnRiveAnimation(
+      'assets/rive/Bear_Intro.riv',
+      'Timeline_Bear_Intro',
+      'rive-stage--intro',
+    );
   }
 }

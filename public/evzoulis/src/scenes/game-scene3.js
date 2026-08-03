@@ -571,4 +571,6 @@ export class GameScene3 extends Phaser.Scene {
     this.scene.start(SCENE_KEYS.EUZOYLIS_OUTRO_SCENE);
     this.input.once(Phaser.Input.Events.POINTER_DOWN, () => {});
   }
+
+ 
 }

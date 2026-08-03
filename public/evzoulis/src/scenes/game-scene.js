@@ -3,6 +3,7 @@ import { SCENE_KEYS } from '../common/scene-keys.js';
 import { ASSET_KEYS } from '../common/assets.js';
 import { ProgressBar } from '../common/progress-bar.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
+import { spawnRiveAnimation, removeRiveAnimation } from '../common/rive-stage.js';
 
 // const textStyleConfig = {
 //   fontSize: '40px',
@@ -47,6 +48,7 @@ export class GameScene extends Phaser.Scene {
   #isLevelComplete;
   #isGameOver;
   #debug;
+  #riveInstance;
 
   constructor() {
     super({
@@ -147,6 +149,9 @@ export class GameScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
 
     this.#startIndicatorPulse();
+
+    this.#createCharacterAnimation();
+
   }
 
   update(time, delta) {
@@ -459,5 +464,19 @@ export class GameScene extends Phaser.Scene {
     this.input.off(Phaser.Input.Events.POINTER_UP_OUTSIDE, this.#handlePointerUp, this);
     this.#stopHoldTimer();
     this.#stopIndicatorPulse();
+    
+    
+    removeRiveAnimation(this.#riveInstance, 'rive-stage--level1'); // remove
+    this.#riveInstance = null;
   }
+
+  #createCharacterAnimation()
+  {
+    this.#riveInstance = spawnRiveAnimation(
+    'assets/rive/Bear_Breathing.riv',   // swap for this scene's real file
+    'Timeline_Bear_Breathing',           // swap for this scene's real state machine name
+    'rive-stage--level1',
+  );
+  }
+
 }

@@ -1,6 +1,7 @@
 import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from '../common/scene-keys.js';
 import { ASSET_KEYS } from '../common/assets.js';
+import { spawnRiveAnimation, removeRiveAnimation } from '../common/rive-stage.js';
 
 const speechBubbleTextStyleConfig = {
   fontSize: '32px',
@@ -12,6 +13,7 @@ const speechBubbleTextStyleConfig = {
 export class OutroScene extends Phaser.Scene {
   #characterAppearDelayMs;
   #characterFadeInDurationMs;
+   #riveInstance;
 
   constructor() {
     super({
@@ -43,13 +45,15 @@ export class OutroScene extends Phaser.Scene {
     this.time.delayedCall(this.#characterAppearDelayMs, this.#showCharacterMessage, [], this);
 
     this.time.delayedCall(
-      this.#characterAppearDelayMs + 8000,
+      this.#characterAppearDelayMs + 80000,
       () => {
         this.scene.start(SCENE_KEYS.EUZOYLIS_INTRO_SCENE);
       },
       [],
       this,
     );
+
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
   }
 
   update(time, delta) {
@@ -71,6 +75,7 @@ export class OutroScene extends Phaser.Scene {
       .setScale(0.5)
       .setAlpha(0);
 
+    this.#createOutroCharacterAnimation();
     const bubbleY = characterY - characterGO.displayHeight - 90;
 
     // TODO: swap ASSET_KEYS.SPEECH_BUBBLE for your real speech-bubble art
@@ -89,4 +94,20 @@ export class OutroScene extends Phaser.Scene {
       ease: 'Sine.easeOut',
     });
   }
+
+  #handleShutdown() {  
+      removeRiveAnimation(this.#riveInstance, 'rive-stage--outro'); // remove
+      this.#riveInstance = null;
+    }
+
+   #createOutroCharacterAnimation()
+    {
+      this.#riveInstance = spawnRiveAnimation(
+        'assets/rive/Bear_Outro.riv',
+        'Timeline_Bear_Outro',
+        'rive-stage--outro',
+        true,   // loop
+        false,  // isStateMachine — this file is a plain Animation
+      );
+    }
 }
