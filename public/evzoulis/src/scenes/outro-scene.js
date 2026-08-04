@@ -45,7 +45,7 @@ export class OutroScene extends Phaser.Scene {
     this.time.delayedCall(this.#characterAppearDelayMs, this.#showCharacterMessage, [], this);
 
     this.time.delayedCall(
-      this.#characterAppearDelayMs + 80000,
+      this.#characterAppearDelayMs + 8000,
       () => {
         this.scene.start(SCENE_KEYS.EUZOYLIS_INTRO_SCENE);
       },

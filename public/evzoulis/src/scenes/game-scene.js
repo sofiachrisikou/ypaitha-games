@@ -199,11 +199,11 @@ export class GameScene extends Phaser.Scene {
    * yet since level 1's completion/progress logic isn't defined.
    */
   #createLevelProgressBar() {
-    const { width } = this.scale;
+      const { width } = this.scale;
     this.#levelProgressBar = new ProgressBar(this, {
-      x: width / 2,
-      y: 70,
-      width: width * 0.86,
+      x: width / 2 + 50,
+      y: 130,
+      width: width * 0.50,
     });
   }
 

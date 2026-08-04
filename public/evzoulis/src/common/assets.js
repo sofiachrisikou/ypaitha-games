@@ -27,8 +27,12 @@ export const ASSET_KEYS = Object.freeze({
 
   //LEVEL 2
   BACKGROUND_Stg2: 'BACKGROUND_Stg2',
-  BUBBLE: 'BUBBLE',
+  BUBBLE1: 'BUBBLE1',
+  BUBBLE2: 'BUBBLE2',
+  BUBBLE3: 'BUBBLE3',
+  BUBBLE4: 'BUBBLE4',
   BUBBLE_POPPED: 'BUBBLE_POPPED',
+  BUBBLE_POPPED1: 'BUBBLE_POPPED1',
   CORRECTSOUND: 'CORRECTSOUND',
   //LEVEL 3
   BACKGROUND_Stg3: 'BACKGROUND_Stg3',
@@ -142,12 +146,28 @@ export const IMAGE_ASSETS = [
     path: 'assets/images/Stage02_BG.png',
   },
   {
-    assetKey: ASSET_KEYS.BUBBLE,
-    path: 'assets/images/thoughtCloud4.png',
+    assetKey: ASSET_KEYS.BUBBLE1,
+    path: 'assets/images/cloud1.png',
+  },
+    {
+    assetKey: ASSET_KEYS.BUBBLE2,
+    path: 'assets/images/cloud2.png',
+  },
+    {
+    assetKey: ASSET_KEYS.BUBBLE3,
+    path: 'assets/images/cloud3.png',
+  },
+    {
+    assetKey: ASSET_KEYS.BUBBLE4,
+    path: 'assets/images/cloud4.png',
   },
   {
     assetKey: ASSET_KEYS.BUBBLE_POPPED,
-    path: 'assets/images/thoughtCloud5.png',
+    path: 'assets/images/cloudBurst1.png',
+  },
+  {
+    assetKey: ASSET_KEYS.BUBBLE_POPPED1,
+    path: 'assets/images/cloudBurst2.png',
   },
   //LEVEL 3
   {
@@ -156,7 +176,7 @@ export const IMAGE_ASSETS = [
   },
   {
     assetKey: ASSET_KEYS.BEAR_BODY,
-    path: 'assets/images/Body_Head.png',
+    path: 'assets/images/Body.png',
   },
   {
     assetKey: ASSET_KEYS.CHAR_ARM_R,

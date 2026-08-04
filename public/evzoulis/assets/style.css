@@ -14,7 +14,7 @@ body,
 #rive-stage {
   position: absolute;
   pointer-events: none;
-  z-index: 10;
+  z-index: 1;
 }
 
 .rive-stage--intro {
@@ -30,6 +30,13 @@ body,
   height: 160%;
   left: 50%;
   top: 50%;
+  transform: translate(-50%, -50%);
+}
+.rive-stage--level3{
+  width: 160%;
+  height: 160%;
+  left: 53.5%;
+  top: 45%;
   transform: translate(-50%, -50%);
 }
 

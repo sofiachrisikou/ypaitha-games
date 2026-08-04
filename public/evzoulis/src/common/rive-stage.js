@@ -33,3 +33,19 @@ export function removeRiveAnimation(riveInstance, cssClass) {
   canvas.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
   canvas.classList.remove(cssClass);
 }
+
+/**
+ * @param {object} riveInstance
+ * @param {string} stateMachineName
+ * @param {string} inputName
+ * @param {boolean|number} value
+ */
+export function setStateMachineInput(riveInstance, stateMachineName, inputName, value) {
+  const inputs = riveInstance.stateMachineInputs(stateMachineName);
+  const input = inputs.find(i => i.name === inputName);
+  if (!input) {
+    console.warn(`Rive input "${inputName}" not found on "${stateMachineName}"`);
+    return;
+  }
+  input.value = value;
+}
