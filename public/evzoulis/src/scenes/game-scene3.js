@@ -593,7 +593,7 @@ export class GameScene3 extends Phaser.Scene {
     this.add.text(width / 2, height / 2 - 60, title, TEXT_STYLES.DEFAULT).setOrigin(0.5).setDepth(4);
     this.add.text(width / 2, height / 2 + 40, subtitle, TEXT_STYLES.DEFAULT).setOrigin(0.5).setDepth(4);
  
-    const helloButton = this.add.text(width / 2, height / 2 + 140, 'Επόμενο Επίπεδο', TEXT_STYLES.DEFAULT).setOrigin(0.5).setDepth(3);
+    const helloButton = this.add.text(width / 2, height / 2 + 140, 'Επόμενο Επίπεδο', TEXT_STYLES.DEFAULT).setOrigin(0.5).setDepth(11);
     helloButton.setInteractive();
     helloButton.on('pointerdown', () => this.#goToNextLevel());
   }

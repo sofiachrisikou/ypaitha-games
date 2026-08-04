@@ -99,7 +99,7 @@ export class GameScene extends Phaser.Scene {
     this.add.image(width / 2, height / 2, ASSET_KEYS.BACKGROUND_Stg1);
 
     // TODO: position to match your actual character/candle art layout
-    this.#candleX = width * 0.65;
+    this.#candleX = width * 0.85;
     this.#candleBottomY = height * 0.7;
     this.#candleTopY = height * 0.35;
 
@@ -359,7 +359,7 @@ export class GameScene extends Phaser.Scene {
     let sound = this.sound.add(ASSET_KEYS.CORRECTSOUND);
     sound.play();
 
-    this.#levelProgressBar.setProgress(this.#breathsCompleted / this.#requiredBreaths);
+    //this.#levelProgressBar.setProgress(this.#breathsCompleted / this.#requiredBreaths);
 
     if (this.#breathsCompleted >= this.#requiredBreaths) {
       this.#handleLevelComplete();
@@ -423,6 +423,7 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.#showEndMessage('Μπράβο! Ανάπνευσες τέλεια! 🎉', '');
+    this.#levelProgressBar.setProgress(2 / 3);
   }
 
   #handleGameOver() {
