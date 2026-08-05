@@ -35,6 +35,10 @@ export class GameScene3 extends Phaser.Scene {
   #grabRadius;
   #reachRadius;
   #forbiddenZoneDropBufferDeg;
+  #forbiddenZoneBounceBackDeg;
+  #forbiddenZoneBounceDurationMs;
+  #forbiddenZoneRecoilDeg;
+  #forbiddenZoneRecoilDurationMs;
   #limbDoneTintDurationMs;
   #gameDurationSeconds;
   #remainingSeconds;
@@ -69,6 +73,11 @@ export class GameScene3 extends Phaser.Scene {
     // how many degrees before the actual forbidden-zone edge the limb gets
     // dropped — e.g. 2 means it releases at 88°/272° for a boundary at 90°/270°
     this.#forbiddenZoneDropBufferDeg = 2;
+    // after dropping, the limb animates back this many degrees AWAY from
+    // whichever forbidden-zone edge it was closer to, so it settles clear
+    // of the zone instead of resting right at the edge
+    this.#forbiddenZoneBounceBackDeg = 15;
+    this.#forbiddenZoneBounceDurationMs = 180;
     // how long a completed limb stays tinted green before reverting to its
     // normal colors — matches the smile duration below for now
     this.#limbDoneTintDurationMs = 700;
@@ -448,7 +457,9 @@ export class GameScene3 extends Phaser.Scene {
       if (this.#debug) {
         console.log(`${limb.key}: dropped — approaching forbidden zone`);
       }
-      this.#releaseLimb(limb);
+      const bounceTargetAngle = this.#computeBounceTargetAngle(limb);
+      this.#releaseLimb(limb, bounceTargetAngle);
+      this.#bounceLimbToAngle(limb, bounceTargetAngle);
       return;
     }
  
@@ -465,8 +476,14 @@ export class GameScene3 extends Phaser.Scene {
     this.#releaseLimb(this.#grabbedLimb);
   }
  
-  /** Shared release logic — used for both a normal pointer-up and a forced forbidden-zone drop */
-  #releaseLimb(limb) {
+  /**
+   * Shared release logic — used for both a normal pointer-up and a forced
+   * forbidden-zone drop. landingAngleDeg defaults to wherever the limb
+   * currently is; the forbidden-zone drop passes the post-bounce angle
+   * instead, so the grab indicator appears where the limb will actually
+   * end up rather than where it was at the moment of the drop.
+   */
+  #releaseLimb(limb, landingAngleDeg = limb.angleDeg) {
     this.#grabbedLimb = null;
  
     if (limb.isDone) {
@@ -475,9 +492,40 @@ export class GameScene3 extends Phaser.Scene {
  
     this.#hideCurrentTargetMarker(limb);
  
-    const tip = this.#limbTipPosition(limb, limb.angleDeg);
+    const tip = this.#limbTipPosition(limb, landingAngleDeg);
     limb.grabIndicatorGO.setPosition(tip.x, tip.y);
     this.#pulseGrabIndicator(limb);
+  }
+ 
+  /**
+   * Which direction (in our 0°=right angle system) points AWAY from the
+   * forbidden zone, given the limb's current angle — away from startDeg
+   * means decreasing angle, away from endDeg means increasing angle.
+   * Picks whichever edge is currently closer via ShortestBetween, which is
+   * direction-agnostic, so this works the same whether the limb was
+   * rotating clockwise or counter-clockwise when it got dropped.
+   */
+  #computeBounceTargetAngle(limb) {
+    const distanceToStart = Math.abs(Phaser.Math.Angle.ShortestBetween(limb.angleDeg, limb.forbiddenZone.startDeg));
+    const distanceToEnd = Math.abs(Phaser.Math.Angle.ShortestBetween(limb.angleDeg, limb.forbiddenZone.endDeg));
+    const nearerEdgeIsStart = distanceToStart <= distanceToEnd;
+    const bounceSign = nearerEdgeIsStart ? -1 : 1;
+    return limb.angleDeg + bounceSign * this.#forbiddenZoneBounceBackDeg;
+  }
+ 
+  /** Animates limb.angleDeg (and its visual rotation) from where it is now to toAngleDeg */
+  #bounceLimbToAngle(limb, toAngleDeg) {
+    const fromAngleDeg = limb.angleDeg;
+    this.tweens.addCounter({
+      from: fromAngleDeg,
+      to: toAngleDeg,
+      duration: this.#forbiddenZoneBounceDurationMs,
+      ease: 'Sine.easeOut',
+      onUpdate: (tween) => {
+        limb.angleDeg = tween.getValue();
+        limb.rectangleGO.setRotation(this.#toImageRotationRad(limb.angleDeg));
+      },
+    });
   }
  
   #checkLimbTargetReached(limb) {
