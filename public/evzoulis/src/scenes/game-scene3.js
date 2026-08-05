@@ -34,6 +34,8 @@ export class GameScene3 extends Phaser.Scene {
   #grabbedLimb;
   #grabRadius;
   #reachRadius;
+  #forbiddenZoneDropBufferDeg;
+  #limbDoneTintDurationMs;
   #gameDurationSeconds;
   #remainingSeconds;
   #countdownTimerEvent;
@@ -64,6 +66,12 @@ export class GameScene3 extends Phaser.Scene {
     this.#grabbedLimb = null;
     this.#grabRadius = 90;
     this.#reachRadius = 90;
+    // how many degrees before the actual forbidden-zone edge the limb gets
+    // dropped — e.g. 2 means it releases at 88°/272° for a boundary at 90°/270°
+    this.#forbiddenZoneDropBufferDeg = 2;
+    // how long a completed limb stays tinted green before reverting to its
+    // normal colors — matches the smile duration below for now
+    this.#limbDoneTintDurationMs = 700;
     this.#gameDurationSeconds = 60;
     this.#remainingSeconds = this.#gameDurationSeconds;
     this.#totalLimbsRequired = 4;
@@ -181,8 +189,8 @@ export class GameScene3 extends Phaser.Scene {
     this.input.on(Phaser.Input.Events.POINTER_UP, this.#handlePointerUp, this);
     this.input.on(Phaser.Input.Events.POINTER_UP_OUTSIDE, this.#handlePointerUp, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
-
-
+ 
+ 
     this.#createCharacterAnimation();
   }
  
@@ -250,22 +258,23 @@ export class GameScene3 extends Phaser.Scene {
   }
  
   /**
-   * Live per-frame rotation limit while dragging. If the raw pointer angle
-   * falls inside the limb's forbidden zone, pins it to whichever edge of
-   * that zone is nearest to the limb's CURRENT angle (not the raw input) —
-   * that gives it a hard mechanical-stop feel and avoids any flicker
-   * between the two edges near the middle of the forbidden arc.
+   * True if angleDeg is within #forbiddenZoneDropBufferDeg of EITHER edge
+   * of the limb's forbidden zone, or already inside it. ShortestBetween is
+   * used for the edge-distance check, which is direction-agnostic by
+   * construction — approaching an edge clockwise or counter-clockwise
+   * produces the same distance, so this triggers symmetrically either way.
+   * Used to drop the limb before it ever reaches the actual boundary,
+   * rather than letting it slide along the boundary once there.
    */
-  #applyAngleLimit(limb, rawAngleDeg) {
+  #isNearForbiddenZone(limb, angleDeg) {
     if (!limb.forbiddenZone) {
-      return rawAngleDeg;
+      return false;
     }
-    if (!this.#isAngleInRange(rawAngleDeg, limb.forbiddenZone.startDeg, limb.forbiddenZone.endDeg)) {
-      return rawAngleDeg;
-    }
-    const distanceToStart = Math.abs(Phaser.Math.Angle.ShortestBetween(limb.angleDeg, limb.forbiddenZone.startDeg));
-    const distanceToEnd = Math.abs(Phaser.Math.Angle.ShortestBetween(limb.angleDeg, limb.forbiddenZone.endDeg));
-    return distanceToStart <= distanceToEnd ? limb.forbiddenZone.startDeg : limb.forbiddenZone.endDeg;
+    const distanceToStart = Math.abs(Phaser.Math.Angle.ShortestBetween(angleDeg, limb.forbiddenZone.startDeg));
+    const distanceToEnd = Math.abs(Phaser.Math.Angle.ShortestBetween(angleDeg, limb.forbiddenZone.endDeg));
+    const nearAnEdge = distanceToStart <= this.#forbiddenZoneDropBufferDeg || distanceToEnd <= this.#forbiddenZoneDropBufferDeg;
+    const insideZone = this.#isAngleInRange(angleDeg, limb.forbiddenZone.startDeg, limb.forbiddenZone.endDeg);
+    return nearAnEdge || insideZone;
   }
  
   /**
@@ -434,7 +443,16 @@ export class GameScene3 extends Phaser.Scene {
     const limb = this.#grabbedLimb;
     const rawAngleRad = Phaser.Math.Angle.Between(limb.pivotX, limb.pivotY, pointer.x, pointer.y);
     const rawAngleDeg = Phaser.Math.RadToDeg(rawAngleRad);
-    limb.angleDeg = this.#applyAngleLimit(limb, rawAngleDeg);
+ 
+    if (this.#isNearForbiddenZone(limb, rawAngleDeg)) {
+      if (this.#debug) {
+        console.log(`${limb.key}: dropped — approaching forbidden zone`);
+      }
+      this.#releaseLimb(limb);
+      return;
+    }
+ 
+    limb.angleDeg = rawAngleDeg;
     limb.rectangleGO.setRotation(this.#toImageRotationRad(limb.angleDeg));
  
     this.#checkLimbTargetReached(limb);
@@ -444,7 +462,11 @@ export class GameScene3 extends Phaser.Scene {
     if (!this.#grabbedLimb) {
       return;
     }
-    const limb = this.#grabbedLimb;
+    this.#releaseLimb(this.#grabbedLimb);
+  }
+ 
+  /** Shared release logic — used for both a normal pointer-up and a forced forbidden-zone drop */
+  #releaseLimb(limb) {
     this.#grabbedLimb = null;
  
     if (limb.isDone) {
@@ -508,10 +530,10 @@ export class GameScene3 extends Phaser.Scene {
  
   #completeLimb(limb) {
     limb.isDone = true;
-    // TODO: a flat green tint may look harsh on real art — worth revisiting
-    // once you see it (a checkmark icon, a brief glow tween, etc. might
-    // read better than recoloring the limb itself)
     limb.rectangleGO.setTint(LIMB_DONE_COLOR);
+    this.time.delayedCall(this.#limbDoneTintDurationMs, () => {
+      limb.rectangleGO.clearTint();
+    });
     this.#stopGrabIndicatorPulse(limb);
     this.#grabbedLimb = null;
  
@@ -523,9 +545,9 @@ export class GameScene3 extends Phaser.Scene {
     if (this.#limbsStretchedCount >= this.#totalLimbsRequired) {
       this.#handleLevelComplete();
     }
-
+ 
     this.#setSmiling(true);
-
+ 
      this.time.delayedCall(
       700,
       () => {
@@ -557,7 +579,7 @@ export class GameScene3 extends Phaser.Scene {
       limbsStretched: this.#limbsStretchedCount,
       secondsLeft: this.#remainingSeconds,
     });
- 
+    this.#levelProgressBar.setProgress(0 / 3);
     this.#showEndMessage('Μπράβο! Έκανες τέλεια διατάσεις! 🎉', '');
   }
  
@@ -604,7 +626,7 @@ export class GameScene3 extends Phaser.Scene {
     this.input.off(Phaser.Input.Events.POINTER_UP, this.#handlePointerUp, this);
     this.input.off(Phaser.Input.Events.POINTER_UP_OUTSIDE, this.#handlePointerUp, this);
     this.#stopAllTimersAndIndicators();
-
+ 
     removeRiveAnimation(this.#riveInstance, 'rive-stage--level3'); // remove
     this.#riveInstance = null;
   }
@@ -613,9 +635,9 @@ export class GameScene3 extends Phaser.Scene {
     this.scene.start(SCENE_KEYS.EUZOYLIS_OUTRO_SCENE);
     this.input.once(Phaser.Input.Events.POINTER_DOWN, () => {});
   }
-
+ 
    //rive
-
+ 
   #createCharacterAnimation()
   {
     this.#riveInstance = spawnRiveAnimation(
@@ -624,11 +646,10 @@ export class GameScene3 extends Phaser.Scene {
       'rive-stage--level3',
     );
   }
-
+ 
   #setSmiling(value)
   {
     setStateMachineInput(this.#riveInstance, 'StateMachine_Bear_Smile', 'IsSmiling', value);
   }
     
 }
- 

@@ -43,7 +43,7 @@ body,
 .rive-stage--outro{
   width: 160%;
   height: 160%;
-  left: 50%;
-  top: 50%;
+  left: 80%;
+  top: 82%;
   transform: translate(-50%, -50%);
 }

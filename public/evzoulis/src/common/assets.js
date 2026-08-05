@@ -24,6 +24,9 @@ export const ASSET_KEYS = Object.freeze({
   CANDLE: 'CANDLE',
   CANDLE_FLAME: 'CANDLE_FLAME',
   ARROW_UP: 'ARROW_UP',
+  FLOWER1: 'FLOWER1',
+  FLOWER2: 'FLOWER2',
+  FLOWER3: 'FLOWER3',
 
   //LEVEL 2
   BACKGROUND_Stg2: 'BACKGROUND_Stg2',
@@ -139,6 +142,18 @@ export const IMAGE_ASSETS = [
   {
     assetKey: ASSET_KEYS.ARROW_UP,
     path: 'assets/images/UpArrow.png',
+  },
+  {
+    assetKey: ASSET_KEYS.FLOWER1,
+    path: 'assets/images/flower01.png',
+  },
+  {
+    assetKey: ASSET_KEYS.FLOWER2,
+    path: 'assets/images/flower02.png',
+  },
+  {
+    assetKey: ASSET_KEYS.FLOWER3,
+    path: 'assets/images/flower03.png',
   },
   //LEVEL 2
   {

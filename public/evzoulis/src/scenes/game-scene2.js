@@ -430,7 +430,7 @@ export class GameScene2 extends Phaser.Scene {
  
     this.#poppedCount += 1;
     this.#progressTextGO.setText(`${this.#poppedCount} / ${this.#totalBubbles}`);
-    this.#levelProgressBar.setProgress(this.#poppedCount / this.#totalBubbles);
+    //this.#levelProgressBar.setProgress(this.#poppedCount / this.#totalBubbles);
  
     if (this.#debug) {
       console.log(`bubble popped (${this.#poppedCount}/${this.#totalBubbles})`);
@@ -512,6 +512,8 @@ export class GameScene2 extends Phaser.Scene {
     const helloButton = this.add.text(width / 2, height / 2 + 140, 'Επόμενο Επίπεδο', TEXT_STYLES.DEFAULT).setOrigin(0.5);
     helloButton.setInteractive();
     helloButton.on('pointerdown', () => this.#goToNextLevel());
+
+    this.#levelProgressBar.setProgress(1 / 3);
     return;
     this.#nextlevelBtnGO = this.add
       .image(500, 500, ASSET_KEYS.BTN1)
