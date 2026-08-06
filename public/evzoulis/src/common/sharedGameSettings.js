@@ -6,8 +6,8 @@ export const TEXT_STYLES = {
   DEFAULT: {
     fontFamily: FONT_FAMILY,
     fontSize: '40px',
-    color: '#043D8C',
-    stroke: '#ff2B00',
+    color: '#56BCE3',
+    stroke: '#3C86A3',
     strokeThickness: 6,
   },
   // Text inside a bubble — thought-cloud-scene.js

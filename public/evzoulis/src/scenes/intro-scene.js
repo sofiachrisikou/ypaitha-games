@@ -72,16 +72,13 @@ export class IntroScene extends Phaser.Scene {
   create() {
     const { width, height } = this.scale;
 
-    // TODO: swap ASSET_KEYS.INTRO_BACKGROUND for your real background
     this.add.image(width / 2, height / 2, ASSET_KEYS.BACKGROUND_INTRO);
 
     this.#decorObjects = [];
     this.#spawnDecorTestColumns();
 
-    // TODO: swap ASSET_KEYS.LOGO for your real logo
     this.#logoGO = this.add.image(width * 0.5, height * 0.78, ASSET_KEYS.LOGO).setScale(0.55);
 
-    // TODO: swap ASSET_KEYS.BUTTON for your real start-button art
     this.#startButtonGO = this.add
       .image(width * 0.5, height * 0.93, ASSET_KEYS.BTN1)
       .setScale(0.45)
@@ -248,27 +245,18 @@ export class IntroScene extends Phaser.Scene {
   #showCharacterPrompt() {
     const { width, height } = this.scale;
      this.#createIntroCharacterAnimation();
-    const characterX = width - 300;
-    const characterY = height + 100;
-    //const characterY = height * 0.92;
-    // TODO: swap ASSET_KEYS.CHARACTER for your real Ευζούλης art
-    this.#characterGO = this.add
-      .image(characterX, characterY, ASSET_KEYS.CHARACTER_INTRO)
-      .setOrigin(0.5, 1)
-      .setScale(0.5);
+    const bubbleX = width - 300;
+    const bubbleY = height/2 + 200;
 
-    const bubbleY = characterY - this.#characterGO.displayHeight - 140;
-
-    // TODO: swap ASSET_KEYS.SPEECH_BUBBLE for your real speech-bubble art
     const bubbleImage = this.add.image(0, 0, ASSET_KEYS.SPEECH_BUBBLE).setScale(0.35);
     const bubbleText = this.add.text(0, 0, 'ΘΑ ΜΕ ΒΟΗΘΗΣΕΙΣ ;', TEXT_STYLES.SPEECH_BUBBLE).setOrigin(0.5);
-    this.add.container(characterX - 330, bubbleY, [bubbleImage, bubbleText]);
+    this.add.container(bubbleX - 330, bubbleY, [bubbleImage, bubbleText]);
 
-    const levelButtonX = characterX - this.#characterGO.displayWidth / 2 - 240;
-    const levelButtonY = characterY - this.#characterGO.displayHeight / 2;
+    const levelButtonX = bubbleX - 500;
+    const levelButtonY = bubbleY + 600
 
 
-    // TODO: swap ASSET_KEYS.BUTTON for your real "go to level 1" button art
+   
     this.#levelButtonGO = this.add
       .image(levelButtonX, levelButtonY, ASSET_KEYS.BTN1)
       .setScale(0.5)

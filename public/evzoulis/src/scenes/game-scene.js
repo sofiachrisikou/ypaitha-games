@@ -63,6 +63,11 @@ export class GameScene extends Phaser.Scene {
   #flowerStage2Threshold;
   #flowerStage3Threshold;
  
+  //timer
+  #remainingSeconds;
+  #timerTextGO;
+  #countdownTimerEvent;
+
   constructor() {
     super({
       key: SCENE_KEYS.EUZOYLIS_GAME_SCENE1,
@@ -86,7 +91,7 @@ export class GameScene extends Phaser.Scene {
     // real dimensions of whatever PNGs get loaded into these texture keys.
     this.#arrowHeightRatio = 0.09; // fraction of screen height
     this.#flameHeightRatio = 0.35; // fraction of the candle's own display height
-    this.#requiredBreaths = 5;
+    this.#requiredBreaths = 8;
     // TODO: confirm — placeholder fail condition so #handleGameOver has a
     // real trigger. Level 1 spec doesn't define a game-over rule yet.
     this.#maxFailedBreaths = 5;
@@ -101,6 +106,10 @@ export class GameScene extends Phaser.Scene {
     this.#holdTimerEvent = null;
     this.#indicatorTween = null;
     this.#isLevelComplete = false;
+
+    //timer
+    this.#remainingSeconds = 60;
+
     this.#isGameOver = false;
     // on while you're tuning the gesture feel — draws the start/end zones
     // and logs why each failed attempt failed. Flip to false for the build.
@@ -124,71 +133,101 @@ export class GameScene extends Phaser.Scene {
     const { width, height } = this.scale;
  
     this.add.image(width / 2, height / 2, ASSET_KEYS.BACKGROUND_Stg1);
- 
-    // TODO: position to match your actual character/candle art layout
+    
+    
+    //Flower
+    this.#createFlower();
+    //Candle
     this.#candleX = width * 0.85;
     this.#candleBottomY = height * 0.7;
-    this.#candleTopY = height * 0.35;
- 
-    // this.add.image(width * 0.35, height * 0.55, ASSET_KEYS.CHARACTER);
- 
+    this.#candleTopY = height * 0.35; 
     // Candle is scaled to exactly span the start/end touch zones, so the
     // art always lines up with the interactive area no matter what
     // resolution the source PNG actually is.
     const candleDisplayHeight = this.#candleBottomY - this.#candleTopY;
- 
-    // TODO: swap ASSET_KEYS.CANDLE_BODY for your real texture key
+    
     const candleImage = this.add.image(this.#candleX, this.#candleBottomY, ASSET_KEYS.CANDLE).setOrigin(0.5, 1);
     this.#scaleImageToHeight(candleImage, candleDisplayHeight);
- 
-    // TODO: swap ASSET_KEYS.CANDLE_FLAME for your real texture key
+    
     this.#candleFlame = this.add.image(this.#candleX, this.#candleTopY, ASSET_KEYS.CANDLE_FLAME).setOrigin(0.5, 1);
     this.#scaleImageToHeight(this.#candleFlame, candleDisplayHeight * this.#flameHeightRatio);
- 
-    // TODO: swap ASSET_KEYS.SWIPE_ARROW for your real texture key. Reused
-    // rotated 180° for the OUT direction instead of a second asset — see
-    // #startIndicatorPulse.
-    this.#swipeIndicatorGO = this.add
-      .image(this.#candleX, this.#candleBottomY, ASSET_KEYS.ARROW_UP)
-      .setOrigin(0.5, 0.5);
-    this.#arrowBaseScale = this.#scaleImageToHeight(this.#swipeIndicatorGO, height * this.#arrowHeightRatio);
- 
-    this.#createSwipeGestureBar();
-    this.#createLevelProgressBar();
-    this.#createFlower();
- 
-    const breathsTextLabel = this.add.text(10, 10, 'Αναπνοές:', TEXT_STYLES.DEFAULT);
-    this.#breathsTextGO = this.add.text(
-      breathsTextLabel.x + breathsTextLabel.width,
-      breathsTextLabel.y,
-      `0 / ${this.#requiredBreaths}`,
-      TEXT_STYLES.DEFAULT,
-    );
- 
+    
     if (this.#debug) {
       const debugGraphics = this.add.graphics();
       debugGraphics.lineStyle(2, 0x00ff00, 0.8);
       debugGraphics.strokeCircle(this.#candleX, this.#candleBottomY, this.#zoneRadius);
       debugGraphics.strokeCircle(this.#candleX, this.#candleTopY, this.#zoneRadius);
     }
- 
+    
+    //Swipe
+    // #startIndicatorPulse.
+    this.#swipeIndicatorGO = this.add
+    .image(this.#candleX, this.#candleBottomY, ASSET_KEYS.ARROW_UP)
+    .setOrigin(0.5, 0.5);
+    this.#arrowBaseScale = this.#scaleImageToHeight(this.#swipeIndicatorGO, height * this.#arrowHeightRatio);
+    
+    this.#createSwipeGestureBar();
+    this.#startIndicatorPulse();
+    
+    
+    //Progressbar
+    this.#createLevelProgressBar();
+    this.#levelProgressBar.setProgress(3 / 3);
+    //Game Stats
+    const labelsTop = this.#levelProgressBar.getBounds().bottom + 60;
+    const breathsTextLabel = this.add.text(50, labelsTop, 'Αναπνοές:', TEXT_STYLES.DEFAULT);
+    this.#breathsTextGO = this.add.text(
+      breathsTextLabel.x + breathsTextLabel.width,
+      breathsTextLabel.y,
+      `0 / ${this.#requiredBreaths}`,
+      TEXT_STYLES.DEFAULT,
+    );
+    
+    //timer text
+     const timerTextLabel = this.add.text(50, labelsTop + 50, 'Χρόνος:', TEXT_STYLES.DEFAULT);
+      this.#timerTextGO = this.add.text(
+      timerTextLabel.x + timerTextLabel.width,
+      labelsTop + 50,
+      `${this.#remainingSeconds}`,
+      TEXT_STYLES.DEFAULT,
+    );
+
+    //Events
     this.input.on(Phaser.Input.Events.POINTER_DOWN, this.#handlePointerDown, this);
     this.input.on(Phaser.Input.Events.POINTER_MOVE, this.#handlePointerMove, this);
     this.input.on(Phaser.Input.Events.POINTER_UP, this.#handlePointerUp, this);
     this.input.on(Phaser.Input.Events.POINTER_UP_OUTSIDE, this.#handlePointerUp, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
- 
-    this.#startIndicatorPulse();
- 
+    
+    //timer start
+       this.#countdownTimerEvent = this.time.addEvent({
+      delay: 1000,
+      callback: this.#tickCountdown,
+      callbackScope: this,
+      loop: true,
+    });
+
+    //rive
     this.#createCharacterAnimation();
-    this.#levelProgressBar.setProgress(3 / 3);
   }
- 
+  
   update(time, delta) {
     // No continuous per-frame movement in this game — the swipe/hold state
     // machine is entirely event-driven from pointerdown/move/up below, and
     // the hold duration is a Timer Event. Left here so the Scene lifecycle
     // stays complete and consistent with the rest of the project.
+  }
+
+  #tickCountdown() {
+    if (this.#isLevelComplete || this.#isGameOver) {
+      return;
+    }
+    this.#remainingSeconds -= 1;
+    this.#timerTextGO.setText(`${this.#remainingSeconds}`);
+ 
+    if (this.#remainingSeconds <= 0) {
+      this.#handleGameOver();
+    }
   }
  
   /** Vertical bar next to the candle that fills as the player swipes/holds through one breath gesture. */
@@ -416,7 +455,7 @@ export class GameScene extends Phaser.Scene {
     this.#startIndicatorPulse();
  
     if (this.#failedBreaths >= this.#maxFailedBreaths) {
-      this.#handleGameOver();
+      //this.#handleGameOver();
     }
   }
  
@@ -453,6 +492,12 @@ export class GameScene extends Phaser.Scene {
       this.#blowOutCandle();
       this.time.delayedCall(this.#relightDelayMs, this.#relightCandle, [], this);
       this.#setBreathing(false,false);
+      this.time.delayedCall(2000, ()=>{
+        if(this.#riveInstance!=null)
+          {
+            this.#setBreathing(false,true);
+          }
+      });
     } else {
       // breath-IN doesn't touch the flame — just get the next prompt ready
       this.#startIndicatorPulse();
@@ -540,6 +585,9 @@ export class GameScene extends Phaser.Scene {
     this.#stopHoldTimer();
     this.#stopIndicatorPulse();
  
+    this.#goToNextLevel();
+    return;
+    //not needed , players goes to next level
     this.events.emit('gameOver', {
       breathsCompleted: this.#breathsCompleted,
       failedBreaths: this.#failedBreaths,
@@ -558,14 +606,20 @@ export class GameScene extends Phaser.Scene {
     helloButton.setInteractive();
     helloButton.on('pointerdown', () => this.#goToNextLevel());
 
-
+    this.#removeVisualsOnGameEnd();
+  }
+  
+  #removeVisualsOnGameEnd()
+  {
     removeRiveAnimation(this.#riveInstance, 'rive-stage--level1'); // remove
     this.#riveInstance = null;
+    //flower
+    //candleFlame
+    //candleBody
   }
- 
+
   #goToNextLevel() {
     this.scene.start(SCENE_KEYS.EUZOYLIS_GAME_SCENE2);
-    this.input.once(Phaser.Input.Events.POINTER_DOWN, () => {});
   }
  
   #handleShutdown() {

@@ -43,9 +43,9 @@ const BUBBLE_BURST_ANIM_KEY = 'bubbleBurst';
 // tuning from a negative number and adjust per texture from there.
 const CLOUD_TEXTURE_CONFIG = {
   [ASSET_KEYS.BUBBLE1]: { centerOffsetY: 0 },
-  [ASSET_KEYS.BUBBLE2]: { centerOffsetY: 0 },
-  [ASSET_KEYS.BUBBLE3]: { centerOffsetY: 0 },
-  [ASSET_KEYS.BUBBLE4]: { centerOffsetY: 0 },
+  [ASSET_KEYS.BUBBLE2]: { centerOffsetY: -20 },
+  [ASSET_KEYS.BUBBLE3]: { centerOffsetY: -20 },
+  [ASSET_KEYS.BUBBLE4]: { centerOffsetY: -20 },
 };
 const CLOUD_TEXTURE_KEYS = Object.keys(CLOUD_TEXTURE_CONFIG);
  
@@ -63,17 +63,18 @@ export class GameScene2 extends Phaser.Scene {
   #scorePerSecond;
   #poppedCount;
   #score;
-  #remainingSeconds;
   #isLevelComplete;
   #isGameOver;
-  #countdownTimerEvent;
   #scoreTextGO;
-  #timerTextGO;
   #progressTextGO;
   #levelProgressBar;
   #nextlevelBtnGO;
   #debug;
- 
+  //timer
+  #remainingSeconds;
+  #timerTextGO;
+  #countdownTimerEvent;
+  
   constructor() {
     super({
       key: SCENE_KEYS.EUZOYLIS_GAME_SCENE2,
@@ -95,7 +96,7 @@ export class GameScene2 extends Phaser.Scene {
     this.#bubbleSpacingPadding = 30;
     // real value is computed in create() from the actual bottom edge of
     // your top UI, once it exists — this is just a fallback before that
-    this.#topSpawnExclusionY = 260;
+    this.#topSpawnExclusionY = 550;
     // how many local candidates each scattered point tries before giving
     // up and being retired from the active list — bounds the algorithm,
     // it can never loop forever regardless of how tight the space is
@@ -128,49 +129,54 @@ export class GameScene2 extends Phaser.Scene {
     // real collision footprint) is measured separately per-texture below,
     // since your cloud art isn't necessarily square.
     this.#bubbleDiameter = Math.min(width, height) * 0.26;
- 
+    
+    //Progressbar
     this.#createLevelProgressBar();
- 
-    const labelsTop = this.#levelProgressBar.getBounds().bottom + 20;
- 
-    const scoreTextLabel = this.add.text(10, labelsTop, 'Σκορ:', TEXT_STYLES.DEFAULT);
-    this.#scoreTextGO = this.add.text(
-      scoreTextLabel.x + scoreTextLabel.width,
-      labelsTop,
-      `${this.#score}`,
-      TEXT_STYLES.DEFAULT,
-    );
- 
-    const timerTextLabel = this.add.text(10, labelsTop + 40, 'Χρόνος:', TEXT_STYLES.DEFAULT);
-    this.#timerTextGO = this.add.text(
-      timerTextLabel.x + timerTextLabel.width,
-      labelsTop + 40,
-      `${this.#remainingSeconds}`,
-      TEXT_STYLES.DEFAULT,
-    );
- 
-    const progressTextLabel = this.add.text(10, labelsTop + 80, 'Pops:', TEXT_STYLES.DEFAULT);
+    this.#levelProgressBar.setProgress(2 / 3);
+    //Game stats
+    const labelsTop = this.#levelProgressBar.getBounds().bottom + 60;
+    
+    // const scoreTextLabel = this.add.text(10, labelsTop, 'Σκορ:', TEXT_STYLES.DEFAULT);
+    // this.#scoreTextGO = this.add.text(
+    //   scoreTextLabel.x + scoreTextLabel.width,
+    //   labelsTop,
+    //   `${this.#score}`,
+    //   TEXT_STYLES.DEFAULT,
+    // );
+     
+    const progressTextLabel = this.add.text(10, labelsTop + 50, 'Pops:', TEXT_STYLES.DEFAULT);
     this.#progressTextGO = this.add.text(
       progressTextLabel.x + progressTextLabel.width,
-      labelsTop + 80,
+      labelsTop + 50,
       `0 / ${this.#totalBubbles}`,
       TEXT_STYLES.DEFAULT,
     );
- 
-    // Bubbles can't spawn above this Y — measured from the actual bottom
-    // edge of your top UI (whichever is lower: the progress bar or the
-    // text rows), so it stays correct automatically if you move/resize
-    // either later. The + 30 is just a bit of extra breathing room.
-    this.#topSpawnExclusionY = Math.max(this.#levelProgressBar.getBounds().bottom, this.#progressTextGO.getBounds().bottom) + 30;
- 
+    
+    const timerTextLabel = this.add.text(10, labelsTop , 'Χρόνος:', TEXT_STYLES.DEFAULT);
+    this.#timerTextGO = this.add.text(
+      timerTextLabel.x + timerTextLabel.width,
+      labelsTop ,
+      `${this.#remainingSeconds}`,
+      TEXT_STYLES.DEFAULT,
+    );
+    
+    //timer start
     this.#countdownTimerEvent = this.time.addEvent({
       delay: 1000,
       callback: this.#tickCountdown,
       callbackScope: this,
       loop: true,
     });
- 
+    
+    // Bubbles can't spawn above this Y — measured from the actual bottom
+    // edge of your top UI (whichever is lower: the progress bar or the
+    // text rows), so it stays correct automatically if you move/resize
+    // either later. The + 30 is just a bit of extra breathing room.
+    this.#topSpawnExclusionY = Math.max(this.#levelProgressBar.getBounds().bottom, this.#progressTextGO.getBounds().bottom) + 30;
+    
+    
     this.#spawnAllBubbles();
+    
   }
  
   update(time, delta) {
@@ -460,8 +466,8 @@ export class GameScene2 extends Phaser.Scene {
     this.#isLevelComplete = true;
     this.#stopTimers();
  
-    this.#score = this.#remainingSeconds * this.#scorePerSecond;
-    this.#scoreTextGO.setText(`${this.#score}`);
+    // this.#score = this.#remainingSeconds * this.#scorePerSecond;
+    // this.#scoreTextGO.setText(`${this.#score}`);
  
     this.events.emit('levelComplete', {
       score: this.#score,
@@ -480,6 +486,9 @@ export class GameScene2 extends Phaser.Scene {
     this.#stopTimers();
     this.#clearUnpoppedBubbles();
  
+    this.#goToNextLevel();
+    return;
+    //not used the player jsut goes to next level
     this.events.emit('gameOver', {
       poppedCount: this.#poppedCount,
     });
@@ -524,6 +533,6 @@ export class GameScene2 extends Phaser.Scene {
  
   #goToNextLevel() {
     this.scene.start(SCENE_KEYS.EUZOYLIS_GAME_SCENE3);
-    this.input.once(Phaser.Input.Events.POINTER_DOWN, () => {});
+    //this.input.once(Phaser.Input.Events.POINTER_DOWN, () => {});
   }
 }

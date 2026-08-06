@@ -14,7 +14,8 @@ import { spawnRiveAnimation, removeRiveAnimation , setStateMachineInput} from '.
 const LIMB_DONE_COLOR = 0x4caf50;
 const TARGET_MARKER_COLOR = 0x0072FF;
 const TARGET_MARKER_REACHED_COLOR = 0x19FA00;
-const GRAB_INDICATOR_COLOR = 0xF200F2;
+const GRAB_INDICATOR_ARM_COLOR = 0xD19F21;
+const GRAB_INDICATOR_LEG_COLOR = 0x21C8D1;
 // One scale factor for the whole character — body, arms, and legs all use
 // this exact same number, so whatever proportions the artist drew stay
 // intact. Do not give limbs their own independent scale.
@@ -100,16 +101,15 @@ export class GameScene3 extends Phaser.Scene {
  
     this.add.image(width / 2, height / 2, ASSET_KEYS.BACKGROUND_Stg3);
  
-    this.#createLevelProgressBar();
- 
+    
     // TODO: placeholder proportions — retune once the real bear art exists
     this.#bodyWidth = width * 0.32;
     this.#bodyHeight = height * 0.3;
     this.#bodyX = width * 0.5;
     this.#bodyY = height * 0.42;
- 
+    
     this.add.image(this.#bodyX, this.#bodyY, ASSET_KEYS.BEAR_BODY).setScale(CHARACTER_SCALE).setDepth(1);
- 
+    
     // Every target is an { x, y } point — the angle toward it is worked
     // out automatically in #pointToAngle. These starting coordinates land
     // in the same places your last working version did; move any single
@@ -121,8 +121,11 @@ export class GameScene3 extends Phaser.Scene {
         pivotX: this.#bodyX + this.#bodyWidth / 2 - 50,
         pivotY: this.#bodyY - this.#bodyHeight / 2 + 330,
         restAngleDeg: 60,
+        forbiddenZone: { startDeg: 80, endDeg: 290 },
         texture: ASSET_KEYS.CHAR_ARM_R,
         targets: [
+          { x: 938, y: 689 },
+          { x: 670, y: 1007 },
           { x: 938, y: 689 },
           { x: 670, y: 1007 },
           { x: 938, y: 689 },
@@ -133,8 +136,11 @@ export class GameScene3 extends Phaser.Scene {
         pivotX: this.#bodyX - this.#bodyWidth / 2 + 50,
         pivotY: this.#bodyY - this.#bodyHeight / 2 + 330,
         restAngleDeg: 120,
+        forbiddenZone: { startDeg: 250, endDeg: 100 },
         texture: ASSET_KEYS.CHAR_ARM_L,
         targets: [
+          { x: 142, y: 689 },
+          { x: 393, y: 1007 },
           { x: 142, y: 689 },
           { x: 393, y: 1007 },
           { x: 142, y: 689 },
@@ -145,10 +151,11 @@ export class GameScene3 extends Phaser.Scene {
         pivotX: this.#bodyX + this.#bodyWidth / 4,
         pivotY: this.#bodyY + this.#bodyHeight / 2 - 20,
         restAngleDeg: 90,
-        // top-left quarter (up and toward the body) — unreachable
-        forbiddenZone: { startDeg: 180, endDeg: 270 },
+        forbiddenZone: { startDeg: 120, endDeg: 340 },
         texture: ASSET_KEYS.CHAR_LEG_R,
         targets: [
+          { x: 841, y: 1074 },
+          { x: 400, y: 1400 },
           { x: 841, y: 1074 },
           { x: 400, y: 1400 },
           { x: 841, y: 1074 },
@@ -160,55 +167,63 @@ export class GameScene3 extends Phaser.Scene {
         pivotY: this.#bodyY + this.#bodyHeight / 2 - 20,
         restAngleDeg: 90,
         // top-right quarter (up and toward the body) — unreachable
-        forbiddenZone: { startDeg: 270, endDeg: 360 },
+        forbiddenZone: { startDeg: 210, endDeg: 60 },
         texture: ASSET_KEYS.CHAR_LEG_L,
         targets: [
+          { x: 239, y: 1074 },
+          { x: 668, y: 1400 },
           { x: 239, y: 1074 },
           { x: 668, y: 1400 },
           { x: 239, y: 1074 },
         ],
       }),
     ];
- 
-    const progressTextLabel = this.add.text(10, 10, 'Διατάσεις:', TEXT_STYLES.DEFAULT);
+    
+    //Progressbar
+    this.#createLevelProgressBar();
+    this.#levelProgressBar.setProgress(1 / 3);
+    //Game Stats
+    const labelsTop = this.#levelProgressBar.getBounds().bottom + 60;
+    const progressTextLabel = this.add.text(50, labelsTop, 'Διατάσεις:', TEXT_STYLES.DEFAULT);
     this.#progressTextGO = this.add.text(
       progressTextLabel.x + progressTextLabel.width,
       progressTextLabel.y,
       `0 / ${this.#totalLimbsRequired}`,
       TEXT_STYLES.DEFAULT,
     );
- 
-    const timerTextLabel = this.add.text(10, 50, 'Χρόνος:', TEXT_STYLES.DEFAULT);
+    //timer text
+    const timerTextLabel = this.add.text(50, labelsTop + 40, 'Χρόνος:', TEXT_STYLES.DEFAULT);
     this.#timerTextGO = this.add.text(
       timerTextLabel.x + timerTextLabel.width,
       timerTextLabel.y,
       `${this.#remainingSeconds}`,
       TEXT_STYLES.DEFAULT,
     );
- 
+    //timer start
     this.#countdownTimerEvent = this.time.addEvent({
       delay: 1000,
       callback: this.#tickCountdown,
       callbackScope: this,
       loop: true,
     });
- 
+    
     this.input.on(Phaser.Input.Events.POINTER_DOWN, this.#handlePointerDown, this);
     this.input.on(Phaser.Input.Events.POINTER_MOVE, this.#handlePointerMove, this);
     this.input.on(Phaser.Input.Events.POINTER_UP, this.#handlePointerUp, this);
     this.input.on(Phaser.Input.Events.POINTER_UP_OUTSIDE, this.#handlePointerUp, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
- 
- 
+    
+    //rive
     this.#createCharacterAnimation();
+    
   }
- 
+  
   update(time, delta) {
     // No continuous per-frame movement — limbs only rotate in response to
     // pointermove while grabbed, and the countdown is a Timer Event. Left
     // here so the Scene lifecycle stays complete and consistent.
   }
- 
+  
   /**
    * Shared top-center level-progress bar (src/common/progress-bar.js), built
    * from ASSET_KEYS.PROGRESSBAR_BG (track) + ASSET_KEYS.PROGRESSBAR_FG (fill).
@@ -343,7 +358,7 @@ export class GameScene3 extends Phaser.Scene {
       limb.targetMarkerGOs.push(marker);
     });
  
-    this.#createGrabIndicator(limb);
+    this.#createGrabIndicator(limb,config.key);
  
     return limb;
   }
@@ -357,10 +372,18 @@ export class GameScene3 extends Phaser.Scene {
     };
   }
  
-  #createGrabIndicator(limb) {
+  #createGrabIndicator(limb,limbKey) {
     const tip = this.#limbTipPosition(limb, limb.angleDeg);
     limb.grabIndicatorGO = this.add.circle(tip.x, tip.y, 14, 0xffffff, 0);
-    limb.grabIndicatorGO.setStrokeStyle(3, GRAB_INDICATOR_COLOR, 1);
+    if(limbKey == 'RIGHT_ARM' || limbKey == 'LEFT_ARM')
+    {
+      limb.grabIndicatorGO.setStrokeStyle(3, GRAB_INDICATOR_ARM_COLOR, 1).setDepth(2);
+      
+    }
+    else
+    {
+      limb.grabIndicatorGO.setStrokeStyle(3, GRAB_INDICATOR_LEG_COLOR, 1).setDepth(2);
+    }
     this.#pulseGrabIndicator(limb);
   }
  
@@ -588,7 +611,7 @@ export class GameScene3 extends Phaser.Scene {
     this.#limbsStretchedCount += 1;
     this.#progressTextGO.setText(`${this.#limbsStretchedCount} / ${this.#totalLimbsRequired}`);
  
-    this.#levelProgressBar.setProgress(this.#limbsStretchedCount / this.#totalLimbsRequired);
+    //this.#levelProgressBar.setProgress(this.#limbsStretchedCount / this.#totalLimbsRequired);
  
     if (this.#limbsStretchedCount >= this.#totalLimbsRequired) {
       this.#handleLevelComplete();
@@ -638,6 +661,9 @@ export class GameScene3 extends Phaser.Scene {
     this.#isGameOver = true;
     this.#stopAllTimersAndIndicators();
  
+    this.#goToNextLevel();
+    return;
+    //not needed we go to next level
     this.events.emit('gameOver', {
       limbsStretched: this.#limbsStretchedCount,
     });
@@ -681,7 +707,7 @@ export class GameScene3 extends Phaser.Scene {
  
   #goToNextLevel() {
     this.scene.start(SCENE_KEYS.EUZOYLIS_OUTRO_SCENE);
-    this.input.once(Phaser.Input.Events.POINTER_DOWN, () => {});
+    //this.input.once(Phaser.Input.Events.POINTER_DOWN, () => {});
   }
  
    //rive

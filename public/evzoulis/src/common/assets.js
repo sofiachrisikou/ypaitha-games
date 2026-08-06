@@ -8,7 +8,6 @@ export const ASSET_KEYS = Object.freeze({
   SPEECH_BUBBLE: 'SPEECH_BUBBLE',
   //INTRO
   BACKGROUND_INTRO: 'BACKGROUND_INTRO',
-  CHARACTER_INTRO: 'CHARACTER_INTRO',
   LOGO: 'LOGO',
   EMOJI1: 'EMOJI1',
   EMOJI2: 'EMOJI2',
@@ -27,6 +26,8 @@ export const ASSET_KEYS = Object.freeze({
   FLOWER1: 'FLOWER1',
   FLOWER2: 'FLOWER2',
   FLOWER3: 'FLOWER3',
+  INHALE:'INHALE',
+  EXHALE:'EXHALE',
 
   //LEVEL 2
   BACKGROUND_Stg2: 'BACKGROUND_Stg2',
@@ -45,7 +46,6 @@ export const ASSET_KEYS = Object.freeze({
   CHAR_LEG_R: 'CHAR_LEG_R',
   CHAR_LEG_L: 'CHAR_LEG_L',
   //OUTRO
-  CHARACTER_OUTRO: 'CHARACTER_OUTRO',
   BACKGROUND_OUTRO: 'BACKGROUND_OUTRO',
 });
 
@@ -76,10 +76,6 @@ export const IMAGE_ASSETS = [
     path: 'assets/images/speechBubble.png',
   },
   //INTRO
-  {
-    assetKey: ASSET_KEYS.CHARACTER_INTRO,
-    path: 'assets/images/euzoulisIntro.png',
-  },
   {
     assetKey: ASSET_KEYS.BACKGROUND_INTRO,
     //path: 'assets/images/01.png',
@@ -155,6 +151,14 @@ export const IMAGE_ASSETS = [
     assetKey: ASSET_KEYS.FLOWER3,
     path: 'assets/images/flower03.png',
   },
+  {
+    assetKey: ASSET_KEYS.INHALE,
+    path: 'assets/images/Inhale.png',
+  },
+  {
+    assetKey: ASSET_KEYS.EXHALE,
+    path: 'assets/images/Exhale.png',
+  },
   //LEVEL 2
   {
     assetKey: ASSET_KEYS.BACKGROUND_Stg2,
@@ -210,10 +214,7 @@ export const IMAGE_ASSETS = [
     path: 'assets/images/Leg_L.png',
   },
   //OUTRO
-  {
-    assetKey: ASSET_KEYS.CHARACTER_OUTRO,
-    path: 'assets/images/euzoulisOutro.png',
-  },
+
   {
     assetKey: ASSET_KEYS.BACKGROUND_OUTRO,
     path: 'assets/images/outroBG.png',
