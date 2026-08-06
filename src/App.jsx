@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import Stage from './components/Stage.jsx'
 import IdleReset from './components/IdleReset.jsx'
+import MuteButton from './components/MuteButton.jsx'
 import Home from './screens/Home.jsx'
 import Stats from './screens/Stats.jsx'
 import Evzoulis from './games/evzoulis/Evzoulis.jsx'
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="/game/evzoulis" element={<Evzoulis />} />
         <Route path="/stats" element={<Stats />} />
       </Routes>
+      <MuteButton />
     </Stage>
   )
 }

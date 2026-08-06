@@ -2,6 +2,29 @@
 // με το πρώτο άγγιγμα (policy autoplay), που πάντα υπάρχει στο παιχνίδι.
 let ctx = null
 
+// Σίγαση (με μνήμη στο localStorage).
+let muted = false
+try {
+  muted = localStorage.getItem('hh-muted') === '1'
+} catch {
+  muted = false
+}
+export function isMuted() {
+  return muted
+}
+export function setMuted(v) {
+  muted = Boolean(v)
+  try {
+    localStorage.setItem('hh-muted', muted ? '1' : '0')
+  } catch {
+    // αγνόησε
+  }
+}
+export function toggleMute() {
+  setMuted(!muted)
+  return muted
+}
+
 function getCtx() {
   if (typeof window === 'undefined') return null
   if (!ctx) {
@@ -14,6 +37,7 @@ function getCtx() {
 }
 
 function tone(freq, start, dur, type = 'triangle', gain = 0.22) {
+  if (muted) return
   const c = getCtx()
   if (!c) return
   const o = c.createOscillator()

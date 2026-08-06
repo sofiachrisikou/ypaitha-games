@@ -195,6 +195,7 @@ button {
   width: 970px;
   height: auto;
   filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.28));
+  animation: card-bob 3.4s ease-in-out infinite;
 }
 .home2__card--top {
   top: 320px;
@@ -202,8 +203,43 @@ button {
 .home2__card--bottom {
   top: 1095px;
 }
+.home2__card--bottom img {
+  animation-duration: 3.9s;
+  animation-delay: 0.5s;
+}
 .home2__card:active {
   transform: translateX(-50%) scale(0.97);
+}
+@keyframes card-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(-0.6deg);
+  }
+}
+
+/* Κουμπί σίγασης (καθολικό, πάνω-δεξιά) */
+.mute-btn {
+  position: absolute;
+  top: 26px;
+  right: 26px;
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.32);
+  border: 3px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  font-size: 56px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 600;
+}
+.mute-btn:active {
+  transform: scale(0.92);
 }
 
 /* Κρυφό hotspot για /stats (κάτω αριστερή γωνία) */
