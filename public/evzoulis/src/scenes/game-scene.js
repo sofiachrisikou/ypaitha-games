@@ -64,6 +64,12 @@ export class GameScene extends Phaser.Scene {
   #cyclesCompleted;
   #flowerStage2Threshold;
   #flowerStage3Threshold;
+  #breathImageGO;
+  #breathImageBaseScale;
+  #breathImageStartY;
+  #breathImageEndY;
+  #breathImageWobbleTween;
+  #breathImageTransitionTween;
  
   //timer
   #remainingSeconds;
@@ -179,7 +185,9 @@ export class GameScene extends Phaser.Scene {
     
     //Progressbar
     this.#createLevelProgressBar();
-    this.#levelProgressBar.setProgress(3 / 3);
+    this.#levelProgressBar.setProgress(8/8);
+    //Inhale/Exhale image
+    this.#createBreathImage();
     //Game Stats
     const labelsTop = this.#levelProgressBar.getBounds().bottom + 60;
     const breathsTextLabel = this.add.text(50, labelsTop, 'Αναπνοές:', TEXT_STYLES.DEFAULT);
@@ -305,7 +313,83 @@ export class GameScene extends Phaser.Scene {
     }
     this.#flowerGO.setTexture(textureKey);
   }
- 
+
+  /**
+   * INHALE/EXHALE swap image shown above the character/Rive animation and
+   * below the progress bar. Idles wobbling at full size/position; each
+   * successful breath (#handleBreathSuccess) plays #playBreathImageSwap to
+   * shrink+fade it down, swap texture, then grow+fade it back up to rest.
+   */
+  #createBreathImage() {
+    const { width } = this.scale;
+    const progressBarBottom = this.#levelProgressBar.getBounds().bottom;
+
+    const x = width / 2;
+    this.#breathImageStartY = progressBarBottom + 200;
+    this.#breathImageEndY = this.#breathImageStartY + 200;
+
+    this.#breathImageBaseScale = 0.55;
+    this.#breathImageGO = this.add
+      .image(x, this.#breathImageStartY, ASSET_KEYS.INHALE)
+      .setOrigin(0.5, 0.5)
+      .setScale(this.#breathImageBaseScale);
+
+    this.#startBreathImageWobble();
+  }
+
+  #startBreathImageWobble() {
+    this.#breathImageWobbleTween = this.tweens.add({
+      targets: this.#breathImageGO,
+      angle: { from: -4, to: 4 },
+      duration: 900,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
+  }
+
+  #stopBreathImageWobble() {
+    if (this.#breathImageWobbleTween) {
+      this.#breathImageWobbleTween.stop();
+      this.#breathImageWobbleTween = null;
+    }
+    this.#breathImageGO.setAngle(0);
+  }
+
+  /** Shrinks+fades the current breath image down, swaps INHALE<->EXHALE mid-flight, then grows+fades it back up to rest and resumes wobbling. */
+  #playBreathImageSwap() {
+    this.#stopBreathImageWobble();
+
+    const shrinkScale = this.#breathImageBaseScale * 0.6;
+
+    this.#breathImageTransitionTween = this.tweens.add({
+      targets: this.#breathImageGO,
+      y: this.#breathImageEndY,
+      scale: shrinkScale,
+      alpha: 0,
+      duration: 450,
+      ease: 'Sine.easeIn',
+      onComplete: () => {
+        const nextKey =
+          this.#breathImageGO.texture.key === ASSET_KEYS.INHALE ? ASSET_KEYS.EXHALE : ASSET_KEYS.INHALE;
+        this.#breathImageGO.setTexture(nextKey);
+
+        this.#breathImageTransitionTween = this.tweens.add({
+          targets: this.#breathImageGO,
+          y: this.#breathImageStartY,
+          scale: this.#breathImageBaseScale,
+          alpha: 1,
+          duration: 450,
+          ease: 'Sine.easeOut',
+          onComplete: () => {
+            this.#breathImageTransitionTween = null;
+            this.#startBreathImageWobble();
+          },
+        });
+      },
+    });
+  }
+
   /**
    * Which physical Y (candle bottom or top) is the START zone for the
    * CURRENT breath direction — bottom for IN, top for OUT.
@@ -474,6 +558,7 @@ export class GameScene extends Phaser.Scene {
     this.#breathsTextGO.setText(`${this.#breathsCompleted} / ${this.#requiredBreaths}`);
  
     this.#correctSound.play();
+    this.#playBreathImageSwap();
 
     const wasBreathOut = this.#currentDirection === BREATH_DIRECTION.OUT;
  
@@ -578,7 +663,7 @@ export class GameScene extends Phaser.Scene {
     });
  
     this.#showEndMessage('Μπράβο! Ανάπνευσες τέλεια! 🎉', '');
-    this.#levelProgressBar.setProgress(2 / 3);
+    this.#levelProgressBar.setProgress(5.6/8);
   }
  
   #handleGameOver() {
@@ -626,8 +711,15 @@ export class GameScene extends Phaser.Scene {
     this.input.off(Phaser.Input.Events.POINTER_UP_OUTSIDE, this.#handlePointerUp, this);
     this.#stopHoldTimer();
     this.#stopIndicatorPulse();
-    
-    
+    if (this.#breathImageWobbleTween) {
+      this.#breathImageWobbleTween.stop();
+      this.#breathImageWobbleTween = null;
+    }
+    if (this.#breathImageTransitionTween) {
+      this.#breathImageTransitionTween.stop();
+      this.#breathImageTransitionTween = null;
+    }
+
     this.#removeVisualsOnGameEnd();
   }
  

@@ -139,7 +139,7 @@ export class GameScene2 extends Phaser.Scene {
     
     //Progressbar
     this.#createLevelProgressBar();
-    this.#levelProgressBar.setProgress(2 / 3);
+    this.#levelProgressBar.setProgress(5.6 / 8);
     //Game stats
     const labelsTop = this.#levelProgressBar.getBounds().bottom + 60;
     
@@ -481,7 +481,7 @@ export class GameScene2 extends Phaser.Scene {
     //   poppedCount: this.#poppedCount,
     //   secondsLeft: this.#remainingSeconds,
     // });
-    this.#levelProgressBar.setProgress(1 / 3);
+    this.#levelProgressBar.setProgress(3.3 / 8);
     this.#showEndMessage('Μπράβο! Τα κατάφερες! 🎉', ``);
     //this.#goToNextLevel();
   }

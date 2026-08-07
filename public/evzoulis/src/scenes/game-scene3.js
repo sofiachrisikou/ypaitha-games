@@ -170,7 +170,7 @@ export class GameScene3 extends Phaser.Scene {
       }),
       this.#createLimb({
         key: 'LEFT_LEG',
-        pivotX: this.#bodyX - this.#bodyWidth / 4,
+        pivotX: this.#bodyX - this.#bodyWidth / 4 -15,
         pivotY: this.#bodyY + this.#bodyHeight / 2 - 20,
         restAngleDeg: 90,
         // top-right quarter (up and toward the body) — unreachable
@@ -188,7 +188,7 @@ export class GameScene3 extends Phaser.Scene {
     
     //Progressbar
     this.#createLevelProgressBar();
-    this.#levelProgressBar.setProgress(1 / 3);
+    this.#levelProgressBar.setProgress(3.3/8);
     //Game Stats
     const labelsTop = this.#levelProgressBar.getBounds().bottom + 60;
     const progressTextLabel = this.add.text(50, labelsTop, 'Διατάσεις:', TEXT_STYLES.DEFAULT);
@@ -657,7 +657,7 @@ export class GameScene3 extends Phaser.Scene {
       limbsStretched: this.#limbsStretchedCount,
       secondsLeft: this.#remainingSeconds,
     });
-    this.#levelProgressBar.setProgress(0 / 3);
+    this.#levelProgressBar.setProgress(1/8);
     this.#showEndMessage('Μπράβο! Έκανες τέλεια διατάσεις! 🎉', '');
   }
  
