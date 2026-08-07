@@ -21,12 +21,12 @@ export const TEXT_STYLES = {
   // Text inside the character's speech bubbles — intro-scene.js, outro-scene.js
   SPEECH_BUBBLE: {
     fontFamily: FONT_FAMILY,
-    fontSize: '36px',
+    fontSize: '38px',
     color: '#A36155',
     align: 'center',
-    wordWrap: { width: 260, useAdvancedWrap: true },
+    wordWrap: { width: 300, useAdvancedWrap: true },
   },
-  SPEECH_BUBBLE_POPPED: {
+  BUBBLE_POPPED: {
     fontFamily: FONT_FAMILY,
     fontSize: '40px',
     color: '#2EB000',

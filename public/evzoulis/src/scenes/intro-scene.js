@@ -249,7 +249,7 @@ export class IntroScene extends Phaser.Scene {
     const bubbleY = height/2 + 200;
 
     const bubbleImage = this.add.image(0, 0, ASSET_KEYS.SPEECH_BUBBLE).setScale(0.35);
-    const bubbleText = this.add.text(0, 0, 'ΘΑ ΜΕ ΒΟΗΘΗΣΕΙΣ ;', TEXT_STYLES.SPEECH_BUBBLE).setOrigin(0.5);
+    const bubbleText = this.add.text(0, -20, 'ΘΑ ΜΕ ΒΟΗΘΗΣΕΙΣ ;', TEXT_STYLES.SPEECH_BUBBLE).setOrigin(0.5);
     this.add.container(bubbleX - 330, bubbleY, [bubbleImage, bubbleText]);
 
     const levelButtonX = bubbleX - 500;

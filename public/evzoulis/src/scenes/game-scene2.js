@@ -434,7 +434,7 @@ export class GameScene2 extends Phaser.Scene {
     bubbleData.state = BUBBLE_STATE.POPPED;
     bubbleData.container.disableInteractive();
  
-    bubbleData.text.setStyle(TEXT_STYLES.SPEECH_BUBBLE_POPPED);
+    bubbleData.text.setStyle(TEXT_STYLES.BUBBLE_POPPED);
     bubbleData.text.setText(bubbleData.thoughtData.good);
  
     this.#bubblePopSound.play();

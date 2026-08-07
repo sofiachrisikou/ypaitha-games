@@ -74,7 +74,7 @@ export class OutroScene extends Phaser.Scene {
     const bubbleImage = this.add.image(0, 0, ASSET_KEYS.SPEECH_BUBBLE).setScale(0.35);
     // TODO: replace with your real "well done" copy
     const bubbleText = this.add
-      .text(0, 0, 'ΜΠΡΑΒΟ! ΤΑ ΚΑΤΑΦΕΡΕΣ!', TEXT_STYLES.SPEECH_BUBBLE)
+      .text(0, -20, 'ΜΠΡΑΒΟ! ΤΑ ΚΑΤΑΦΕΡΕΣ!', TEXT_STYLES.SPEECH_BUBBLE)
       .setOrigin(0.5);
     const bubbleContainer = this.add.container(bubblex - 260, bubbleY, [bubbleImage, bubbleText]).setAlpha(0);
 
