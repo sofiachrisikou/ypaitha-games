@@ -4,6 +4,7 @@ import { ASSET_KEYS } from '../common/assets.js';
 import { ProgressBar } from '../common/progress-bar.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
 import { spawnRiveAnimation, removeRiveAnimation , setStateMachineInput} from '../common/rive-stage.js';
+import { showLevelIntro, showEndMessage } from '../common/level-flow.js';
 // const textStyleConfig = {
 //   fontSize: '40px',
 //   color: '#043D8C',
@@ -53,7 +54,8 @@ export class GameScene3 extends Phaser.Scene {
   #isGameOver;
   #debug;
   #riveInstance;
- 
+  #correctSound;
+
   constructor() {
     super({
       key: SCENE_KEYS.EUZOYLIS_GAME_SCENE3,
@@ -97,11 +99,16 @@ export class GameScene3 extends Phaser.Scene {
   }
  
   create() {
+    showLevelIntro(this, ASSET_KEYS.STAGE3_LOGO, () => this.#startLevel());
+  }
+
+  #startLevel() {
     const { width, height } = this.scale;
- 
+
     this.add.image(width / 2, height / 2, ASSET_KEYS.BACKGROUND_Stg3);
- 
-    
+
+    this.#correctSound = this.sound.add(ASSET_KEYS.CORRECTSOUND);
+
     // TODO: placeholder proportions — retune once the real bear art exists
     this.#bodyWidth = width * 0.32;
     this.#bodyHeight = height * 0.3;
@@ -564,7 +571,7 @@ export class GameScene3 extends Phaser.Scene {
     if (distance > this.#reachRadius) {
       return;
     }
- 
+
     limb.targetAnglesDeg.shift();
     const reachedMarker = limb.targetMarkerGOs.shift();
     if (reachedMarker) {
@@ -618,8 +625,8 @@ export class GameScene3 extends Phaser.Scene {
     }
  
     this.#setSmiling(true);
- 
-     this.time.delayedCall(
+    this.#correctSound.play();
+    this.time.delayedCall(
       700,
       () => {
         this.#setSmiling(false);
@@ -684,14 +691,7 @@ export class GameScene3 extends Phaser.Scene {
   }
  
   #showEndMessage(title, subtitle) {
-    const { width, height } = this.scale;
-    this.add.rectangle(0, 0, width, height, 0x000000, 0.6).setOrigin(0).setDepth(4);
-    this.add.text(width / 2, height / 2 - 60, title, TEXT_STYLES.DEFAULT).setOrigin(0.5).setDepth(4);
-    this.add.text(width / 2, height / 2 + 40, subtitle, TEXT_STYLES.DEFAULT).setOrigin(0.5).setDepth(4);
- 
-    const helloButton = this.add.text(width / 2, height / 2 + 140, 'Επόμενο Επίπεδο', TEXT_STYLES.DEFAULT).setOrigin(0.5).setDepth(11);
-    helloButton.setInteractive();
-    helloButton.on('pointerdown', () => this.#goToNextLevel());
+    showEndMessage(this, { title, subtitle, onComplete: () => this.#goToNextLevel() });
   }
  
   #handleShutdown() {

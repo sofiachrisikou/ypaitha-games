@@ -26,8 +26,8 @@ body,
 }
 
 .rive-stage--level1 {
-  width: 160%;
-  height: 160%;
+  width: 135%;
+  height: 135%;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);

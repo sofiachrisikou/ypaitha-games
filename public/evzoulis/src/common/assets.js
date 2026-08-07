@@ -1,11 +1,12 @@
 export const ASSET_KEYS = Object.freeze({
   //SHARED
+  BACKGROUND_GENERIC: 'BACKGROUND_GENERIC',
   PROGRESSBAR_FG: 'PROGRESSBAR_FG',
   PROGRESSBAR_BG: 'PROGRESSBAR_BG',
-  BACKGROUND_Stg1: 'BACKGROUND_Stg1',
   FONT1:'FONT1',
   BTN1: 'BTN1',
   SPEECH_BUBBLE: 'SPEECH_BUBBLE',
+  CORRECTSOUND: 'CORRECTSOUND',
   //INTRO
   BACKGROUND_INTRO: 'BACKGROUND_INTRO',
   LOGO: 'LOGO',
@@ -20,6 +21,8 @@ export const ASSET_KEYS = Object.freeze({
   TESTS: 'TESTS',
   OBJECTS: 'OBJECTS',
   //LEVEL 1
+  BACKGROUND_Stg1: 'BACKGROUND_Stg1',
+  STAGE1_LOGO:'STAGE1_LOGO',
   CANDLE: 'CANDLE',
   CANDLE_FLAME: 'CANDLE_FLAME',
   ARROW_UP: 'ARROW_UP',
@@ -31,15 +34,17 @@ export const ASSET_KEYS = Object.freeze({
 
   //LEVEL 2
   BACKGROUND_Stg2: 'BACKGROUND_Stg2',
+  STAGE2_LOGO:'STAGE2_LOGO',
   BUBBLE1: 'BUBBLE1',
   BUBBLE2: 'BUBBLE2',
   BUBBLE3: 'BUBBLE3',
   BUBBLE4: 'BUBBLE4',
   BUBBLE_POPPED: 'BUBBLE_POPPED',
   BUBBLE_POPPED1: 'BUBBLE_POPPED1',
-  CORRECTSOUND: 'CORRECTSOUND',
+  BUBBLE_POP_SOUND:'BUBBLE_POP_SOUND',
   //LEVEL 3
   BACKGROUND_Stg3: 'BACKGROUND_Stg3',
+  STAGE3_LOGO:'STAGE3_LOGO',
   BEAR_BODY: 'BEAR_BODY',
   CHAR_ARM_R: 'CHAR_ARM_R',
   CHAR_ARM_L: 'CHAR_ARM_L',
@@ -59,6 +64,10 @@ export const FONT_ASSETS =
 
 export const IMAGE_ASSETS = [
   //SHARED
+   {
+    assetKey: ASSET_KEYS.BACKGROUND_GENERIC,
+    path: 'assets/images/Generic_BG.png',
+  },
   {
     assetKey: ASSET_KEYS.PROGRESSBAR_FG,
     path: 'assets/images/progBarFG.png',
@@ -128,6 +137,10 @@ export const IMAGE_ASSETS = [
     path: 'assets/images/Stage01_BG.png',
   },
   {
+    assetKey: ASSET_KEYS.STAGE1_LOGO,
+    path: 'assets/images/Stage01.png',
+  },
+  {
     assetKey: ASSET_KEYS.CANDLE,
     path: 'assets/images/Candle.png',
   },
@@ -165,6 +178,10 @@ export const IMAGE_ASSETS = [
     path: 'assets/images/Stage02_BG.png',
   },
   {
+    assetKey: ASSET_KEYS.STAGE2_LOGO,
+    path: 'assets/images/Stage02.png',
+  },
+  {
     assetKey: ASSET_KEYS.BUBBLE1,
     path: 'assets/images/cloud1.png',
   },
@@ -192,6 +209,10 @@ export const IMAGE_ASSETS = [
   {
     assetKey: ASSET_KEYS.BACKGROUND_Stg3,
     path: 'assets/images/Stage03_BG.png',
+  },
+  {
+    assetKey: ASSET_KEYS.STAGE3_LOGO,
+    path: 'assets/images/Stage03.png',
   },
   {
     assetKey: ASSET_KEYS.BEAR_BODY,
@@ -225,6 +246,10 @@ export const AUDIO_ASSETS = [
   {
     assetKey: ASSET_KEYS.CORRECTSOUND,
     path: 'assets/audio/correct.wav',
+  },
+  {
+    assetKey: ASSET_KEYS.BUBBLE_POP_SOUND,
+    path: 'assets/audio/bubble_pop.wav',
   },
 ];
 

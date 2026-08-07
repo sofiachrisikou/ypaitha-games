@@ -4,6 +4,7 @@ import { ASSET_KEYS } from '../common/assets.js';
 import { THOUGHT_CLOUD_LIST } from '../common/thought-cloud-data.js';
 import { ProgressBar } from '../common/progress-bar.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
+import { showLevelIntro, showEndMessage } from '../common/level-flow.js';
  
 // const textStyleConfig = {
 //   fontSize: '40px',
@@ -68,8 +69,8 @@ export class GameScene2 extends Phaser.Scene {
   #scoreTextGO;
   #progressTextGO;
   #levelProgressBar;
-  #nextlevelBtnGO;
   #debug;
+  #bubblePopSound;
   //timer
   #remainingSeconds;
   #timerTextGO;
@@ -119,10 +120,16 @@ export class GameScene2 extends Phaser.Scene {
   }
  
   create() {
+    showLevelIntro(this, ASSET_KEYS.STAGE2_LOGO, () => this.#startLevel());
+  }
+
+  #startLevel() {
     const { width, height } = this.scale;
- 
+
     this.add.image(width / 2, height / 2, ASSET_KEYS.BACKGROUND_Stg2);
- 
+
+    this.#bubblePopSound = this.sound.add(ASSET_KEYS.BUBBLE_POP_SOUND);
+
     this.#bubbles = [];
     // TODO: retune once the real bubble art is in — this is the WIDTH
     // every bubble is scaled to; each texture's actual HEIGHT (and its
@@ -150,7 +157,7 @@ export class GameScene2 extends Phaser.Scene {
       labelsTop + 50,
       `0 / ${this.#totalBubbles}`,
       TEXT_STYLES.DEFAULT,
-    );
+    ).setDepth(1);
     
     const timerTextLabel = this.add.text(10, labelsTop , 'Χρόνος:', TEXT_STYLES.DEFAULT);
     this.#timerTextGO = this.add.text(
@@ -158,7 +165,7 @@ export class GameScene2 extends Phaser.Scene {
       labelsTop ,
       `${this.#remainingSeconds}`,
       TEXT_STYLES.DEFAULT,
-    );
+    ).setDepth(1);
     
     //timer start
     this.#countdownTimerEvent = this.time.addEvent({
@@ -430,8 +437,8 @@ export class GameScene2 extends Phaser.Scene {
     bubbleData.text.setStyle(TEXT_STYLES.SPEECH_BUBBLE_POPPED);
     bubbleData.text.setText(bubbleData.thoughtData.good);
  
-    // ADD BUBBLE POP AUDIO
- 
+    this.#bubblePopSound.play();
+
     this.#playBurstAnimation(bubbleData.image);
  
     this.#poppedCount += 1;
@@ -469,13 +476,14 @@ export class GameScene2 extends Phaser.Scene {
     // this.#score = this.#remainingSeconds * this.#scorePerSecond;
     // this.#scoreTextGO.setText(`${this.#score}`);
  
-    this.events.emit('levelComplete', {
-      score: this.#score,
-      poppedCount: this.#poppedCount,
-      secondsLeft: this.#remainingSeconds,
-    });
- 
-    this.#showEndMessage('Μπράβο! Τα κατάφερες! 🎉', `Σκορ: ${this.#score}`);
+    // this.events.emit('levelComplete', {
+    //   score: this.#score,
+    //   poppedCount: this.#poppedCount,
+    //   secondsLeft: this.#remainingSeconds,
+    // });
+    this.#levelProgressBar.setProgress(1 / 3);
+    this.#showEndMessage('Μπράβο! Τα κατάφερες! 🎉', ``);
+    //this.#goToNextLevel();
   }
  
   #handleGameOver() {
@@ -512,23 +520,7 @@ export class GameScene2 extends Phaser.Scene {
   }
  
   #showEndMessage(title, subtitle) {
-    const { width, height } = this.scale;
- 
-    this.add.rectangle(0, 0, width, height, 0x000000, 0.6).setOrigin(0);
-    this.add.text(width / 2, height / 2 - 60, title, TEXT_STYLES.DEFAULT).setOrigin(0.5);
-    this.add.text(width / 2, height / 2 + 40, subtitle, TEXT_STYLES.DEFAULT).setOrigin(0.5);
- 
-    const helloButton = this.add.text(width / 2, height / 2 + 140, 'Επόμενο Επίπεδο', TEXT_STYLES.DEFAULT).setOrigin(0.5);
-    helloButton.setInteractive();
-    helloButton.on('pointerdown', () => this.#goToNextLevel());
-
-    this.#levelProgressBar.setProgress(1 / 3);
-    return;
-    this.#nextlevelBtnGO = this.add
-      .image(500, 500, ASSET_KEYS.BTN1)
-      .setScale(0.5)
-      .setInteractive({ useHandCursor: true });
-    this.#nextlevelBtnGO.on(Phaser.Input.Events.POINTER_DOWN, this.scene.start(SCENE_KEYS.EUZOYLIS_GAME_SCENE3), this);
+    showEndMessage(this, { title, subtitle, onComplete: () => this.#goToNextLevel() });
   }
  
   #goToNextLevel() {

@@ -4,6 +4,7 @@ import { ASSET_KEYS } from '../common/assets.js';
 import { ProgressBar } from '../common/progress-bar.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
 import { spawnRiveAnimation, removeRiveAnimation, setStateMachineInput } from '../common/rive-stage.js';
+import { showLevelIntro, showEndMessage } from '../common/level-flow.js';
  
 // const textStyleConfig = {
 //   fontSize: '40px',
@@ -58,6 +59,7 @@ export class GameScene extends Phaser.Scene {
   #isGameOver;
   #debug;
   #riveInstance;
+  #correctSound;
   #flowerGO;
   #cyclesCompleted;
   #flowerStage2Threshold;
@@ -121,8 +123,8 @@ export class GameScene extends Phaser.Scene {
     // starting guess for requiredBreaths=5 (max 2 complete cycles) — retune
     // if you change #requiredBreaths.
     this.#cyclesCompleted = 0;
-    this.#flowerStage2Threshold = 1;
-    this.#flowerStage3Threshold = 2;
+    this.#flowerStage2Threshold = 2;
+    this.#flowerStage3Threshold = 4;
   }
  
   preload() {
@@ -130,11 +132,16 @@ export class GameScene extends Phaser.Scene {
   }
  
   create() {
+    showLevelIntro(this, ASSET_KEYS.STAGE1_LOGO, () => this.#startLevel());
+  }
+
+  #startLevel() {
     const { width, height } = this.scale;
- 
+
     this.add.image(width / 2, height / 2, ASSET_KEYS.BACKGROUND_Stg1);
-    
-    
+
+    this.#correctSound = this.sound.add(ASSET_KEYS.CORRECTSOUND);
+
     //Flower
     this.#createFlower();
     //Candle
@@ -466,17 +473,14 @@ export class GameScene extends Phaser.Scene {
     this.#breathsCompleted += 1;
     this.#breathsTextGO.setText(`${this.#breathsCompleted} / ${this.#requiredBreaths}`);
  
-    // TODO: swap for your real SFX key once it's in ASSET_KEYS
-    // this.sound.play(ASSET_KEYS.SOUND_BREATH_GOOD);
- 
-    let sound = this.sound.add(ASSET_KEYS.CORRECTSOUND);
-    sound.play();
- 
+    this.#correctSound.play();
+
     const wasBreathOut = this.#currentDirection === BREATH_DIRECTION.OUT;
  
     if (wasBreathOut) {
       this.#cyclesCompleted += 1;
       this.#updateFlowerStage();
+
     }
  
     if (this.#debug) {
@@ -597,16 +601,8 @@ export class GameScene extends Phaser.Scene {
   }
  
   #showEndMessage(title, subtitle) {
-    const { width, height } = this.scale;
-    this.add.rectangle(0, 0, width, height, 0x000000, 0.6).setOrigin(0);
-    this.add.text(width / 2, height / 2 - 60, title, TEXT_STYLES.DEFAULT).setOrigin(0.5);
-    this.add.text(width / 2, height / 2 + 40, subtitle, TEXT_STYLES.DEFAULT).setOrigin(0.5);
- 
-    const helloButton = this.add.text(width / 2, height / 2 + 140, 'Επόμενο Επίπεδο', TEXT_STYLES.DEFAULT).setOrigin(0.5);
-    helloButton.setInteractive();
-    helloButton.on('pointerdown', () => this.#goToNextLevel());
-
-    this.#removeVisualsOnGameEnd();
+    showEndMessage(this, { title, subtitle, onComplete: () => this.#goToNextLevel() });
+    //this.#removeVisualsOnGameEnd();
   }
   
   #removeVisualsOnGameEnd()
@@ -619,6 +615,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   #goToNextLevel() {
+    this.#removeVisualsOnGameEnd();
     this.scene.start(SCENE_KEYS.EUZOYLIS_GAME_SCENE2);
   }
  
@@ -631,8 +628,7 @@ export class GameScene extends Phaser.Scene {
     this.#stopIndicatorPulse();
     
     
-    removeRiveAnimation(this.#riveInstance, 'rive-stage--level1'); // remove
-    this.#riveInstance = null;
+    this.#removeVisualsOnGameEnd();
   }
  
   #createCharacterAnimation()
