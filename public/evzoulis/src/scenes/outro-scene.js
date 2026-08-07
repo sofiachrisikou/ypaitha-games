@@ -48,6 +48,8 @@ export class OutroScene extends Phaser.Scene {
     this.time.delayedCall(
       this.#characterAppearDelayMs + 8000,
       () => {
+        // αλεξ εκανα το redirect για την σελιδα αξιολογησης εγω - σοφια
+        window.parent.postMessage({ type: 'evzoulis:done' }, '*');
         this.scene.start(SCENE_KEYS.EUZOYLIS_INTRO_SCENE);
       },
       [],

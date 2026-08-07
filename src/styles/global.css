@@ -1025,7 +1025,17 @@ button {
   width: 470px;
   height: auto;
   filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.15));
-  animation: bob 2.2s ease-in-out infinite;
+  /* bob-centered: κρατά το translate(-50%,-50%) ώστε να μη φεύγει το κύπελλο */
+  animation: bob-centered 2.2s ease-in-out infinite;
+}
+@keyframes bob-centered {
+  0%,
+  100% {
+    transform: translate(-50%, -50%);
+  }
+  50% {
+    transform: translate(-50%, calc(-50% - 22px));
+  }
 }
 .hh-finale__ribbon {
   position: absolute;
