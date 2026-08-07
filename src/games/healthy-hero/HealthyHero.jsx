@@ -19,11 +19,11 @@ const S = '/hh/start'
 const E = '/hh/end'
 // Διακοσμητικά τρόφιμα που «επιπλέουν» στην αρχική (θέσεις κατά το σχέδιο).
 const FLOAT_FOODS = [
-  { src: `${S}/apple.png`, x: 150, y: 760, w: 150, d: 0 },
-  { src: `${S}/Sandwich.png`, x: 195, y: 930, w: 190, d: 0.6 },
-  { src: `${S}/Cheese.png`, x: 135, y: 1100, w: 150, d: 1.1 },
-  { src: `${S}/Yoghurt.png`, x: 190, y: 1265, w: 150, d: 0.3 },
-  { src: `${S}/Broccoli.png`, x: 140, y: 1420, w: 150, d: 0.9 },
+  { src: `${S}/apple.png`, x: 225, y: 935, w: 150, d: 0 },
+  { src: `${S}/Cheese.png`, x: 160, y: 1155, w: 150, d: 1.1 },
+  { src: `${S}/Sandwich.png`, x: 360, y: 1120, w: 180, d: 0.6 },
+  { src: `${S}/Yoghurt.png`, x: 195, y: 1360, w: 150, d: 0.3 },
+  { src: `${S}/Broccoli.png`, x: 385, y: 1370, w: 150, d: 0.9 },
 ]
 
 // Ροή: intro -> m1 -> m2 -> m3 -> finale -> rating -> homepage
