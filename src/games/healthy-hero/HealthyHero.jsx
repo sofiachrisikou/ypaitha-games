@@ -4,7 +4,16 @@ import RatingScreen from '../../components/RatingScreen.jsx'
 import Mission1Plate from './missions/Mission1Plate.jsx'
 import Mission2LunchBox from './missions/Mission2LunchBox.jsx'
 import Mission3Traps from './missions/Mission3Traps.jsx'
+import MissionIntro from './MissionIntro.jsx'
 import { playWin } from '../../services/sound.js'
+import { speak } from '../../services/voice.js'
+
+// Οδηγίες + assets ανά αποστολή (για την οθόνη εισαγωγής).
+const MISSIONS = {
+  m1: { instr: 'Σύρε 5 υγιεινά τρόφιμα μέσα στο πιάτο!', voice: 'm1_intro', bg: '/hh/m1/Background.png' },
+  m2: { instr: 'Γέμισε το κουτί με υγιεινές επιλογές για το κολατσιό!', voice: 'm2_intro', bg: '/hh/m2/Background.png' },
+  m3: { instr: 'Άγγιξε όσα δεν τρώμε συχνά, πριν τελειώσει ο χρόνος!', voice: 'm3_intro', bg: '/hh/m3/Background.png' },
+}
 
 // Confetti (σταθερές θέσεις — χωρίς τυχαιότητα)
 const CONFETTI_COLORS = ['#34c759', '#ff9f2e', '#2ec4f1', '#e5442e', '#ffd23f', '#ffffff']
@@ -31,14 +40,19 @@ export default function HealthyHero() {
   const navigate = useNavigate()
   const [stage, setStage] = useState('intro')
   const [score, setScore] = useState(0)
+  const [ready, setReady] = useState(false) // οδηγίες αποστολής ολοκληρώθηκαν;
 
   const addScore = useCallback((delta) => setScore((s) => s + delta), [])
   const goHome = useCallback(() => navigate('/'), [navigate])
   const noop = useCallback(() => {}, [])
 
-  // Φανφάρα στην τελική κάρτα.
+  // Σε κάθε νέα αποστολή δείξε πρώτα τις οδηγίες. Στο τέλος φανφάρα + φωνή.
   useEffect(() => {
-    if (stage === 'finale') playWin()
+    if (MISSIONS[stage]) setReady(false)
+    if (stage === 'finale') {
+      playWin()
+      speak('super_hero')
+    }
   }, [stage])
 
   if (stage === 'intro') {
@@ -93,15 +107,25 @@ export default function HealthyHero() {
     return <RatingScreen game="healthy-hero" onDone={goHome} />
   }
 
+  const meta = MISSIONS[stage]
   return (
-    <div className="screen hh-game">
-      {stage === 'm1' && (
+    <div className="screen hh-game hh-fade">
+      {!ready && meta && (
+        <MissionIntro
+          bg={meta.bg}
+          hero={`${E}/Hero.png`}
+          text={meta.instr}
+          voiceKey={meta.voice}
+          onStart={() => setReady(true)}
+        />
+      )}
+      {ready && stage === 'm1' && (
         <Mission1Plate addScore={addScore} onProgress={noop} onComplete={() => setStage('m2')} />
       )}
-      {stage === 'm2' && (
+      {ready && stage === 'm2' && (
         <Mission2LunchBox addScore={addScore} onProgress={noop} onNext={() => setStage('m3')} />
       )}
-      {stage === 'm3' && (
+      {ready && stage === 'm3' && (
         <Mission3Traps addScore={addScore} onProgress={noop} onNext={() => setStage('finale')} />
       )}
     </div>

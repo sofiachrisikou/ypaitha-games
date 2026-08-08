@@ -188,14 +188,13 @@ button {
   background: none;
   border: 0;
   padding: 0;
-  transition: transform 0.1s ease;
+  transition: transform 0.36s ease, opacity 0.36s ease;
 }
 .home2__card img {
   display: block;
   width: 970px;
   height: auto;
-  filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.28));
-  animation: card-bob 3.4s ease-in-out infinite;
+  animation: card-bob 3.4s ease-in-out infinite, card-glow 2.2s ease-in-out infinite;
 }
 .home2__card--top {
   top: 320px;
@@ -204,19 +203,72 @@ button {
   top: 1095px;
 }
 .home2__card--bottom img {
-  animation-duration: 3.9s;
-  animation-delay: 0.5s;
+  animation-duration: 3.9s, 2.6s;
+  animation-delay: 0.5s, 0.4s;
 }
 .home2__card:active {
-  transform: translateX(-50%) scale(0.97);
+  transform: translateX(-50%) scale(0.96);
 }
+
+/* «ΠΑΙΞΕ!» CTA πάνω σε κάθε κάρτα */
+.home2__cta {
+  position: absolute;
+  left: 50%;
+  bottom: -24px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #ffd23f, #f7a600);
+  color: #0b3b6b;
+  font-size: 46px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  padding: 14px 56px;
+  border-radius: 999px;
+  border: 5px solid #fff;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.15), 0 12px 24px rgba(0, 0, 0, 0.25);
+  animation: cta-pulse 1.3s ease-in-out infinite;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Zoom «μέσα στο παιχνίδι» με το άγγιγμα */
+.home2__card--zoom {
+  transform: translateX(-50%) scale(2.3);
+  opacity: 0;
+  z-index: 10;
+}
+.home2__card--zoom img {
+  animation: none;
+}
+.home2__card--dim {
+  transform: translateX(-50%) scale(0.9);
+  opacity: 0;
+}
+
 @keyframes card-bob {
   0%,
   100% {
-    transform: translateY(0) rotate(0deg);
+    transform: translateY(0) rotate(0deg) scale(1);
   }
   50% {
-    transform: translateY(-14px) rotate(-0.6deg);
+    transform: translateY(-14px) rotate(-0.6deg) scale(1.015);
+  }
+}
+@keyframes card-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.28));
+  }
+  50% {
+    filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.28)) drop-shadow(0 0 20px rgba(255, 221, 87, 0.75));
+  }
+}
+@keyframes cta-pulse {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.08);
   }
 }
 
@@ -1222,5 +1274,76 @@ button {
   }
   100% {
     transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* ===== Οθόνη οδηγιών πριν από κάθε αποστολή ===== */
+.mission-intro {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  animation: fade-in 0.3s ease;
+}
+.mission-intro__dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 30, 60, 0.55);
+}
+.mission-intro__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 34px;
+  padding: 0 60px;
+  text-align: center;
+  animation: pop-plain 0.4s ease;
+}
+.mission-intro__hero {
+  width: 360px;
+  height: auto;
+  filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.35));
+  animation: bob 2.4s ease-in-out infinite;
+}
+.mission-intro__bubble {
+  background: #fff;
+  border: 8px solid #ffd23f;
+  border-radius: 44px;
+  padding: 40px 56px;
+  max-width: 900px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+.mission-intro__text {
+  font-size: 58px;
+  font-weight: 800;
+  color: #1f2a44;
+  line-height: 1.2;
+}
+.mission-intro__btn {
+  min-width: 380px;
+}
+
+/* ===== Μεταβάσεις οθονών ===== */
+.hh-fade {
+  animation: screen-in 0.35s ease;
+}
+.hh-intro,
+.hh-finale,
+.home2 {
+  animation: fade-in 0.35s ease;
+}
+@keyframes screen-in {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }

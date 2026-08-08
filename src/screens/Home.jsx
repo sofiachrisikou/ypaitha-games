@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const H = '/home'
@@ -6,25 +7,29 @@ const H = '/home'
 // Card01 = Ευζούλης (Η Τάξη που Ηρεμεί), Card02 = Healthy Hero.
 export default function Home() {
   const navigate = useNavigate()
+  const [zoom, setZoom] = useState(null) // ποια κάρτα «μεγαλώνει» πριν το άνοιγμα
+
+  const go = (card, to) => {
+    if (zoom) return
+    setZoom(card)
+    setTimeout(() => navigate(to), 380)
+  }
+
+  const cls = (card) =>
+    `home2__card home2__card--${card === 'evz' ? 'top' : 'bottom'}` +
+    (zoom === card ? ' home2__card--zoom' : '') +
+    (zoom && zoom !== card ? ' home2__card--dim' : '')
 
   return (
     <div className="screen home2" style={{ backgroundImage: `url(${H}/Background.png)` }}>
-      <button
-        type="button"
-        className="home2__card home2__card--top"
-        onClick={() => navigate('/game/evzoulis')}
-        aria-label="Η Τάξη που Ηρεμεί"
-      >
+      <button type="button" className={cls('evz')} onClick={() => go('evz', '/game/evzoulis')} aria-label="Η Τάξη που Ηρεμεί">
         <img src={`${H}/Card01.png`} alt="Η Τάξη που Ηρεμεί" draggable="false" />
+        <span className="home2__cta">ΠΑΙΞΕ!</span>
       </button>
 
-      <button
-        type="button"
-        className="home2__card home2__card--bottom"
-        onClick={() => navigate('/game/healthy-hero')}
-        aria-label="Healthy Hero"
-      >
+      <button type="button" className={cls('hh')} onClick={() => go('hh', '/game/healthy-hero')} aria-label="Healthy Hero">
         <img src={`${H}/Card02.png`} alt="Healthy Hero" draggable="false" />
+        <span className="home2__cta">ΠΑΙΞΕ!</span>
       </button>
 
       {/* Κρυφό hotspot για /stats (κάτω αριστερή γωνία). */}
