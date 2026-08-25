@@ -1,8 +1,9 @@
 import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from '../common/scene-keys.js';
 import { ASSET_KEYS } from '../common/assets.js';
-import { spawnRiveAnimation, removeRiveAnimation } from '../common/rive-stage.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
+import { spawnRiveAnimation, removeRiveAnimation } from '../common/rive-stage.js';
+import { playLevelSuccessFeedback } from '../common/audio-manager.js';
 
 // const speechBubbleTextStyleConfig = {
 //   fontSize: '32px',
@@ -12,15 +13,20 @@ import { TEXT_STYLES } from '../common/sharedGameSettings.js';
 // };
 
 export class OutroScene extends Phaser.Scene {
+  //TIMING
   #characterAppearDelayMs;
   #characterFadeInDurationMs;
-   #riveInstance;
+
+  //CHARACTER
+  #riveInstance;
 
   constructor() {
     super({
       key: SCENE_KEYS.EUZOYLIS_OUTRO_SCENE,
     });
   }
+
+  //#region Scene Lifecycle
 
   /**
    * @public
@@ -64,6 +70,26 @@ export class OutroScene extends Phaser.Scene {
     // delayed call. Left here so the Scene lifecycle stays complete.
   }
 
+  #handleShutdown() {
+    removeRiveAnimation(this.#riveInstance, 'rive-stage--outro'); // remove
+    this.#riveInstance = null;
+  }
+
+  //#endregion
+
+  //#region Character
+
+  #createOutroCharacterAnimation()
+  {
+    this.#riveInstance = spawnRiveAnimation(
+      'assets/rive/Bear_Outro.riv',
+      'Timeline_Bear_Outro',
+      'rive-stage--outro',
+      true,   // loop
+      false,  // isStateMachine — this file is a plain Animation
+    );
+  }
+
   #showCharacterMessage() {
     const { width, height } = this.scale;
 
@@ -71,10 +97,11 @@ export class OutroScene extends Phaser.Scene {
     const bubbleY = height/2 + 80
 
     this.#createOutroCharacterAnimation();
+    // level 3's completion moment — game-scene3.js no longer celebrates on its own
+    playLevelSuccessFeedback(this, 3);
 
-    // TODO: swap ASSET_KEYS.SPEECH_BUBBLE for your real speech-bubble art
-    const bubbleImage = this.add.image(0, 0, ASSET_KEYS.SPEECH_BUBBLE).setScale(0.35);
     // TODO: replace with your real "well done" copy
+    const bubbleImage = this.add.image(0, 0, ASSET_KEYS.SPEECH_BUBBLE).setScale(0.35);
     const bubbleText = this.add
       .text(0, -20, 'ΜΠΡΑΒΟ! ΤΑ ΚΑΤΑΦΕΡΕΣ!', TEXT_STYLES.SPEECH_BUBBLE)
       .setOrigin(0.5);
@@ -88,19 +115,5 @@ export class OutroScene extends Phaser.Scene {
     });
   }
 
-  #handleShutdown() {  
-      removeRiveAnimation(this.#riveInstance, 'rive-stage--outro'); // remove
-      this.#riveInstance = null;
-    }
-
-   #createOutroCharacterAnimation()
-    {
-      this.#riveInstance = spawnRiveAnimation(
-        'assets/rive/Bear_Outro.riv',
-        'Timeline_Bear_Outro',
-        'rive-stage--outro',
-        true,   // loop
-        false,  // isStateMachine — this file is a plain Animation
-      );
-    }
+  //#endregion
 }

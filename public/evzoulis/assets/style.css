@@ -47,3 +47,11 @@ body,
   top: 82%;
   transform: translate(-50%, -50%);
 }
+
+.rive-stage--celebration {
+  width: 160%;
+  height: 160%;
+  left: 80%;
+  top: 82%;
+  transform: translate(-50%, -50%);
+}

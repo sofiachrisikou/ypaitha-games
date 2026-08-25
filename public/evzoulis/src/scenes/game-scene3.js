@@ -5,13 +5,14 @@ import { ProgressBar } from '../common/progress-bar.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
 import { spawnRiveAnimation, removeRiveAnimation , setStateMachineInput} from '../common/rive-stage.js';
 import { showLevelIntro, showEndMessage } from '../common/level-flow.js';
+import { playCorrectSound, playWrongSound } from '../common/audio-manager.js';
 // const textStyleConfig = {
 //   fontSize: '40px',
 //   color: '#043D8C',
 //   stroke: '#ffffff',
 //   strokeThickness: 6,
 // };
- 
+
 const LIMB_DONE_COLOR = 0x4caf50;
 const TARGET_MARKER_COLOR = 0x0072FF;
 const TARGET_MARKER_REACHED_COLOR = 0x19FA00;
@@ -26,8 +27,12 @@ const CHARACTER_SCALE = 2;
 // reachable limb — everything (limb length, grab indicator, targets) is
 // computed relative to this, so change it here, not just in setOrigin().
 const LIMB_ORIGIN_Y = 0.18;
- 
+
 export class GameScene3 extends Phaser.Scene {
+  //CHARACTER
+  #riveInstance;
+
+  //LIMBS
   #bodyX;
   #bodyY;
   #bodyWidth;
@@ -42,26 +47,36 @@ export class GameScene3 extends Phaser.Scene {
   #forbiddenZoneRecoilDeg;
   #forbiddenZoneRecoilDurationMs;
   #limbDoneTintDurationMs;
+
+  //GAMEPLAY
   #gameDurationSeconds;
-  #remainingSeconds;
-  #countdownTimerEvent;
   #totalLimbsRequired;
+  #debug;
+
+  //TIMER
+  #remainingSeconds;
+  #timerTextGO;
+  #countdownTimerEvent;
+
+  //PROGRESS BAR
+  #levelProgressBar;
+
+  //STATS
   #limbsStretchedCount;
   #progressTextGO;
-  #timerTextGO;
-  #levelProgressBar;
+
+  //LEVEL MANAGEMENT
   #isLevelComplete;
   #isGameOver;
-  #debug;
-  #riveInstance;
-  #correctSound;
 
   constructor() {
     super({
       key: SCENE_KEYS.EUZOYLIS_GAME_SCENE3,
     });
   }
- 
+
+  //#region Scene Lifecycle
+
   /**
    * @public
    * Tied to the Phaser Scene lifecycle. Will run one time after the PRELOAD
@@ -93,13 +108,13 @@ export class GameScene3 extends Phaser.Scene {
     // logs grabs/reaches to the console — flip to false once tuned
     this.#debug = true;
   }
- 
+
   preload() {
     console.log('preload called');
   }
- 
+
   create() {
-    showLevelIntro(this, ASSET_KEYS.STAGE3_LOGO, () => this.#startLevel());
+    showLevelIntro(this, ASSET_KEYS.STAGE3_LOGO,'Βοήθησε τον Ευζούλη να κάνει διατάσεις. Μέσω των ενδείξεων κούνησε τα χέρια και τα πόδια του ώστε να ηρεμήσει.', () => this.#startLevel());
   }
 
   #startLevel() {
@@ -107,16 +122,14 @@ export class GameScene3 extends Phaser.Scene {
 
     this.add.image(width / 2, height / 2, ASSET_KEYS.BACKGROUND_Stg3);
 
-    this.#correctSound = this.sound.add(ASSET_KEYS.CORRECTSOUND);
-
     // TODO: placeholder proportions — retune once the real bear art exists
     this.#bodyWidth = width * 0.32;
     this.#bodyHeight = height * 0.3;
     this.#bodyX = width * 0.5;
     this.#bodyY = height * 0.42;
-    
+
     this.add.image(this.#bodyX, this.#bodyY, ASSET_KEYS.BEAR_BODY).setScale(CHARACTER_SCALE).setDepth(1);
-    
+
     // Every target is an { x, y } point — the angle toward it is worked
     // out automatically in #pointToAngle. These starting coordinates land
     // in the same places your last working version did; move any single
@@ -132,9 +145,9 @@ export class GameScene3 extends Phaser.Scene {
         texture: ASSET_KEYS.CHAR_ARM_R,
         targets: [
           { x: 938, y: 689 },
-          { x: 670, y: 1007 },
+          { x: 938, y: 1050 },
           { x: 938, y: 689 },
-          { x: 670, y: 1007 },
+          { x: 938, y: 1050 },
           { x: 938, y: 689 },
         ],
       }),
@@ -147,9 +160,9 @@ export class GameScene3 extends Phaser.Scene {
         texture: ASSET_KEYS.CHAR_ARM_L,
         targets: [
           { x: 142, y: 689 },
-          { x: 393, y: 1007 },
+          { x: 142, y: 1050 },
           { x: 142, y: 689 },
-          { x: 393, y: 1007 },
+          { x: 142, y: 1050 },
           { x: 142, y: 689 },
         ],
       }),
@@ -162,9 +175,9 @@ export class GameScene3 extends Phaser.Scene {
         texture: ASSET_KEYS.CHAR_LEG_R,
         targets: [
           { x: 841, y: 1074 },
-          { x: 400, y: 1400 },
+          { x: 600, y: 1400 },
           { x: 841, y: 1074 },
-          { x: 400, y: 1400 },
+          { x: 600, y: 1400 },
           { x: 841, y: 1074 },
         ],
       }),
@@ -178,14 +191,14 @@ export class GameScene3 extends Phaser.Scene {
         texture: ASSET_KEYS.CHAR_LEG_L,
         targets: [
           { x: 239, y: 1074 },
-          { x: 668, y: 1400 },
+          { x: 400, y: 1400 },
           { x: 239, y: 1074 },
-          { x: 668, y: 1400 },
+          { x: 400, y: 1400 },
           { x: 239, y: 1074 },
         ],
       }),
     ];
-    
+
     //Progressbar
     this.#createLevelProgressBar();
     this.#levelProgressBar.setProgress(3.3/8);
@@ -213,39 +226,119 @@ export class GameScene3 extends Phaser.Scene {
       callbackScope: this,
       loop: true,
     });
-    
+
     this.input.on(Phaser.Input.Events.POINTER_DOWN, this.#handlePointerDown, this);
     this.input.on(Phaser.Input.Events.POINTER_MOVE, this.#handlePointerMove, this);
     this.input.on(Phaser.Input.Events.POINTER_UP, this.#handlePointerUp, this);
     this.input.on(Phaser.Input.Events.POINTER_UP_OUTSIDE, this.#handlePointerUp, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
-    
+
     //rive
     this.#createCharacterAnimation();
-    
+
   }
-  
+
   update(time, delta) {
     // No continuous per-frame movement — limbs only rotate in response to
     // pointermove while grabbed, and the countdown is a Timer Event. Left
     // here so the Scene lifecycle stays complete and consistent.
   }
-  
-  /**
-   * Shared top-center level-progress bar (src/common/progress-bar.js), built
-   * from ASSET_KEYS.PROGRESSBAR_BG (track) + ASSET_KEYS.PROGRESSBAR_FG (fill).
-   * Displayed only for now — #levelProgressBar.setProgress() is not called
-   * yet since level 3's completion/progress logic isn't defined.
-   */
-  #createLevelProgressBar() {
-     const { width } = this.scale;
-    this.#levelProgressBar = new ProgressBar(this, {
-      x: width / 2 + 50,
-      y: 130,
-      width: width * 0.50,
-    });
+
+  //#endregion
+
+  //#region Character
+
+  #createCharacterAnimation()
+  {
+    this.#riveInstance = spawnRiveAnimation(
+      'assets/rive/Bear_StateMachine_Smile.riv',
+      'StateMachine_Bear_Smile',
+      'rive-stage--level3',
+    );
   }
- 
+
+  #setSmiling(value)
+  {
+    setStateMachineInput(this.#riveInstance, 'StateMachine_Bear_Smile', 'IsSmiling', value);
+  }
+
+  //#endregion
+
+  //#region Gesture Input
+
+  #handlePointerDown(pointer) {
+    if (this.#isLevelComplete || this.#isGameOver || this.#grabbedLimb) {
+      return;
+    }
+
+    let closestLimb = null;
+    let closestDistance = this.#grabRadius;
+
+    this.#limbs.forEach((limb) => {
+      if (limb.isDone) {
+        return;
+      }
+      const tip = this.#limbTipPosition(limb, limb.angleDeg);
+      const distance = Phaser.Math.Distance.Between(pointer.x, pointer.y, tip.x, tip.y);
+      if (distance <= closestDistance) {
+        closestDistance = distance;
+        closestLimb = limb;
+      }
+    });
+
+    if (!closestLimb) {
+      return;
+    }
+
+    this.#grabbedLimb = closestLimb;
+    this.#stopGrabIndicatorPulse(closestLimb);
+    this.#setOtherGrabIndicatorsVisible(closestLimb, false);
+    this.#showCurrentTargetMarker(closestLimb);
+
+    if (this.#debug) {
+      console.log(`${closestLimb.key}: grabbed`);
+    }
+  }
+
+  #handlePointerMove(pointer) {
+    if (!this.#grabbedLimb) {
+      return;
+    }
+
+    const limb = this.#grabbedLimb;
+    const rawAngleRad = Phaser.Math.Angle.Between(limb.pivotX, limb.pivotY, pointer.x, pointer.y);
+    const rawAngleDeg = Phaser.Math.RadToDeg(rawAngleRad);
+
+    if (this.#isNearForbiddenZone(limb, rawAngleDeg)) {
+      if (this.#debug) {
+        console.log(`${limb.key}: dropped — approaching forbidden zone`);
+      }
+      const bounceTargetAngle = this.#computeBounceTargetAngle(limb);
+      this.#releaseLimb(limb, bounceTargetAngle);
+      this.#bounceLimbToAngle(limb, bounceTargetAngle);
+
+      playWrongSound(this);
+
+      return;
+    }
+
+    limb.angleDeg = rawAngleDeg;
+    limb.rectangleGO.setRotation(this.#toImageRotationRad(limb.angleDeg));
+
+    this.#checkLimbTargetReached(limb);
+  }
+
+  #handlePointerUp(pointer) {
+    if (!this.#grabbedLimb) {
+      return;
+    }
+    this.#releaseLimb(this.#grabbedLimb);
+  }
+
+  //#endregion
+
+  //#region Limbs
+
   /**
    * Converts an { x, y } target point into the angle from this limb's
    * pivot toward it. Only the direction matters — the limb can only ever
@@ -256,7 +349,7 @@ export class GameScene3 extends Phaser.Scene {
     const angleRad = Phaser.Math.Angle.Between(pivotX, pivotY, point.x, point.y);
     return Phaser.Math.RadToDeg(angleRad);
   }
- 
+
   /**
    * True if angleDeg falls strictly inside (startDeg, endDeg), handling
    * ranges that wrap past 360/0.
@@ -270,7 +363,7 @@ export class GameScene3 extends Phaser.Scene {
     }
     return normalized > start || normalized < end;
   }
- 
+
   /**
    * Safety net: if a hand-authored target still lands inside a limb's
    * forbidden zone, pulls it to the nearest edge of that zone instead of
@@ -287,7 +380,7 @@ export class GameScene3 extends Phaser.Scene {
     const distanceToEnd = Math.abs(Phaser.Math.Angle.ShortestBetween(targetDeg, limb.forbiddenZone.endDeg));
     return distanceToStart <= distanceToEnd ? limb.forbiddenZone.startDeg : limb.forbiddenZone.endDeg;
   }
- 
+
   /**
    * True if angleDeg is within #forbiddenZoneDropBufferDeg of EITHER edge
    * of the limb's forbidden zone, or already inside it. ShortestBetween is
@@ -307,7 +400,7 @@ export class GameScene3 extends Phaser.Scene {
     const insideZone = this.#isAngleInRange(angleDeg, limb.forbiddenZone.startDeg, limb.forbiddenZone.endDeg);
     return nearAnEdge || insideZone;
   }
- 
+
   /**
    * The limb art hangs straight down from its top pivot in its default,
    * unrotated state — that "down" default is 90° in our angle system
@@ -320,7 +413,7 @@ export class GameScene3 extends Phaser.Scene {
   #toImageRotationRad(angleDeg) {
     return Phaser.Math.DegToRad(angleDeg - 90);
   }
- 
+
   /**
    * Builds one limb: the image itself, its stretch targets rendered as
    * rings (only the current one visible — the next reveals once the
@@ -331,11 +424,11 @@ export class GameScene3 extends Phaser.Scene {
     const limbImage = this.add.image(config.pivotX, config.pivotY, config.texture).setOrigin(0.5, LIMB_ORIGIN_Y);
     limbImage.setScale(CHARACTER_SCALE);
     limbImage.setRotation(this.#toImageRotationRad(config.restAngleDeg));
- 
+
     // Only the part of the image BELOW the origin actually swings out as
     // the limb — must stay in sync with LIMB_ORIGIN_Y above.
     const limbLength = limbImage.height * (1 - LIMB_ORIGIN_Y) * CHARACTER_SCALE;
- 
+
     const limb = {
       key: config.key,
       pivotX: config.pivotX,
@@ -351,11 +444,11 @@ export class GameScene3 extends Phaser.Scene {
       markerRevealTween: null,
       targetMarkerGOs: [],
     };
- 
+
     limb.targetAnglesDeg = config.targets.map((point) =>
       this.#clampTargetIntoAllowedRange(limb, this.#pointToAngle(config.pivotX, config.pivotY, point)),
     );
- 
+
     limb.targetAnglesDeg.forEach((targetDeg) => {
       const point = this.#limbTipPosition(limb, targetDeg);
       const marker = this.add.circle(point.x, point.y, 20, TARGET_MARKER_COLOR, 0).setDepth(2);
@@ -364,12 +457,12 @@ export class GameScene3 extends Phaser.Scene {
       marker.setVisible(false);
       limb.targetMarkerGOs.push(marker);
     });
- 
+
     this.#createGrabIndicator(limb,config.key);
- 
+
     return limb;
   }
- 
+
   /** Where this limb's free end currently is (or would be, at a given angle) */
   #limbTipPosition(limb, angleDeg) {
     const angleRad = Phaser.Math.DegToRad(angleDeg);
@@ -378,14 +471,14 @@ export class GameScene3 extends Phaser.Scene {
       y: limb.pivotY + Math.sin(angleRad) * limb.length,
     };
   }
- 
+
   #createGrabIndicator(limb,limbKey) {
     const tip = this.#limbTipPosition(limb, limb.angleDeg);
     limb.grabIndicatorGO = this.add.circle(tip.x, tip.y, 14, 0xffffff, 0);
     if(limbKey == 'RIGHT_ARM' || limbKey == 'LEFT_ARM')
     {
       limb.grabIndicatorGO.setStrokeStyle(3, GRAB_INDICATOR_ARM_COLOR, 1).setDepth(2);
-      
+
     }
     else
     {
@@ -393,7 +486,7 @@ export class GameScene3 extends Phaser.Scene {
     }
     this.#pulseGrabIndicator(limb);
   }
- 
+
   #pulseGrabIndicator(limb) {
     limb.grabIndicatorGO.setVisible(true).setAlpha(0.5).setScale(0.9);
     limb.grabIndicatorTween = this.tweens.add({
@@ -406,7 +499,7 @@ export class GameScene3 extends Phaser.Scene {
       ease: 'Sine.easeInOut',
     });
   }
- 
+
   #stopGrabIndicatorPulse(limb) {
     if (limb.grabIndicatorTween) {
       limb.grabIndicatorTween.stop();
@@ -414,7 +507,28 @@ export class GameScene3 extends Phaser.Scene {
     }
     limb.grabIndicatorGO.setVisible(false);
   }
- 
+
+  /**
+   * Hides (or restores) every OTHER not-yet-done limb's grab indicator.
+   * Used so that while one limb is held, its siblings' pulsing "grab here"
+   * rings don't clutter the screen — multi-touch isn't supported anyway,
+   * so there's nothing to do with them until this limb is released.
+   * Done limbs are skipped in both directions: they never show an
+   * indicator again once completed.
+   */
+  #setOtherGrabIndicatorsVisible(exceptLimb, visible) {
+    this.#limbs.forEach((limb) => {
+      if (limb === exceptLimb || limb.isDone) {
+        return;
+      }
+      if (visible) {
+        this.#pulseGrabIndicator(limb);
+      } else {
+        this.#stopGrabIndicatorPulse(limb);
+      }
+    });
+  }
+
   /** Reveals the limb's current (next-to-reach) target — only while it's grabbed */
   #showCurrentTargetMarker(limb) {
     const marker = limb.targetMarkerGOs[0];
@@ -427,7 +541,7 @@ export class GameScene3 extends Phaser.Scene {
     }
     marker.setVisible(true).setAlpha(1).setScale(1);
   }
- 
+
   /** Hides the limb's current target again once it's released without reaching it */
   #hideCurrentTargetMarker(limb) {
     const marker = limb.targetMarkerGOs[0];
@@ -440,72 +554,7 @@ export class GameScene3 extends Phaser.Scene {
     }
     marker.setVisible(false);
   }
- 
-  #handlePointerDown(pointer) {
-    if (this.#isLevelComplete || this.#isGameOver || this.#grabbedLimb) {
-      return;
-    }
- 
-    let closestLimb = null;
-    let closestDistance = this.#grabRadius;
- 
-    this.#limbs.forEach((limb) => {
-      if (limb.isDone) {
-        return;
-      }
-      const tip = this.#limbTipPosition(limb, limb.angleDeg);
-      const distance = Phaser.Math.Distance.Between(pointer.x, pointer.y, tip.x, tip.y);
-      if (distance <= closestDistance) {
-        closestDistance = distance;
-        closestLimb = limb;
-      }
-    });
- 
-    if (!closestLimb) {
-      return;
-    }
- 
-    this.#grabbedLimb = closestLimb;
-    this.#stopGrabIndicatorPulse(closestLimb);
-    this.#showCurrentTargetMarker(closestLimb);
- 
-    if (this.#debug) {
-      console.log(`${closestLimb.key}: grabbed`);
-    }
-  }
- 
-  #handlePointerMove(pointer) {
-    if (!this.#grabbedLimb) {
-      return;
-    }
- 
-    const limb = this.#grabbedLimb;
-    const rawAngleRad = Phaser.Math.Angle.Between(limb.pivotX, limb.pivotY, pointer.x, pointer.y);
-    const rawAngleDeg = Phaser.Math.RadToDeg(rawAngleRad);
- 
-    if (this.#isNearForbiddenZone(limb, rawAngleDeg)) {
-      if (this.#debug) {
-        console.log(`${limb.key}: dropped — approaching forbidden zone`);
-      }
-      const bounceTargetAngle = this.#computeBounceTargetAngle(limb);
-      this.#releaseLimb(limb, bounceTargetAngle);
-      this.#bounceLimbToAngle(limb, bounceTargetAngle);
-      return;
-    }
- 
-    limb.angleDeg = rawAngleDeg;
-    limb.rectangleGO.setRotation(this.#toImageRotationRad(limb.angleDeg));
- 
-    this.#checkLimbTargetReached(limb);
-  }
- 
-  #handlePointerUp(pointer) {
-    if (!this.#grabbedLimb) {
-      return;
-    }
-    this.#releaseLimb(this.#grabbedLimb);
-  }
- 
+
   /**
    * Shared release logic — used for both a normal pointer-up and a forced
    * forbidden-zone drop. landingAngleDeg defaults to wherever the limb
@@ -515,18 +564,19 @@ export class GameScene3 extends Phaser.Scene {
    */
   #releaseLimb(limb, landingAngleDeg = limb.angleDeg) {
     this.#grabbedLimb = null;
- 
+    this.#setOtherGrabIndicatorsVisible(limb, true);
+
     if (limb.isDone) {
       return;
     }
- 
+
     this.#hideCurrentTargetMarker(limb);
- 
+
     const tip = this.#limbTipPosition(limb, landingAngleDeg);
     limb.grabIndicatorGO.setPosition(tip.x, tip.y);
     this.#pulseGrabIndicator(limb);
   }
- 
+
   /**
    * Which direction (in our 0°=right angle system) points AWAY from the
    * forbidden zone, given the limb's current angle — away from startDeg
@@ -542,7 +592,7 @@ export class GameScene3 extends Phaser.Scene {
     const bounceSign = nearerEdgeIsStart ? -1 : 1;
     return limb.angleDeg + bounceSign * this.#forbiddenZoneBounceBackDeg;
   }
- 
+
   /** Animates limb.angleDeg (and its visual rotation) from where it is now to toAngleDeg */
   #bounceLimbToAngle(limb, toAngleDeg) {
     const fromAngleDeg = limb.angleDeg;
@@ -557,17 +607,17 @@ export class GameScene3 extends Phaser.Scene {
       },
     });
   }
- 
+
   #checkLimbTargetReached(limb) {
     if (limb.targetAnglesDeg.length === 0) {
       return;
     }
- 
+
     const nextTargetDeg = limb.targetAnglesDeg[0];
     const tip = this.#limbTipPosition(limb, limb.angleDeg);
     const targetPoint = this.#limbTipPosition(limb, nextTargetDeg);
     const distance = Phaser.Math.Distance.Between(tip.x, tip.y, targetPoint.x, targetPoint.y);
- 
+
     if (distance > this.#reachRadius) {
       return;
     }
@@ -584,7 +634,7 @@ export class GameScene3 extends Phaser.Scene {
         onComplete: () => reachedMarker.destroy(),
       });
     }
- 
+
     const nextMarker = limb.targetMarkerGOs[0];
     if (nextMarker) {
       nextMarker.setVisible(true).setAlpha(0).setScale(0.6);
@@ -596,16 +646,16 @@ export class GameScene3 extends Phaser.Scene {
         ease: 'Back.easeOut',
       });
     }
- 
+
     if (this.#debug) {
       console.log(`${limb.key}: target reached (${limb.targetAnglesDeg.length} left)`);
     }
- 
+
     if (limb.targetAnglesDeg.length === 0) {
       this.#completeLimb(limb);
     }
   }
- 
+
   #completeLimb(limb) {
     limb.isDone = true;
     limb.rectangleGO.setTint(LIMB_DONE_COLOR);
@@ -614,18 +664,19 @@ export class GameScene3 extends Phaser.Scene {
     });
     this.#stopGrabIndicatorPulse(limb);
     this.#grabbedLimb = null;
- 
+    this.#setOtherGrabIndicatorsVisible(limb, true);
+
     this.#limbsStretchedCount += 1;
     this.#progressTextGO.setText(`${this.#limbsStretchedCount} / ${this.#totalLimbsRequired}`);
- 
+
     //this.#levelProgressBar.setProgress(this.#limbsStretchedCount / this.#totalLimbsRequired);
- 
+
     if (this.#limbsStretchedCount >= this.#totalLimbsRequired) {
       this.#handleLevelComplete();
     }
- 
+
     this.#setSmiling(true);
-    this.#correctSound.play();
+    playCorrectSound(this);
     this.time.delayedCall(
       700,
       () => {
@@ -633,26 +684,53 @@ export class GameScene3 extends Phaser.Scene {
       },
     );
   }
- 
+
+  //#endregion
+
+  //#region Timer
+
   #tickCountdown() {
     if (this.#isLevelComplete || this.#isGameOver) {
       return;
     }
     this.#remainingSeconds -= 1;
     this.#timerTextGO.setText(`${this.#remainingSeconds}`);
- 
+
     if (this.#remainingSeconds <= 0) {
       this.#handleGameOver();
     }
   }
- 
+
+  //#endregion
+
+  //#region Progress Bar
+
+  /**
+   * Shared top-center level-progress bar (src/common/progress-bar.js), built
+   * from ASSET_KEYS.PROGRESSBAR_BG (track) + ASSET_KEYS.PROGRESSBAR_FG (fill).
+   * Displayed only for now — #levelProgressBar.setProgress() is not called
+   * yet since level 3's completion/progress logic isn't defined.
+   */
+  #createLevelProgressBar() {
+     const { width } = this.scale;
+    this.#levelProgressBar = new ProgressBar(this, {
+      x: width / 2 + 50,
+      y: 130,
+      width: width * 0.50,
+    });
+  }
+
+  //#endregion
+
+  //#region Level Management
+
   #handleLevelComplete() {
     if (this.#isLevelComplete || this.#isGameOver) {
       return;
     }
     this.#isLevelComplete = true;
     this.#stopAllTimersAndIndicators();
- 
+
     this.events.emit('levelComplete', {
       limbsStretched: this.#limbsStretchedCount,
       secondsLeft: this.#remainingSeconds,
@@ -660,24 +738,24 @@ export class GameScene3 extends Phaser.Scene {
     this.#levelProgressBar.setProgress(1/8);
     this.#showEndMessage('Μπράβο! Έκανες τέλεια διατάσεις! 🎉', '');
   }
- 
+
   #handleGameOver() {
     if (this.#isLevelComplete || this.#isGameOver) {
       return;
     }
     this.#isGameOver = true;
     this.#stopAllTimersAndIndicators();
- 
+
     this.#goToNextLevel();
     return;
     //not needed we go to next level
     this.events.emit('gameOver', {
       limbsStretched: this.#limbsStretchedCount,
     });
- 
+
     this.#showEndMessage('Ο χρόνος τελείωσε', 'Ας ξαναδοκιμάσουμε');
   }
- 
+
   #stopAllTimersAndIndicators() {
     if (this.#countdownTimerEvent) {
       this.#countdownTimerEvent.remove();
@@ -689,41 +767,28 @@ export class GameScene3 extends Phaser.Scene {
       }
     });
   }
- 
+
+  /** Panel disabled — outro scene shows its own bear + bubble instead. Same ~3s delay, uncomment below to re-enable. */
   #showEndMessage(title, subtitle) {
-    showEndMessage(this, { title, subtitle, onComplete: () => this.#goToNextLevel() });
+    // showEndMessage(this, { title, subtitle, onComplete: () => this.#goToNextLevel() });
+    this.time.delayedCall(3000, () => this.#goToNextLevel());
   }
- 
+
   #handleShutdown() {
     this.input.off(Phaser.Input.Events.POINTER_DOWN, this.#handlePointerDown, this);
     this.input.off(Phaser.Input.Events.POINTER_MOVE, this.#handlePointerMove, this);
     this.input.off(Phaser.Input.Events.POINTER_UP, this.#handlePointerUp, this);
     this.input.off(Phaser.Input.Events.POINTER_UP_OUTSIDE, this.#handlePointerUp, this);
     this.#stopAllTimersAndIndicators();
- 
+
     removeRiveAnimation(this.#riveInstance, 'rive-stage--level3'); // remove
     this.#riveInstance = null;
   }
- 
+
   #goToNextLevel() {
     this.scene.start(SCENE_KEYS.EUZOYLIS_OUTRO_SCENE);
     //this.input.once(Phaser.Input.Events.POINTER_DOWN, () => {});
   }
- 
-   //rive
- 
-  #createCharacterAnimation()
-  {
-    this.#riveInstance = spawnRiveAnimation(
-      'assets/rive/Bear_StateMachine_Smile.riv',
-      'StateMachine_Bear_Smile',
-      'rive-stage--level3',
-    );
-  }
- 
-  #setSmiling(value)
-  {
-    setStateMachineInput(this.#riveInstance, 'StateMachine_Bear_Smile', 'IsSmiling', value);
-  }
-    
+
+  //#endregion
 }

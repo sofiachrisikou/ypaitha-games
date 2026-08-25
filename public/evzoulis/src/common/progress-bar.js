@@ -14,6 +14,7 @@ import { ASSET_KEYS } from './assets.js';
  *   const bottomY = this.#progressBar.getBounds().bottom;
  */
 export class ProgressBar {
+  //RENDERING
   #bgImage;
   #fillImage;
   #fillFrameWidth;
@@ -41,6 +42,8 @@ export class ProgressBar {
 
     this.setProgress(0);
   }
+
+  //#region Progress Bar
 
   /** @param {number} ratio 0 (empty) to 1 (full) */
   setProgress(ratio) {
@@ -70,7 +73,13 @@ export class ProgressBar {
     this.#fillImage.destroy();
   }
 
+  //#endregion
+
+  //#region Utils
+
   #scaleImageToWidth(image, targetWidth) {
     image.setScale(targetWidth / image.width);
   }
+
+  //#endregion
 }

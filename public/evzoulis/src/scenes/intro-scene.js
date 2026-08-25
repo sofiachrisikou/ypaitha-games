@@ -14,6 +14,7 @@ import { spawnRiveAnimation, removeRiveAnimation } from '../common/rive-stage.js
 const CLOUD_ANIM_KEY = 'introCloudGrow';
 
 export class IntroScene extends Phaser.Scene {
+  //DECOR ANIMATIONS
   #decorAnimationsActive;
   #decorObjects;
   #upvoteGrowDurationMs;
@@ -26,10 +27,14 @@ export class IntroScene extends Phaser.Scene {
   #shakeDurationMs;
   #fadeDurationMs;
   #shakeMinAlpha;
+
+  //UI
   #logoGO;
   #startButtonGO;
-  #characterGO;
   #levelButtonGO;
+
+  //CHARACTER
+  #characterGO;
   #riveInstance;
 
   constructor() {
@@ -37,6 +42,8 @@ export class IntroScene extends Phaser.Scene {
       key: SCENE_KEYS.EUZOYLIS_INTRO_SCENE,
     });
   }
+
+  //#region Scene Lifecycle
 
   /**
    * @public
@@ -86,9 +93,6 @@ export class IntroScene extends Phaser.Scene {
     this.#startButtonGO.on(Phaser.Input.Events.POINTER_DOWN, this.#handleStartButtonPressed, this);
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
-
-    
-
   }
 
   update(time, delta) {
@@ -96,6 +100,24 @@ export class IntroScene extends Phaser.Scene {
     // runs on Tweens (and one Phaser Animation for the cloud), not manual
     // per-frame math. Left here so the Scene lifecycle stays complete.
   }
+
+  #handleShutdown() {
+    this.#decorAnimationsActive = false;
+    this.#decorObjects.forEach((gameObject) => this.tweens.killTweensOf(gameObject));
+    if (this.#startButtonGO) {
+      this.#startButtonGO.off(Phaser.Input.Events.POINTER_DOWN, this.#handleStartButtonPressed, this);
+    }
+    if (this.#levelButtonGO) {
+      this.#levelButtonGO.off(Phaser.Input.Events.POINTER_DOWN, this.#handleLevelButtonPressed, this);
+    }
+
+     removeRiveAnimation(this.#riveInstance, 'rive-stage--intro'); // remove
+  this.#riveInstance = null;
+  }
+
+  //#endregion
+
+  //#region Decor Animations
 
   /**
    * Three stacked-column test spawns, one column per animation type, purely
@@ -235,11 +257,28 @@ export class IntroScene extends Phaser.Scene {
     return image;
   }
 
+  //#endregion
+
+  //#region Character
+
+  #createIntroCharacterAnimation()
+  {
+    this.#riveInstance = spawnRiveAnimation(
+      'assets/rive/Bear_Intro.riv',
+      'Timeline_Bear_Intro',
+      'rive-stage--intro',
+    );
+  }
+
+  //#endregion
+
+  //#region Input
+
   #handleStartButtonPressed() {
     this.#logoGO.destroy();
     this.#startButtonGO.destroy();
     this.#showCharacterPrompt();
-      
+
   }
 
   #showCharacterPrompt() {
@@ -256,7 +295,6 @@ export class IntroScene extends Phaser.Scene {
     const levelButtonY = bubbleY + 600
 
 
-   
     this.#levelButtonGO = this.add
       .image(levelButtonX, levelButtonY, ASSET_KEYS.BTN1)
       .setScale(0.5)
@@ -271,28 +309,5 @@ export class IntroScene extends Phaser.Scene {
     this.scene.start(SCENE_KEYS.EUZOYLIS_GAME_SCENE1);
   }
 
-  #handleShutdown() {
-    this.#decorAnimationsActive = false;
-    this.#decorObjects.forEach((gameObject) => this.tweens.killTweensOf(gameObject));
-    if (this.#startButtonGO) {
-      this.#startButtonGO.off(Phaser.Input.Events.POINTER_DOWN, this.#handleStartButtonPressed, this);
-    }
-    if (this.#levelButtonGO) {
-      this.#levelButtonGO.off(Phaser.Input.Events.POINTER_DOWN, this.#handleLevelButtonPressed, this);
-    }
-
-     removeRiveAnimation(this.#riveInstance, 'rive-stage--intro'); // remove
-  this.#riveInstance = null;
-  }
-
-  //rive
-
-  #createIntroCharacterAnimation()
-  {
-    this.#riveInstance = spawnRiveAnimation(
-      'assets/rive/Bear_Intro.riv',
-      'Timeline_Bear_Intro',
-      'rive-stage--intro',
-    );
-  }
+  //#endregion
 }

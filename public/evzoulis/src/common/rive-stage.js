@@ -1,5 +1,7 @@
 const { Rive, Layout, Fit, Alignment } = window.rive;
 
+//#region Rive Animation
+
 /**
  * @param {string} src
  * @param {string} name - state machine OR animation name, depending on isStateMachine
@@ -34,6 +36,10 @@ export function removeRiveAnimation(riveInstance, cssClass) {
   canvas.classList.remove(cssClass);
 }
 
+//#endregion
+
+//#region Input
+
 /**
  * @param {object} riveInstance
  * @param {string} stateMachineName
@@ -49,3 +55,5 @@ export function setStateMachineInput(riveInstance, stateMachineName, inputName, 
   }
   input.value = value;
 }
+
+//#endregion

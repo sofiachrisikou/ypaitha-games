@@ -10,9 +10,9 @@ export class PreloadScene extends Phaser.Scene {
     });
   }
 
+  //#region Scene Lifecycle
+
   preload() {
-
-
     IMAGE_ASSETS.forEach((asset) => {
       this.load.image(asset.assetKey, asset.path);
     });
@@ -26,8 +26,9 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   async create() {
-
     await loadFont('GameFont', 'assets/fonts/ComicSansMSBold.ttf');
-    this.scene.start(SCENE_KEYS.EUZOYLIS_INTRO_SCENE);
+    this.scene.start(SCENE_KEYS.EUZOYLIS_GAME_SCENE1);
   }
+
+  //#endregion
 }

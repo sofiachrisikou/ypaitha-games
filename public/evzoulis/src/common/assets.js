@@ -7,6 +7,18 @@ export const ASSET_KEYS = Object.freeze({
   BTN1: 'BTN1',
   SPEECH_BUBBLE: 'SPEECH_BUBBLE',
   CORRECTSOUND: 'CORRECTSOUND',
+  WRONGSOUND: 'WRONGSOUND',
+  POS_FEEDBACK1 :'POS_FEEDBACK1',
+  POS_FEEDBACK2 :'POS_FEEDBACK2',
+  POS_FEEDBACK3 :'POS_FEEDBACK3',
+  POS_FEEDBACK4 :'POS_FEEDBACK4',
+  // one fixed clip per level/outcome, not a pool
+  LVL1_SUCCESS_FEEDBACK: 'LVL1_SUCCESS_FEEDBACK',
+  LVL1_GAMEOVER_FEEDBACK: 'LVL1_GAMEOVER_FEEDBACK',
+  LVL2_SUCCESS_FEEDBACK: 'LVL2_SUCCESS_FEEDBACK',
+  LVL2_GAMEOVER_FEEDBACK: 'LVL2_GAMEOVER_FEEDBACK',
+  LVL3_SUCCESS_FEEDBACK: 'LVL3_SUCCESS_FEEDBACK',
+  LVL3_GAMEOVER_FEEDBACK: 'LVL3_GAMEOVER_FEEDBACK',
   //INTRO
   BACKGROUND_INTRO: 'BACKGROUND_INTRO',
   LOGO: 'LOGO',
@@ -243,10 +255,59 @@ export const IMAGE_ASSETS = [
 ];
 
 export const AUDIO_ASSETS = [
+  //SHARED
   {
     assetKey: ASSET_KEYS.CORRECTSOUND,
     path: 'assets/audio/correct.wav',
   },
+   {
+    assetKey: ASSET_KEYS.WRONGSOUND,
+    path: 'assets/audio/wrong.mp3',
+  },
+    {
+    assetKey: ASSET_KEYS.POS_FEEDBACK1,
+    path: 'assets/audio/PossitiveFeedback1.mp3',
+  },
+  {
+    assetKey: ASSET_KEYS.POS_FEEDBACK2,
+    path: 'assets/audio/PossitiveFeedback2.mp3',
+  },
+  {
+    assetKey: ASSET_KEYS.POS_FEEDBACK3,
+    path: 'assets/audio/PossitiveFeedback3.mp3',
+  },
+  {
+    assetKey: ASSET_KEYS.POS_FEEDBACK4,
+    path: 'assets/audio/PossitiveFeedback4.mp3',
+  },
+
+  // TODO: placeholder clips, swap in real per-level audio
+  {
+    assetKey: ASSET_KEYS.LVL1_SUCCESS_FEEDBACK,
+    path: 'assets/audio/PossitiveFeedback1.mp3',
+  },
+  {
+    assetKey: ASSET_KEYS.LVL1_GAMEOVER_FEEDBACK,
+    path: 'assets/audio/wrong.mp3',
+  },
+  {
+    assetKey: ASSET_KEYS.LVL2_SUCCESS_FEEDBACK,
+    path: 'assets/audio/PossitiveFeedback1.mp3',
+  },
+  {
+    assetKey: ASSET_KEYS.LVL2_GAMEOVER_FEEDBACK,
+    path: 'assets/audio/wrong.mp3',
+  },
+  {
+    assetKey: ASSET_KEYS.LVL3_SUCCESS_FEEDBACK,
+    path: 'assets/audio/PossitiveFeedback1.mp3',
+  },
+  {
+    assetKey: ASSET_KEYS.LVL3_GAMEOVER_FEEDBACK,
+    path: 'assets/audio/wrong.mp3',
+  },
+
+  //STAGE 2
   {
     assetKey: ASSET_KEYS.BUBBLE_POP_SOUND,
     path: 'assets/audio/bubble_pop.wav',

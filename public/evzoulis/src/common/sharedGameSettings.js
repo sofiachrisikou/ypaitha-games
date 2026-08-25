@@ -10,6 +10,14 @@ export const TEXT_STYLES = {
     stroke: '#3C86A3',
     strokeThickness: 6,
   },
+  INSTRUCTIONS: {
+    fontFamily: FONT_FAMILY,
+    fontSize: '50px',
+    color: '#56BCE3',
+    stroke: '#3C86A3',
+    strokeThickness: 6,
+    wordWrap: { width: 760, useAdvancedWrap: true },
+  },
   // Text inside a bubble — thought-cloud-scene.js
   BUBBLE: {
     fontFamily: FONT_FAMILY,
@@ -21,10 +29,10 @@ export const TEXT_STYLES = {
   // Text inside the character's speech bubbles — intro-scene.js, outro-scene.js
   SPEECH_BUBBLE: {
     fontFamily: FONT_FAMILY,
-    fontSize: '38px',
+    fontSize: '42px',
     color: '#A36155',
     align: 'center',
-    wordWrap: { width: 300, useAdvancedWrap: true },
+    wordWrap: { width: 320, useAdvancedWrap: true },
   },
   BUBBLE_POPPED: {
     fontFamily: FONT_FAMILY,
@@ -35,6 +43,9 @@ export const TEXT_STYLES = {
   },
 
 };
+
+//#region Fonts
+
 export async function loadFont(fontFamilyName, fontFilePath) {
   try {
     const fontFace = new FontFace(fontFamilyName, `url(${fontFilePath})`);
@@ -44,3 +55,5 @@ export async function loadFont(fontFamilyName, fontFilePath) {
     console.warn(`Could not load font "${fontFamilyName}" from ${fontFilePath} — falling back to default font.`, error);
   }
 }
+
+//#endregion
