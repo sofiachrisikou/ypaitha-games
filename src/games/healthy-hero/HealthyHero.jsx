@@ -7,8 +7,13 @@ import Mission3Traps from './missions/Mission3Traps.jsx'
 import MissionIntro from './MissionIntro.jsx'
 import RiveHero from '../../components/RiveHero.jsx'
 import MascotCompanion from './MascotCompanion.jsx'
+import TunePanel from './TunePanel.jsx'
 import { playWin } from '../../services/sound.js'
 import { speak } from '../../services/voice.js'
+
+// Κρυφή λειτουργία ρύθμισης: ?tune=1 (και ?stage=m1/m2/m3 για μετάβαση).
+const PARAMS = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()
+const TUNE = PARAMS.get('tune') === '1'
 
 // Αντιδράσεις ανά αποστολή (επίσημο script HH-XX):
 // key = κωδικός VO (φωνή), bubble = σύντομο κείμενο στην οθόνη.
@@ -58,9 +63,9 @@ const DONE_VO = { m1: 'HH-12', m2: 'HH-18' }
 
 // Θέση/μέγεθος μασκότ ανά αποστολή (ο κάτω-δεξιά χώρος διαφέρει).
 const MASCOT_POS = {
-  m1: { w: 860, right: -120, bottom: -240 }, // μεγάλος, βαθιά στον κάτω-δεξιά κύκλο
-  m2: { w: 820, right: -120, bottom: -220 },
-  m3: { w: 620, right: -60, bottom: 210 }, // πιο πάνω, να μη σκεπάζει ΧΡΟΝΟΣ/ΣΚΟΡ
+  m1: { w: 560, right: -30, bottom: -20, zoom: 1.7 }, // στον κάτω-δεξιά κύκλο
+  m2: { w: 540, right: -30, bottom: -10, zoom: 1.7 },
+  m3: { w: 470, right: -10, bottom: 120, zoom: 1.7 }, // πιο πάνω, να μη σκεπάζει ΧΡΟΝΟΣ/ΣΚΟΡ
 }
 
 const CONFETTI_COLORS = ['#34c759', '#ff9f2e', '#2ec4f1', '#e5442e', '#ffd23f', '#ffffff']
@@ -84,10 +89,11 @@ const FLOAT_FOODS = [
 // Ροή: intro -> m1 -> m2 -> m3 -> finale -> rating -> homepage
 export default function HealthyHero() {
   const navigate = useNavigate()
-  const [stage, setStage] = useState('intro')
+  const [stage, setStage] = useState(() => (TUNE && PARAMS.get('stage')) || 'intro')
   const [score, setScore] = useState(0)
-  const [ready, setReady] = useState(false)
+  const [ready, setReady] = useState(TUNE) // σε tune mode ξεκίνα κατευθείαν στην αποστολή
   const [reaction, setReaction] = useState(null)
+  const [tunePos, setTunePos] = useState(() => MASCOT_POS[(TUNE && PARAMS.get('stage')) || 'm1'] || MASCOT_POS.m1)
   const rIdx = useRef({ correct: 0, wrong: 0 })
 
   const addScore = useCallback((delta) => setScore((s) => s + delta), [])
@@ -114,7 +120,10 @@ export default function HealthyHero() {
 
   // Οδηγίες σε κάθε νέα αποστολή· VO αρχής/τέλους.
   useEffect(() => {
-    if (MISSIONS[stage]) setReady(false)
+    if (MISSIONS[stage]) {
+      if (!TUNE) setReady(false)
+      setTunePos(MASCOT_POS[stage] || MASCOT_POS.m1)
+    }
     if (stage === 'intro') speak('HH-01')
     if (stage === 'finale') {
       playWin()
@@ -203,7 +212,8 @@ export default function HealthyHero() {
       {ready && stage === 'm3' && (
         <Mission3Traps addScore={addScore} onReaction={onReaction} onNext={() => advance('m3', 'finale')} />
       )}
-      {ready && <MascotCompanion reaction={reaction} pos={MASCOT_POS[stage]} />}
+      {ready && <MascotCompanion reaction={reaction} pos={TUNE ? tunePos : MASCOT_POS[stage]} />}
+      {TUNE && <TunePanel stage={stage} pos={tunePos} onChange={setTunePos} />}
     </div>
   )
 }

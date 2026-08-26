@@ -1375,7 +1375,12 @@ button {
 .mascot__hero {
   position: absolute;
   /* width/height/right/bottom έρχονται inline (ανά αποστολή) */
+  overflow: hidden; /* κόβει το κενό padding του Rive όταν κάνουμε zoom */
   filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.25));
+}
+.mascot__zoom {
+  position: absolute;
+  inset: 0;
 }
 .mascot__rive {
   position: absolute;
@@ -1444,4 +1449,46 @@ button {
   0%, 100% { transform: translateX(0) rotate(0deg); }
   25% { transform: translateX(-14px) rotate(-5deg); }
   75% { transform: translateX(14px) rotate(5deg); }
+}
+
+/* ===== Κρυφό εργαλείο ρύθμισης μασκότ (?tune=1) ===== */
+.tune {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 560px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 4px solid #1f2a44;
+  border-radius: 20px;
+  padding: 20px 24px;
+  z-index: 999;
+  pointer-events: auto;
+  color: #1f2a44;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 30px;
+}
+.tune__title {
+  font-weight: 900;
+  font-size: 34px;
+}
+.tune__row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tune__row input {
+  width: 100%;
+  height: 44px;
+}
+.tune__val {
+  margin-top: 8px;
+  font-family: monospace;
+  font-size: 26px;
+  background: #f2f6fb;
+  padding: 12px;
+  border-radius: 12px;
+  user-select: all;
+  word-break: break-all;
 }
