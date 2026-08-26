@@ -1361,3 +1361,90 @@ button {
     transform: scale(1);
   }
 }
+
+/* ===== Μασκότ-σύντροφος σε κάθε αποστολή (κάτω δεξιά) ===== */
+.mascot {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 440px;
+  height: 620px;
+  pointer-events: none;
+  z-index: 60;
+}
+.mascot__hero {
+  position: absolute;
+  right: -30px;
+  bottom: -40px;
+  width: 440px;
+  height: 600px;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.25));
+}
+.mascot__rive {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+.mascot__hero--correct {
+  animation: mascot-jump 0.7s ease;
+}
+.mascot__hero--wrong {
+  animation: mascot-shake 0.5s ease;
+}
+.mascot__bubble {
+  position: absolute;
+  right: 290px;
+  bottom: 440px;
+  background: #fff;
+  border: 7px solid #ffd23f;
+  border-radius: 40px;
+  padding: 22px 40px;
+  font-size: 50px;
+  font-weight: 800;
+  color: #1f2a44;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+  white-space: nowrap;
+  animation: bubble-in 0.3s ease;
+}
+.mascot__bubble::after {
+  content: '';
+  position: absolute;
+  right: 46px;
+  bottom: -30px;
+  border-width: 32px 24px 0 0;
+  border-style: solid;
+  border-color: #ffd23f transparent transparent transparent;
+}
+.mascot__bubble--correct {
+  border-color: #34c759;
+}
+.mascot__bubble--correct::after {
+  border-top-color: #34c759;
+}
+.mascot__bubble--wrong {
+  border-color: #ff6b5e;
+}
+.mascot__bubble--wrong::after {
+  border-top-color: #ff6b5e;
+}
+@keyframes bubble-in {
+  0% {
+    transform: translateY(14px) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes mascot-jump {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-46px); }
+  55% { transform: translateY(0); }
+  72% { transform: translateY(-18px); }
+}
+@keyframes mascot-shake {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  25% { transform: translateX(-14px) rotate(-5deg); }
+  75% { transform: translateX(14px) rotate(5deg); }
+}

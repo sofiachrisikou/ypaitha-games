@@ -2,7 +2,6 @@ import { useRef, useState } from 'react'
 import { LUNCHBOX_ITEMS, BG_IMG, LUNCHBOX_GOAL as GOAL } from '../data/lunchbox.js'
 import { STAGE_W } from '../../../components/Stage.jsx'
 import { playCorrect, playWrong, playWin } from '../../../services/sound.js'
-import { praise, encourage } from '../../../services/voice.js'
 
 // Το κουτί + το badge είναι ήδη ζωγραφισμένα στο Background.png.
 // Εδώ βάζουμε μόνο τα draggable φαγητά και τα ρίχνουμε στις θήκες.
@@ -36,7 +35,7 @@ const SLOTS = [
 // Περιοχή «μέσα στο κουτί» (θήκες).
 const overBox = (x, y) => x > 340 && x < 985 && y > 640 && y < 1145
 
-export default function Mission2LunchBox({ addScore, onProgress, onNext }) {
+export default function Mission2LunchBox({ addScore, onProgress, onReaction, onNext }) {
   const rootRef = useRef(null)
   const dragRef = useRef(null)
   const [tray, setTray] = useState(() =>
@@ -92,7 +91,7 @@ export default function Mission2LunchBox({ addScore, onProgress, onNext }) {
       })
       addScore(10)
       playCorrect()
-      praise()
+      onReaction && onReaction('correct')
       setFlash(true)
       setTimeout(() => setFlash(false), 500)
       dragRef.current = null
@@ -105,7 +104,7 @@ export default function Mission2LunchBox({ addScore, onProgress, onNext }) {
       dragRef.current = rd
       setDrag(rd)
       playWrong()
-      encourage()
+      onReaction && onReaction('wrong')
       setFeedback('Αυτό δεν είναι για κάθε μέρα!')
       setTimeout(() => {
         dragRef.current = null

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import RatingScreen from '../../components/RatingScreen.jsx'
 import Mission1Plate from './missions/Mission1Plate.jsx'
@@ -6,8 +6,13 @@ import Mission2LunchBox from './missions/Mission2LunchBox.jsx'
 import Mission3Traps from './missions/Mission3Traps.jsx'
 import MissionIntro from './MissionIntro.jsx'
 import RiveHero from '../../components/RiveHero.jsx'
+import MascotCompanion from './MascotCompanion.jsx'
 import { playWin } from '../../services/sound.js'
-import { speak } from '../../services/voice.js'
+import { speak, CLIPS } from '../../services/voice.js'
+
+// Φράσεις που εναλλάσσονται (φωνή + μπαλόνι) ανά τύπο αντίδρασης.
+const PRAISE_KEYS = ['bravo', 'poly_kala', 'ta_kataferes', 'sinexise']
+const ENCOURAGE_KEYS = ['dokimase', 'oxi_afto', 'ligo_akoma']
 
 // Οδηγίες + assets ανά αποστολή (για την οθόνη εισαγωγής).
 const MISSIONS = {
@@ -42,10 +47,20 @@ export default function HealthyHero() {
   const [stage, setStage] = useState('intro')
   const [score, setScore] = useState(0)
   const [ready, setReady] = useState(false) // οδηγίες αποστολής ολοκληρώθηκαν;
+  const [reaction, setReaction] = useState(null) // { type, text } για τη μασκότ
+  const rIdx = useRef({ correct: 0, wrong: 0 })
 
   const addScore = useCallback((delta) => setScore((s) => s + delta), [])
   const goHome = useCallback(() => navigate('/'), [navigate])
   const noop = useCallback(() => {}, [])
+
+  // Αντίδραση μασκότ: επιλέγει φράση, τη λέει (φωνή) και τη δείχνει σε μπαλόνι.
+  const onReaction = useCallback((type) => {
+    const keys = type === 'correct' ? PRAISE_KEYS : ENCOURAGE_KEYS
+    const key = keys[rIdx.current[type === 'correct' ? 'correct' : 'wrong']++ % keys.length]
+    speak(key)
+    setReaction({ type, text: CLIPS[key] || '', n: Date.now() })
+  }, [])
 
   // Σε κάθε νέα αποστολή δείξε πρώτα τις οδηγίες. Στο τέλος φανφάρα + φωνή.
   useEffect(() => {
@@ -121,14 +136,15 @@ export default function HealthyHero() {
         />
       )}
       {ready && stage === 'm1' && (
-        <Mission1Plate addScore={addScore} onProgress={noop} onComplete={() => setStage('m2')} />
+        <Mission1Plate addScore={addScore} onProgress={noop} onReaction={onReaction} onComplete={() => setStage('m2')} />
       )}
       {ready && stage === 'm2' && (
-        <Mission2LunchBox addScore={addScore} onProgress={noop} onNext={() => setStage('m3')} />
+        <Mission2LunchBox addScore={addScore} onProgress={noop} onReaction={onReaction} onNext={() => setStage('m3')} />
       )}
       {ready && stage === 'm3' && (
-        <Mission3Traps addScore={addScore} onProgress={noop} onNext={() => setStage('finale')} />
+        <Mission3Traps addScore={addScore} onProgress={noop} onReaction={onReaction} onNext={() => setStage('finale')} />
       )}
+      {ready && <MascotCompanion reaction={reaction} />}
     </div>
   )
 }

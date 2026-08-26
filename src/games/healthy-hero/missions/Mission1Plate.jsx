@@ -2,7 +2,6 @@ import { useRef, useState } from 'react'
 import { FOODS, PLATE_IMG, BG_IMG, GOAL } from '../data/foods.js'
 import { STAGE_W } from '../../../components/Stage.jsx'
 import { playCorrect, playWrong, playWin } from '../../../services/sound.js'
-import { praise, encourage } from '../../../services/voice.js'
 
 // Γεωμετρία (συντεταγμένες stage 1080x1920)
 const CX = 540
@@ -24,7 +23,7 @@ function plateSlot(j) {
   return { x: CX + r * Math.cos(angle), y: CY + r * Math.sin(angle) }
 }
 
-export default function Mission1Plate({ addScore, onProgress, onComplete }) {
+export default function Mission1Plate({ addScore, onProgress, onReaction, onComplete }) {
   const rootRef = useRef(null)
   const dragRef = useRef(null)
   const [tray, setTray] = useState(() =>
@@ -79,7 +78,7 @@ export default function Mission1Plate({ addScore, onProgress, onComplete }) {
       })
       addScore(10)
       playCorrect()
-      praise()
+      onReaction && onReaction('correct')
       setGlow(true)
       setTimeout(() => setGlow(false), 600)
       dragRef.current = null
@@ -92,7 +91,7 @@ export default function Mission1Plate({ addScore, onProgress, onComplete }) {
       dragRef.current = rd
       setDrag(rd)
       playWrong()
-      encourage()
+      onReaction && onReaction('wrong')
       setFeedback('Δοκίμασε κάτι πιο θρεπτικό!')
       setTimeout(() => {
         dragRef.current = null
