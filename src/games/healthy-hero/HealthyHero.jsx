@@ -63,9 +63,9 @@ const DONE_VO = { m1: 'HH-12', m2: 'HH-18' }
 
 // Θέση/μέγεθος μασκότ ανά αποστολή (ο κάτω-δεξιά χώρος διαφέρει).
 const MASCOT_POS = {
-  m1: { w: 560, right: -30, bottom: -20, zoom: 1.7 }, // στον κάτω-δεξιά κύκλο
-  m2: { w: 540, right: -30, bottom: -10, zoom: 1.7 },
-  m3: { w: 470, right: -10, bottom: 120, zoom: 1.7 }, // πιο πάνω, να μη σκεπάζει ΧΡΟΝΟΣ/ΣΚΟΡ
+  m1: { w: 586, right: -146, bottom: -87, zoom: 1.6 },
+  m2: { w: 560, right: -121, bottom: -79, zoom: 1.7 },
+  m3: { w: 548, right: -124, bottom: -68, zoom: 1.75 },
 }
 
 const CONFETTI_COLORS = ['#34c759', '#ff9f2e', '#2ec4f1', '#e5442e', '#ffd23f', '#ffffff']
