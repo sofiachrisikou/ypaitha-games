@@ -36,6 +36,34 @@ function getCtx() {
   return ctx
 }
 
+// «Ξεκλείδωμα» ήχου: σε κινητά (ειδικά iOS) το Web Audio απαιτεί το AudioContext
+// να ξεκινήσει/ξυπνήσει ΜΕΣΑ σε άγγιγμα, αλλιώς οι ήχοι δεν ακούγονται.
+// Το τρέχουμε στο πρώτο κάθε αγγίγματος.
+let unlocked = false
+export function unlockAudio() {
+  const c = getCtx()
+  if (!c) return
+  if (c.state === 'suspended') c.resume()
+  if (unlocked) return
+  try {
+    const buf = c.createBuffer(1, 1, 22050)
+    const src = c.createBufferSource()
+    src.buffer = buf
+    src.connect(c.destination)
+    src.start(0)
+    unlocked = true
+  } catch {
+    // αγνόησε
+  }
+}
+
+if (typeof window !== 'undefined') {
+  const onFirstTouch = () => unlockAudio()
+  window.addEventListener('pointerdown', onFirstTouch, { passive: true })
+  window.addEventListener('touchstart', onFirstTouch, { passive: true })
+  window.addEventListener('click', onFirstTouch, { passive: true })
+}
+
 function tone(freq, start, dur, type = 'triangle', gain = 0.22) {
   if (muted) return
   const c = getCtx()

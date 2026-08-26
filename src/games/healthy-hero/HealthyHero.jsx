@@ -5,6 +5,7 @@ import Mission1Plate from './missions/Mission1Plate.jsx'
 import Mission2LunchBox from './missions/Mission2LunchBox.jsx'
 import Mission3Traps from './missions/Mission3Traps.jsx'
 import MissionIntro from './MissionIntro.jsx'
+import RiveHero from '../../components/RiveHero.jsx'
 import { playWin } from '../../services/sound.js'
 import { speak } from '../../services/voice.js'
 
@@ -68,7 +69,7 @@ export default function HealthyHero() {
             draggable="false"
           />
         ))}
-        <img src={`${E}/Hero.png`} alt="" className="hh-intro__hero" draggable="false" />
+        <RiveHero src="/hh/rive/Hero_Screen01.riv" className="hh-intro__hero" fallback={`${E}/Hero.png`} />
         <button type="button" className="hh-start-btn" onClick={() => setStage('m1')} aria-label="Έναρξη">
           <img src={`${S}/Start_Button.png`} alt="Έναρξη" draggable="false" />
         </button>
@@ -94,7 +95,7 @@ export default function HealthyHero() {
         </div>
         <img src={`${E}/Trophy.png`} alt="" className="hh-finale__trophy" draggable="false" />
         <img src={`${E}/Ribon.png`} alt="Συγχαρητήρια! Έγινες Super Healthy Hero!" className="hh-finale__ribbon" draggable="false" />
-        <img src={`${E}/Hero.png`} alt="" className="hh-finale__hero" draggable="false" />
+        <RiveHero src="/hh/rive/Hero_Screen02.riv" className="hh-finale__hero" fallback={`${E}/Hero.png`} />
         <div className="hh-finale__score">Σκορ: ⭐ {score}</div>
         <button type="button" className="big-button big-button--primary hh-finale__btn" onClick={() => setStage('rating')}>
           Συνέχεια →

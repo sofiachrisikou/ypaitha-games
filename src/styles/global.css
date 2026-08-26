@@ -1029,11 +1029,24 @@ button {
 .hh-intro__hero {
   position: absolute;
   right: -10px;
-  bottom: 250px;
-  width: 620px;
-  height: auto;
+  bottom: 230px;
+  width: 640px;
+  height: 800px;
+  display: block;
   filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.2));
-  animation: bob 2.6s ease-in-out infinite;
+}
+.rive-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.rive-fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 .hh-float {
   position: absolute;
@@ -1102,8 +1115,9 @@ button {
   left: 540px;
   top: 1380px;
   transform: translate(-50%, -50%);
-  width: 360px;
-  height: auto;
+  width: 380px;
+  height: 470px;
+  display: block;
 }
 .hh-finale__score {
   position: absolute;
