@@ -12,8 +12,11 @@ const HIT_R = 275 // ακτίνα «μέσα στο πιάτο»
 const RX = 430 // δακτύλιος τροφίμων (οριζόντια)
 const RY = 560 // δακτύλιος τροφίμων (κάθετα)
 
+// Κατανομή τροφίμων σε τόξο ~285°, αφήνοντας ΚΕΝΟ κάτω-δεξιά για τη μασκότ.
 function slotPos(i, total) {
-  const angle = (-90 + i * (360 / total)) * (Math.PI / 180)
+  const startDeg = 96
+  const arcDeg = 285
+  const angle = (startDeg + (i * arcDeg) / (total - 1)) * (Math.PI / 180)
   return { x: CX + RX * Math.cos(angle), y: CY + RY * Math.sin(angle) }
 }
 
