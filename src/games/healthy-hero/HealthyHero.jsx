@@ -56,6 +56,13 @@ const MISSIONS = {
 // VO ολοκλήρωσης ανά αποστολή.
 const DONE_VO = { m1: 'HH-12', m2: 'HH-18' }
 
+// Θέση/μέγεθος μασκότ ανά αποστολή (ο κάτω-δεξιά χώρος διαφέρει).
+const MASCOT_POS = {
+  m1: { w: 560, right: -30, bottom: -40 }, // μέσα στον κίτρινο κύκλο
+  m2: { w: 520, right: -30, bottom: -30 }, // μέσα στον κίτρινο κύκλο
+  m3: { w: 420, right: -10, bottom: 300 }, // πιο πάνω, να μη σκεπάζει ΧΡΟΝΟΣ/ΣΚΟΡ
+}
+
 const CONFETTI_COLORS = ['#34c759', '#ff9f2e', '#2ec4f1', '#e5442e', '#ffd23f', '#ffffff']
 const CONFETTI = Array.from({ length: 28 }, (_, i) => ({
   left: (i * 37) % 100,
@@ -162,7 +169,7 @@ export default function HealthyHero() {
         </div>
         <img src={`${E}/Trophy.png`} alt="" className="hh-finale__trophy" draggable="false" />
         <img src={`${E}/Ribon.png`} alt="Συγχαρητήρια! Έγινες Super Healthy Hero!" className="hh-finale__ribbon" draggable="false" />
-        <RiveHero src="/hh/rive/Hero_Screen02.riv" className="hh-finale__hero" fallback={`${E}/Hero.png`} />
+        <RiveHero src="/hh/rive/Hero_Screen01.riv" className="hh-finale__hero" fallback={`${E}/Hero.png`} />
         <div className="hh-finale__score">Σκορ: ⭐ {score}</div>
         <button type="button" className="big-button big-button--primary hh-finale__btn" onClick={() => setStage('rating')}>
           Συνέχεια →
@@ -196,7 +203,7 @@ export default function HealthyHero() {
       {ready && stage === 'm3' && (
         <Mission3Traps addScore={addScore} onReaction={onReaction} onNext={() => advance('m3', 'finale')} />
       )}
-      {ready && <MascotCompanion reaction={reaction} />}
+      {ready && <MascotCompanion reaction={reaction} pos={MASCOT_POS[stage]} />}
     </div>
   )
 }

@@ -1113,10 +1113,10 @@ button {
 .hh-finale__hero {
   position: absolute;
   left: 540px;
-  top: 1380px;
+  top: 1360px;
   transform: translate(-50%, -50%);
-  width: 380px;
-  height: 470px;
+  width: 460px;
+  height: 580px;
   display: block;
 }
 .hh-finale__score {
@@ -1367,17 +1367,14 @@ button {
   position: absolute;
   right: 0;
   bottom: 0;
-  width: 600px;
-  height: 800px;
+  width: 760px;
+  height: 980px;
   pointer-events: none;
   z-index: 60;
 }
 .mascot__hero {
   position: absolute;
-  right: -40px;
-  bottom: -50px;
-  width: 600px;
-  height: 780px;
+  /* width/height/right/bottom έρχονται inline (ανά αποστολή) */
   filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.25));
 }
 .mascot__rive {
