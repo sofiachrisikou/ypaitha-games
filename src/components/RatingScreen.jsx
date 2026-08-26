@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { saveVote } from '../services/votes.js'
+import { speak } from '../services/voice.js'
 
 const FACES = [
   { rating: 1, emoji: '😣', label: 'Πολύ δυσαρεστημένος' },
@@ -18,15 +19,18 @@ export default function RatingScreen({ game, onDone }) {
   doneRef.current = onDone
 
   useEffect(() => {
+    // VO μόνο για το Healthy Hero (δεν επηρεάζει τον Ευζούλη).
+    if (game === 'healthy-hero') speak('HH-29')
     // Αυτόματη επιστροφή μετά από 15s χωρίς ψήφο.
     timeoutRef.current = setTimeout(() => doneRef.current && doneRef.current(), 15000)
     return () => clearTimeout(timeoutRef.current)
-  }, [])
+  }, [game])
 
   const pick = (rating) => {
     if (thanks) return
     clearTimeout(timeoutRef.current)
     setThanks(true)
+    if (game === 'healthy-hero') speak('HH-30')
     // Αποθήκευση χωρίς να μπλοκάρει το UI.
     saveVote({ game, rating }).catch(() => {})
     setTimeout(() => doneRef.current && doneRef.current(), 2000)

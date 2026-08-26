@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { FOODS, PLATE_IMG, BG_IMG, GOAL } from '../data/foods.js'
 import { STAGE_W } from '../../../components/Stage.jsx'
 import { playCorrect, playWrong, playWin } from '../../../services/sound.js'
+import { speak } from '../../../services/voice.js'
 
 // Γεωμετρία (συντεταγμένες stage 1080x1920)
 const CX = 540
@@ -68,6 +69,7 @@ export default function Mission1Plate({ addScore, onProgress, onReaction, onComp
       setPlaced((pl) => {
         const next = [...pl, food]
         if (onProgress) onProgress(next.length)
+        if (next.length === GOAL - 2) speak('HH-11') // «Άλλα δύο και το πιάτο είναι έτοιμο!»
         if (next.length >= GOAL) {
           setTimeout(() => {
             setWon(true)
@@ -169,8 +171,6 @@ export default function Mission1Plate({ addScore, onProgress, onReaction, onComp
           </button>
         )
       })}
-
-      {feedback && <div className="feedback-toast">{feedback}</div>}
 
       {won && (
         <div className="reward-overlay">

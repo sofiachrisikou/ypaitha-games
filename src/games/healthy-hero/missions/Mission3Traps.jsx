@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { TRAP_ITEMS, BG_IMG, TRAP_TIME, TRAP_POINTS } from '../data/traps.js'
 import { playCorrect, playWrong, playWin } from '../../../services/sound.js'
+import { speak } from '../../../services/voice.js'
 
 const TRAPS_TOTAL = TRAP_ITEMS.filter((f) => !f.healthy).length
 const COLS = [250, 540, 830]
@@ -28,7 +29,10 @@ export default function Mission3Traps({ addScore, onProgress, onReaction, onNext
     if (finishedRef.current) return
     finishedRef.current = true
     setFinished(kind)
-    if (kind === 'win') playWin()
+    if (kind === 'win') {
+      playWin()
+      speak('HH-25') // «Τα κατάφερες! Τα ξεχώρισες όλα!»
+    }
     setTimeout(() => onNext && onNext(), 1900)
   }
 
@@ -40,7 +44,9 @@ export default function Mission3Traps({ addScore, onProgress, onReaction, onNext
           finish('timeout')
           return 0
         }
-        return s - 1
+        const n = s - 1
+        if (n === 10) speak('HH-24') // «Γρήγορα! Ο χρόνος τελειώνει!»
+        return n
       })
     }, 1000)
     return () => clearInterval(t)
@@ -104,8 +110,6 @@ export default function Mission3Traps({ addScore, onProgress, onReaction, onNext
           +{TRAP_POINTS}
         </div>
       ))}
-
-      {feedback && <div className="feedback-toast feedback-toast--soft">{feedback}</div>}
 
       {/* ΧΡΟΝΟΣ / ΣΚΟΡ — αριθμοί πάνω στους baked-in κύκλους του background */}
       <div className={`hh-num ${timeLeft <= 5 ? 'hh-num--low' : ''}`} style={{ left: 470, top: 1852 }}>

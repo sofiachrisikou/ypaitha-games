@@ -8,20 +8,54 @@ import MissionIntro from './MissionIntro.jsx'
 import RiveHero from '../../components/RiveHero.jsx'
 import MascotCompanion from './MascotCompanion.jsx'
 import { playWin } from '../../services/sound.js'
-import { speak, CLIPS } from '../../services/voice.js'
+import { speak } from '../../services/voice.js'
 
-// Φράσεις που εναλλάσσονται (φωνή + μπαλόνι) ανά τύπο αντίδρασης.
-const PRAISE_KEYS = ['bravo', 'poly_kala', 'ta_kataferes', 'sinexise']
-const ENCOURAGE_KEYS = ['dokimase', 'oxi_afto', 'ligo_akoma']
-
-// Οδηγίες + assets ανά αποστολή (για την οθόνη εισαγωγής).
-const MISSIONS = {
-  m1: { instr: 'Σύρε 5 υγιεινά τρόφιμα μέσα στο πιάτο!', voice: 'm1_intro', bg: '/hh/m1/Background.png' },
-  m2: { instr: 'Γέμισε το κουτί με υγιεινές επιλογές για το κολατσιό!', voice: 'm2_intro', bg: '/hh/m2/Background.png' },
-  m3: { instr: 'Άγγιξε όσα δεν τρώμε συχνά, πριν τελειώσει ο χρόνος!', voice: 'm3_intro', bg: '/hh/m3/Background.png' },
+// Αντιδράσεις ανά αποστολή (επίσημο script HH-XX):
+// key = κωδικός VO (φωνή), bubble = σύντομο κείμενο στην οθόνη.
+const REACTIONS = {
+  m1: {
+    correct: [
+      { key: 'HH-05', bubble: 'Τέλεια επιλογή!' },
+      { key: 'HH-06', bubble: 'Δύναμη! 💪' },
+      { key: 'HH-07', bubble: 'Κι άλλο ένα!' },
+    ],
+    wrong: [
+      { key: 'HH-08', bubble: 'Όχι αυτό!' },
+      { key: 'HH-09', bubble: 'Δοκίμασε ξανά' },
+      { key: 'HH-10', bubble: 'Ψάξε ξανά' },
+    ],
+  },
+  m2: {
+    correct: [
+      { key: 'HH-14', bubble: 'Ωραίο κολατσιό!' },
+      { key: 'HH-15', bubble: 'Ενέργεια! ⚡' },
+    ],
+    wrong: [
+      { key: 'HH-16', bubble: 'Όχι αυτό!' },
+      { key: 'HH-17', bubble: 'Δοκίμασε ξανά' },
+    ],
+  },
+  m3: {
+    correct: [
+      { key: 'HH-20', bubble: 'Σωστά!' },
+      { key: 'HH-21', bubble: 'Το εντόπισες!' },
+    ],
+    wrong: [
+      { key: 'HH-22', bubble: 'Αυτό το τρώμε συχνά!' },
+      { key: 'HH-23', bubble: 'Κοίτα καλύτερα' },
+    ],
+  },
 }
 
-// Confetti (σταθερές θέσεις — χωρίς τυχαιότητα)
+// Οδηγίες + VO + φόντο ανά αποστολή (οθόνη εισαγωγής).
+const MISSIONS = {
+  m1: { instr: 'Σύρε 5 υγιεινά τρόφιμα μέσα στο πιάτο!', voice: 'HH-03', bg: '/hh/m1/Background.png' },
+  m2: { instr: 'Γέμισε το κουτί με υγιεινές επιλογές για το κολατσιό!', voice: 'HH-13', bg: '/hh/m2/Background.png' },
+  m3: { instr: 'Άγγιξε όσα δεν τρώμε συχνά, πριν τελειώσει ο χρόνος!', voice: 'HH-19', bg: '/hh/m3/Background.png' },
+}
+// VO ολοκλήρωσης ανά αποστολή.
+const DONE_VO = { m1: 'HH-12', m2: 'HH-18' }
+
 const CONFETTI_COLORS = ['#34c759', '#ff9f2e', '#2ec4f1', '#e5442e', '#ffd23f', '#ffffff']
 const CONFETTI = Array.from({ length: 28 }, (_, i) => ({
   left: (i * 37) % 100,
@@ -32,7 +66,6 @@ const CONFETTI = Array.from({ length: 28 }, (_, i) => ({
 
 const S = '/hh/start'
 const E = '/hh/end'
-// Διακοσμητικά τρόφιμα που «επιπλέουν» στην αρχική (θέσεις κατά το σχέδιο).
 const FLOAT_FOODS = [
   { src: `${S}/apple.png`, x: 225, y: 935, w: 150, d: 0 },
   { src: `${S}/Cheese.png`, x: 160, y: 1155, w: 150, d: 1.1 },
@@ -46,28 +79,39 @@ export default function HealthyHero() {
   const navigate = useNavigate()
   const [stage, setStage] = useState('intro')
   const [score, setScore] = useState(0)
-  const [ready, setReady] = useState(false) // οδηγίες αποστολής ολοκληρώθηκαν;
-  const [reaction, setReaction] = useState(null) // { type, text } για τη μασκότ
+  const [ready, setReady] = useState(false)
+  const [reaction, setReaction] = useState(null)
   const rIdx = useRef({ correct: 0, wrong: 0 })
 
   const addScore = useCallback((delta) => setScore((s) => s + delta), [])
   const goHome = useCallback(() => navigate('/'), [navigate])
   const noop = useCallback(() => {}, [])
 
-  // Αντίδραση μασκότ: επιλέγει φράση, τη λέει (φωνή) και τη δείχνει σε μπαλόνι.
-  const onReaction = useCallback((type) => {
-    const keys = type === 'correct' ? PRAISE_KEYS : ENCOURAGE_KEYS
-    const key = keys[rIdx.current[type === 'correct' ? 'correct' : 'wrong']++ % keys.length]
-    speak(key)
-    setReaction({ type, text: CLIPS[key] || '', n: Date.now() })
+  // Αντίδραση μασκότ: φράση+φωνή ανάλογα με την τρέχουσα αποστολή.
+  const onReaction = useCallback(
+    (type) => {
+      const set = (REACTIONS[stage] && REACTIONS[stage][type]) || []
+      if (!set.length) return
+      const item = set[rIdx.current[type]++ % set.length]
+      speak(item.key)
+      setReaction({ type, text: item.bubble, n: Date.now() })
+    },
+    [stage],
+  )
+
+  // Προχώρα στην επόμενη αποστολή, λέγοντας το VO ολοκλήρωσης.
+  const advance = useCallback((from, to) => {
+    if (DONE_VO[from]) speak(DONE_VO[from])
+    setStage(to)
   }, [])
 
-  // Σε κάθε νέα αποστολή δείξε πρώτα τις οδηγίες. Στο τέλος φανφάρα + φωνή.
+  // Οδηγίες σε κάθε νέα αποστολή· VO αρχής/τέλους.
   useEffect(() => {
     if (MISSIONS[stage]) setReady(false)
+    if (stage === 'intro') speak('HH-01')
     if (stage === 'finale') {
       playWin()
-      speak('super_hero')
+      speak('HH-26')
     }
   }, [stage])
 
@@ -85,7 +129,15 @@ export default function HealthyHero() {
           />
         ))}
         <RiveHero src="/hh/rive/Hero_Screen01.riv" className="hh-intro__hero" fallback={`${E}/Hero.png`} />
-        <button type="button" className="hh-start-btn" onClick={() => setStage('m1')} aria-label="Έναρξη">
+        <button
+          type="button"
+          className="hh-start-btn"
+          onClick={() => {
+            speak('HH-02')
+            setStage('m1')
+          }}
+          aria-label="Έναρξη"
+        >
           <img src={`${S}/Start_Button.png`} alt="Έναρξη" draggable="false" />
         </button>
       </div>
@@ -136,13 +188,13 @@ export default function HealthyHero() {
         />
       )}
       {ready && stage === 'm1' && (
-        <Mission1Plate addScore={addScore} onProgress={noop} onReaction={onReaction} onComplete={() => setStage('m2')} />
+        <Mission1Plate addScore={addScore} onReaction={onReaction} onComplete={() => advance('m1', 'm2')} />
       )}
       {ready && stage === 'm2' && (
-        <Mission2LunchBox addScore={addScore} onProgress={noop} onReaction={onReaction} onNext={() => setStage('m3')} />
+        <Mission2LunchBox addScore={addScore} onReaction={onReaction} onNext={() => advance('m2', 'm3')} />
       )}
       {ready && stage === 'm3' && (
-        <Mission3Traps addScore={addScore} onProgress={noop} onReaction={onReaction} onNext={() => setStage('finale')} />
+        <Mission3Traps addScore={addScore} onReaction={onReaction} onNext={() => advance('m3', 'finale')} />
       )}
       {ready && <MascotCompanion reaction={reaction} />}
     </div>

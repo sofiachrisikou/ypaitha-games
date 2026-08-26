@@ -176,8 +176,6 @@ export default function Mission2LunchBox({ addScore, onProgress, onReaction, onN
         )
       })}
 
-      {feedback && <div className="feedback-toast">{feedback}</div>}
-
       {done && (
         <div className="lunchbox-done">
           <div className="lunchbox-done__emoji">🎉</div>

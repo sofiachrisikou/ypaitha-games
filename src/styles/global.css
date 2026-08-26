@@ -1367,17 +1367,17 @@ button {
   position: absolute;
   right: 0;
   bottom: 0;
-  width: 440px;
-  height: 620px;
+  width: 600px;
+  height: 800px;
   pointer-events: none;
   z-index: 60;
 }
 .mascot__hero {
   position: absolute;
-  right: -30px;
-  bottom: -40px;
-  width: 440px;
-  height: 600px;
+  right: -40px;
+  bottom: -50px;
+  width: 600px;
+  height: 780px;
   filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.25));
 }
 .mascot__rive {
