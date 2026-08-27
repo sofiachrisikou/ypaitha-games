@@ -60,27 +60,39 @@ function ttsFallback(text) {
   }
 }
 
-// Παίζει μια ατάκα με βάση τον κωδικό HH-XX.
+// Δοκιμάζει μια λίστα από URLs με τη σειρά· αν αποτύχουν όλα -> onFail().
+function playFirst(urls, onFail) {
+  let i = 0
+  const tryNext = () => {
+    if (i >= urls.length) return onFail()
+    const url = urls[i++]
+    let advanced = false
+    const next = () => {
+      if (advanced) return
+      advanced = true
+      tryNext()
+    }
+    try {
+      const a = new Audio(url)
+      a.volume = 0.95
+      a.addEventListener('playing', () => {
+        advanced = true // παίζει κανονικό αρχείο -> τέλος
+      })
+      a.addEventListener('error', next)
+      const p = a.play()
+      if (p && typeof p.catch === 'function') p.catch(next)
+    } catch {
+      next()
+    }
+  }
+  tryNext()
+}
+
+// Παίζει μια ατάκα με βάση τον κωδικό HH-XX. Δέχεται mp3 Ή wav·
+// αλλιώς πέφτει σε Ελληνικό TTS του browser.
 export function speak(key) {
   if (isMuted()) return
   const text = CLIPS[key]
   if (!text) return
-  let done = false
-  const fallback = () => {
-    if (done) return
-    done = true
-    ttsFallback(text)
-  }
-  try {
-    const audio = new Audio(`${BASE}/${key}.mp3`)
-    audio.volume = 0.95
-    audio.addEventListener('playing', () => {
-      done = true
-    })
-    audio.addEventListener('error', fallback)
-    const p = audio.play()
-    if (p && typeof p.catch === 'function') p.catch(fallback)
-  } catch {
-    fallback()
-  }
+  playFirst([`${BASE}/${key}.mp3`, `${BASE}/${key}.wav`], () => ttsFallback(text))
 }
