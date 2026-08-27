@@ -1,6 +1,6 @@
 import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from '../common/scene-keys.js';
-import { IMAGE_ASSETS, TEXTURE_ATLAS_ASSETS, AUDIO_ASSETS } from '../common/assets.js';
+import { IMAGE_ASSETS, TEXTURE_ATLAS_ASSETS, AUDIO_ASSETS, RIVE_ASSETS } from '../common/assets.js';
 import { loadFont } from '../common/sharedGameSettings.js';
 
 export class PreloadScene extends Phaser.Scene {
@@ -23,11 +23,15 @@ export class PreloadScene extends Phaser.Scene {
     AUDIO_ASSETS.forEach((asset) => {
       this.load.audio(asset.assetKey, asset.path);
     });
+
+    RIVE_ASSETS.forEach((asset) => {
+      this.load.binary(asset.assetKey, asset.path);
+    });
   }
 
   async create() {
     await loadFont('GameFont', 'assets/fonts/ComicSansMSBold.ttf');
-    this.scene.start(SCENE_KEYS.EUZOYLIS_GAME_SCENE1);
+    this.scene.start(SCENE_KEYS.EUZOYLIS_INTRO_SCENE);
   }
 
   //#endregion

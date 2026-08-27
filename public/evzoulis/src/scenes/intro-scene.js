@@ -264,7 +264,7 @@ export class IntroScene extends Phaser.Scene {
   #createIntroCharacterAnimation()
   {
     this.#riveInstance = spawnRiveAnimation(
-      'assets/rive/Bear_Intro.riv',
+      this.cache.binary.get(ASSET_KEYS.RIVE_BEAR_INTRO),
       'Timeline_Bear_Intro',
       'rive-stage--intro',
     );
@@ -303,9 +303,6 @@ export class IntroScene extends Phaser.Scene {
   }
 
   #handleLevelButtonPressed() {
-     //this.#riveInstance.stop();
-     //document.getElementById('rive-stage--intro').remove();
-     this.#riveInstance?.cleanup();
     this.scene.start(SCENE_KEYS.EUZOYLIS_GAME_SCENE1);
   }
 

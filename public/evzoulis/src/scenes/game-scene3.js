@@ -13,6 +13,8 @@ import { playCorrectSound, playWrongSound } from '../common/audio-manager.js';
 //   strokeThickness: 6,
 // };
 
+const BEAR_STATE_MACHINE = 'StateMachine_Bear_Smile';
+
 const LIMB_DONE_COLOR = 0x4caf50;
 const TARGET_MARKER_COLOR = 0x0072FF;
 const TARGET_MARKER_REACHED_COLOR = 0x19FA00;
@@ -251,15 +253,15 @@ export class GameScene3 extends Phaser.Scene {
   #createCharacterAnimation()
   {
     this.#riveInstance = spawnRiveAnimation(
-      'assets/rive/Bear_StateMachine_Smile.riv',
-      'StateMachine_Bear_Smile',
+      this.cache.binary.get(ASSET_KEYS.RIVE_BEAR_SMILE),
+      BEAR_STATE_MACHINE,
       'rive-stage--level3',
     );
   }
 
   #setSmiling(value)
   {
-    setStateMachineInput(this.#riveInstance, 'StateMachine_Bear_Smile', 'IsSmiling', value);
+    setStateMachineInput(this.#riveInstance, BEAR_STATE_MACHINE, 'IsSmiling', value);
   }
 
   //#endregion

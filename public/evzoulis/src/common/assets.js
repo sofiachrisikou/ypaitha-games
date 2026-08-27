@@ -64,6 +64,11 @@ export const ASSET_KEYS = Object.freeze({
   CHAR_LEG_L: 'CHAR_LEG_L',
   //OUTRO
   BACKGROUND_OUTRO: 'BACKGROUND_OUTRO',
+  //RIVE
+  RIVE_BEAR_INTRO: 'RIVE_BEAR_INTRO',
+  RIVE_BEAR_BREATHING: 'RIVE_BEAR_BREATHING',
+  RIVE_BEAR_SMILE: 'RIVE_BEAR_SMILE',
+  RIVE_BEAR_OUTRO: 'RIVE_BEAR_OUTRO',
 });
 
 export const FONT_ASSETS = 
@@ -311,6 +316,27 @@ export const AUDIO_ASSETS = [
   {
     assetKey: ASSET_KEYS.BUBBLE_POP_SOUND,
     path: 'assets/audio/bubble_pop.wav',
+  },
+];
+
+// Rive files, preloaded as raw binary and handed to Rive as a buffer at
+// spawn time — same load screen as everything else above, no per-scene fetch.
+export const RIVE_ASSETS = [
+  {
+    assetKey: ASSET_KEYS.RIVE_BEAR_INTRO,
+    path: 'assets/rive/Bear_Intro.riv',
+  },
+  {
+    assetKey: ASSET_KEYS.RIVE_BEAR_BREATHING,
+    path: 'assets/rive/Bear_StateMachine_Breathing.riv',
+  },
+  {
+    assetKey: ASSET_KEYS.RIVE_BEAR_SMILE,
+    path: 'assets/rive/Bear_StateMachine_Smile.riv',
+  },
+  {
+    assetKey: ASSET_KEYS.RIVE_BEAR_OUTRO,
+    path: 'assets/rive/Bear_Outro.riv',
   },
 ];
 

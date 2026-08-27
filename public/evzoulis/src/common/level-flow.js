@@ -88,7 +88,7 @@ export function showCelebrationSequence(scene, { message, levelNumber, isSuccess
   const { width, height } = scene.scale;
 
   const riveInstance = spawnRiveAnimation(
-    'assets/rive/Bear_Outro.riv',
+    scene.cache.binary.get(ASSET_KEYS.RIVE_BEAR_OUTRO),
     'Timeline_Bear_Outro',
     CELEBRATION_RIVE_CSS_CLASS,
     true,  // loop

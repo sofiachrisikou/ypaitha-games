@@ -82,7 +82,7 @@ export class OutroScene extends Phaser.Scene {
   #createOutroCharacterAnimation()
   {
     this.#riveInstance = spawnRiveAnimation(
-      'assets/rive/Bear_Outro.riv',
+      this.cache.binary.get(ASSET_KEYS.RIVE_BEAR_OUTRO),
       'Timeline_Bear_Outro',
       'rive-stage--outro',
       true,   // loop

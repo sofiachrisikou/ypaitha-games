@@ -14,6 +14,8 @@ import { playCorrectSound, playWrongSound } from '../common/audio-manager.js';
 //   strokeThickness: 6,
 // };
 
+const BEAR_STATE_MACHINE = 'StateMachine_Bear_Breathing';
+
 const SWIPE_STATE = {
   WAITING: 'WAITING',
   SWIPING: 'SWIPING',
@@ -305,16 +307,16 @@ export class GameScene extends Phaser.Scene {
   #createCharacterAnimation()
   {
     this.#riveInstance = spawnRiveAnimation(
-    'assets/rive/Bear_StateMachine_Breathing.riv',   // swap for this scene's real file
-    'StateMachine_Bear_Breathing',           // swap for this scene's real state machine name
+    this.cache.binary.get(ASSET_KEYS.RIVE_BEAR_BREATHING),
+    BEAR_STATE_MACHINE,
     'rive-stage--level1',
   );
   }
 
   #setBreathing(isBreathing,isIdle)
   {
-    setStateMachineInput(this.#riveInstance, 'StateMachine_Bear_Breathing', 'IsIdle', isIdle);
-    setStateMachineInput(this.#riveInstance, 'StateMachine_Bear_Breathing', 'IsBreathing', isBreathing);
+    setStateMachineInput(this.#riveInstance, BEAR_STATE_MACHINE, 'IsIdle', isIdle);
+    setStateMachineInput(this.#riveInstance, BEAR_STATE_MACHINE, 'IsBreathing', isBreathing);
   }
 
   //#endregion

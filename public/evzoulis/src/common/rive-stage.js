@@ -3,18 +3,18 @@ const { Rive, Layout, Fit, Alignment } = window.rive;
 //#region Rive Animation
 
 /**
- * @param {string} src
+ * @param {ArrayBuffer} buffer - preloaded .riv bytes, e.g. scene.cache.binary.get(ASSET_KEYS.RIVE_...)
  * @param {string} name - state machine OR animation name, depending on isStateMachine
  * @param {string} cssClass
  * @param {boolean} loop - default false
  * @param {boolean} isStateMachine - default true (matches your existing intro/level1 files); pass false for files like this one where the runtime reports it's a plain Animation, not a State Machine
  */
-export function spawnRiveAnimation(src, name, cssClass, loop = false, isStateMachine = true) {
+export function spawnRiveAnimation(buffer, name, cssClass, loop = false, isStateMachine = true) {
   const canvas = document.getElementById('rive-stage');
   canvas.classList.add(cssClass);
 
   const instance = new Rive({
-    src,
+    buffer,
     canvas,
     autoplay: true,
     ...(isStateMachine ? { stateMachines: name } : { animations: name }),
