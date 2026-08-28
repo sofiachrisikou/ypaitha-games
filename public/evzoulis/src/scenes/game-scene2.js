@@ -4,8 +4,9 @@ import { ASSET_KEYS } from '../common/assets.js';
 import { THOUGHT_CLOUD_LIST } from '../common/thought-cloud-data.js';
 import { ProgressBar } from '../common/progress-bar.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
-import { showLevelIntro, showCelebrationSequence } from '../common/level-flow.js';
-import { playGoodMoveFeedback, playBadMoveFeedback, playBubblePopSound } from '../common/audio-manager.js';
+import { showLevelIntroWithVoiceover, showCelebrationSequence, showPersistentGuideCharacter } from '../common/level-flow.js';
+import { playBadMoveFeedback, playBubblePopSound } from '../common/audio-manager.js';
+import { CHARACTER_LINES } from '../common/character-lines.js';
 
 // const textStyleConfig = {
 //   fontSize: '40px',
@@ -64,7 +65,11 @@ export class GameScene2 extends Phaser.Scene {
   #bubbleDiameter;
   #bubbleSpacingPadding;
   #topSpawnExclusionY;
+  #bottomSpawnExclusionHeight;
   #burstFrameRate;
+
+  //CHARACTER
+  #guideCharacter;
 
   //GAMEPLAY
   #gameDurationSeconds;
@@ -108,11 +113,18 @@ export class GameScene2 extends Phaser.Scene {
     this.#totalBubbles = THOUGHT_CLOUD_LIST.length;
     this.#bubbles = [];
     this.#bubbleMargin = 140;
-    // extra gap beyond two bubbles' own footprint radii just touching
-    this.#bubbleSpacingPadding = 30;
+    // extra gap beyond two bubbles' own footprint radii just touching.
+    // Bubbles render ~280px wide (bubbleDiameter, computed in #startLevel),
+    // so the +20 I tried before (30->50) was only ~7% of that — too subtle
+    // to read as "more space". Bumped further; still just one number to tune.
+    this.#bubbleSpacingPadding = 100;
     // real value is computed in create() from the actual bottom edge of
     // your top UI, once it exists — this is just a fallback before that
     this.#topSpawnExclusionY = 550;
+    // real value is computed in #startLevel() from the screen height, so
+    // clouds never spawn low enough to sit behind the guide character —
+    // see --char-guide-scale in style.css if this ever needs retuning
+    this.#bottomSpawnExclusionHeight = 0;
     // frames per second for the 2-frame burst — e.g. 8 = 125ms per frame
     this.#burstFrameRate = 14;
     this.#gameDurationSeconds = 60;
@@ -131,7 +143,7 @@ export class GameScene2 extends Phaser.Scene {
   }
 
   create() {
-    showLevelIntro(this, ASSET_KEYS.STAGE2_LOGO, 'Διώξε τις αρνητικές σκέψεις.',() => this.#startLevel());
+    showLevelIntroWithVoiceover(this, { levelNumber: 2, logoAssetKey: ASSET_KEYS.STAGE2_LOGO, onComplete: () => this.#startLevel() });
   }
 
   #startLevel() {
@@ -190,6 +202,12 @@ export class GameScene2 extends Phaser.Scene {
     // either later. The + 30 is just a bit of extra breathing room.
     this.#topSpawnExclusionY = Math.max(this.#levelProgressBar.getBounds().bottom, this.#progressTextGO.getBounds().bottom) + 30;
 
+    // Reserve room at the bottom for the guide character + speech bubble so
+    // clouds never spawn behind it — rough fraction of screen height. Now
+    // that the character sits lower/more off-screen (style.css), it needs
+    // less reserved space than before; tune this fraction as you go.
+    this.#bottomSpawnExclusionHeight = height * 0.15;
+    this.#guideCharacter = showPersistentGuideCharacter(this);
 
     this.#spawnAllBubbles();
 
@@ -225,7 +243,7 @@ export class GameScene2 extends Phaser.Scene {
     const cellHeight = bubbleMaxHeight + this.#bubbleSpacingPadding;
 
     const areaWidth = width - this.#bubbleMargin * 2;
-    const areaHeight = height - this.#topSpawnExclusionY - this.#bubbleMargin;
+    const areaHeight = height - this.#topSpawnExclusionY - this.#bubbleMargin - this.#bottomSpawnExclusionHeight;
 
     const cols = Math.max(1, Math.floor(areaWidth / cellWidth));
     const rows = Math.max(1, Math.ceil(this.#thoughtCloudList.length / cols));
@@ -352,7 +370,7 @@ export class GameScene2 extends Phaser.Scene {
     if (this.#poppedCount >= this.#totalBubbles) {
       this.#handleLevelComplete();
     }
-    playGoodMoveFeedback(this);
+    this.#guideCharacter.speakRandomFrom(CHARACTER_LINES[2].goodMove);
   }
 
   /** Only called on game-over — level-complete means every bubble is already popped */
@@ -456,8 +474,9 @@ export class GameScene2 extends Phaser.Scene {
     });
   }
 
-  /** No-op — level 2 has nothing to hide, kept for interface consistency with levels 1/3. */
+  /** Frees the shared #rive-stage canvas before showCelebrationSequence spawns its own bear on it. */
   #disableLevelVisuals() {
+    this.#guideCharacter?.destroy();
   }
 
   #goToNextLevel() {

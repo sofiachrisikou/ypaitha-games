@@ -2,7 +2,7 @@ import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from '../common/scene-keys.js';
 import { ASSET_KEYS } from '../common/assets.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
-import { spawnRiveAnimation, removeRiveAnimation } from '../common/rive-stage.js';
+import { spawnRiveAnimation, removeRiveAnimation, BEAR_RIVE_MAX_DPR } from '../common/rive-stage.js';
 import { playLevelSuccessFeedback } from '../common/audio-manager.js';
 
 // const speechBubbleTextStyleConfig = {
@@ -87,6 +87,7 @@ export class OutroScene extends Phaser.Scene {
       'rive-stage--outro',
       true,   // loop
       false,  // isStateMachine — this file is a plain Animation
+      BEAR_RIVE_MAX_DPR,
     );
   }
 

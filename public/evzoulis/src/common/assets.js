@@ -43,6 +43,22 @@ export const ASSET_KEYS = Object.freeze({
   FLOWER3: 'FLOWER3',
   INHALE:'INHALE',
   EXHALE:'EXHALE',
+  //LEVEL 1 VOICEOVER (assets/audio/Stage1/EV_Stg1_XX.mp3 — VO_01/VO_02 are the intro lines)
+  LVL1_VO_01: 'LVL1_VO_01',
+  LVL1_VO_02: 'LVL1_VO_02',
+  LVL1_VO_03: 'LVL1_VO_03',
+  LVL1_VO_04: 'LVL1_VO_04',
+  LVL1_VO_05: 'LVL1_VO_05',
+  LVL1_VO_06: 'LVL1_VO_06',
+  LVL1_VO_07: 'LVL1_VO_07',
+  LVL1_VO_08: 'LVL1_VO_08',
+  LVL1_VO_09: 'LVL1_VO_09',
+  LVL1_VO_10: 'LVL1_VO_10',
+  LVL1_VO_11: 'LVL1_VO_11',
+  LVL1_VO_12: 'LVL1_VO_12',
+  LVL1_VO_13: 'LVL1_VO_13',
+  LVL1_VO_14: 'LVL1_VO_14',
+  LVL1_VO_15: 'LVL1_VO_15',
 
   //LEVEL 2
   BACKGROUND_Stg2: 'BACKGROUND_Stg2',
@@ -54,6 +70,18 @@ export const ASSET_KEYS = Object.freeze({
   BUBBLE_POPPED: 'BUBBLE_POPPED',
   BUBBLE_POPPED1: 'BUBBLE_POPPED1',
   BUBBLE_POP_SOUND:'BUBBLE_POP_SOUND',
+  //LEVEL 2 VOICEOVER (assets/audio/Stage2/EV_Stg2_XX.mp3 — VO_01/VO_02 are the intro lines)
+  LVL2_VO_01: 'LVL2_VO_01',
+  LVL2_VO_02: 'LVL2_VO_02',
+  LVL2_VO_03: 'LVL2_VO_03',
+  LVL2_VO_04: 'LVL2_VO_04',
+  LVL2_VO_05: 'LVL2_VO_05',
+  LVL2_VO_06: 'LVL2_VO_06',
+  LVL2_VO_07: 'LVL2_VO_07',
+  LVL2_VO_08: 'LVL2_VO_08',
+  LVL2_VO_09: 'LVL2_VO_09',
+  LVL2_VO_10: 'LVL2_VO_10',
+  LVL2_VO_11: 'LVL2_VO_11',
   //LEVEL 3
   BACKGROUND_Stg3: 'BACKGROUND_Stg3',
   STAGE3_LOGO:'STAGE3_LOGO',
@@ -62,6 +90,9 @@ export const ASSET_KEYS = Object.freeze({
   CHAR_ARM_L: 'CHAR_ARM_L',
   CHAR_LEG_R: 'CHAR_LEG_R',
   CHAR_LEG_L: 'CHAR_LEG_L',
+  //LEVEL 3 VOICEOVER (assets/audio/Stage3/EV_Stg3_XX.mp3 — both are intro lines; rest of stage 3 VO not ready yet)
+  LVL3_VO_01: 'LVL3_VO_01',
+  LVL3_VO_02: 'LVL3_VO_02',
   //OUTRO
   BACKGROUND_OUTRO: 'BACKGROUND_OUTRO',
   //RIVE
@@ -317,6 +348,40 @@ export const AUDIO_ASSETS = [
     assetKey: ASSET_KEYS.BUBBLE_POP_SOUND,
     path: 'assets/audio/bubble_pop.wav',
   },
+
+  //LEVEL 1 VOICEOVER
+  { assetKey: ASSET_KEYS.LVL1_VO_01, path: 'assets/audio/Stage1/EV_Stg1_01.mp3' },
+  { assetKey: ASSET_KEYS.LVL1_VO_02, path: 'assets/audio/Stage1/EV_Stg1_02.mp3' },
+  { assetKey: ASSET_KEYS.LVL1_VO_03, path: 'assets/audio/Stage1/EV_Stg1_03.mp3' },
+  { assetKey: ASSET_KEYS.LVL1_VO_04, path: 'assets/audio/Stage1/EV_Stg1_04.mp3' },
+  { assetKey: ASSET_KEYS.LVL1_VO_05, path: 'assets/audio/Stage1/EV_Stg1_05.mp3' },
+  { assetKey: ASSET_KEYS.LVL1_VO_06, path: 'assets/audio/Stage1/EV_Stg1_06.mp3' },
+  { assetKey: ASSET_KEYS.LVL1_VO_07, path: 'assets/audio/Stage1/EV_Stg1_07.mp3' },
+  { assetKey: ASSET_KEYS.LVL1_VO_08, path: 'assets/audio/Stage1/EV_Stg1_08.mp3' },
+  { assetKey: ASSET_KEYS.LVL1_VO_09, path: 'assets/audio/Stage1/EV_Stg1_09.mp3' },
+  { assetKey: ASSET_KEYS.LVL1_VO_10, path: 'assets/audio/Stage1/EV_Stg1_10.mp3' },
+  { assetKey: ASSET_KEYS.LVL1_VO_11, path: 'assets/audio/Stage1/EV_Stg1_11.mp3' },
+  { assetKey: ASSET_KEYS.LVL1_VO_12, path: 'assets/audio/Stage1/EV_Stg1_12.mp3' },
+  { assetKey: ASSET_KEYS.LVL1_VO_13, path: 'assets/audio/Stage1/EV_Stg1_13.mp3' },
+  { assetKey: ASSET_KEYS.LVL1_VO_14, path: 'assets/audio/Stage1/EV_Stg1_14.mp3' },
+  { assetKey: ASSET_KEYS.LVL1_VO_15, path: 'assets/audio/Stage1/EV_Stg1_15.mp3' },
+
+  //LEVEL 2 VOICEOVER
+  { assetKey: ASSET_KEYS.LVL2_VO_01, path: 'assets/audio/Stage2/EV_Stg2_01.mp3' },
+  { assetKey: ASSET_KEYS.LVL2_VO_02, path: 'assets/audio/Stage2/EV_Stg2_02.mp3' },
+  { assetKey: ASSET_KEYS.LVL2_VO_03, path: 'assets/audio/Stage2/EV_Stg2_03.mp3' },
+  { assetKey: ASSET_KEYS.LVL2_VO_04, path: 'assets/audio/Stage2/EV_Stg2_04.mp3' },
+  { assetKey: ASSET_KEYS.LVL2_VO_05, path: 'assets/audio/Stage2/EV_Stg2_05.mp3' },
+  { assetKey: ASSET_KEYS.LVL2_VO_06, path: 'assets/audio/Stage2/EV_Stg2_06.mp3' },
+  { assetKey: ASSET_KEYS.LVL2_VO_07, path: 'assets/audio/Stage2/EV_Stg2_07.mp3' },
+  { assetKey: ASSET_KEYS.LVL2_VO_08, path: 'assets/audio/Stage2/EV_Stg2_08.mp3' },
+  { assetKey: ASSET_KEYS.LVL2_VO_09, path: 'assets/audio/Stage2/EV_Stg2_09.mp3' },
+  { assetKey: ASSET_KEYS.LVL2_VO_10, path: 'assets/audio/Stage2/EV_Stg2_10.mp3' },
+  { assetKey: ASSET_KEYS.LVL2_VO_11, path: 'assets/audio/Stage2/EV_Stg2_11.mp3' },
+
+  //LEVEL 3 VOICEOVER (only intro clips exist so far — rest of stage 3 VO not ready)
+  { assetKey: ASSET_KEYS.LVL3_VO_01, path: 'assets/audio/Stage3/EV_Stg3_01.mp3' },
+  { assetKey: ASSET_KEYS.LVL3_VO_02, path: 'assets/audio/Stage3/EV_Stg3_02.mp3' },
 ];
 
 // Rive files, preloaded as raw binary and handed to Rive as a buffer at

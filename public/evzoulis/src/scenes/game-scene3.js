@@ -4,7 +4,7 @@ import { ASSET_KEYS } from '../common/assets.js';
 import { ProgressBar } from '../common/progress-bar.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
 import { spawnRiveAnimation, removeRiveAnimation , setStateMachineInput} from '../common/rive-stage.js';
-import { showLevelIntro, showEndMessage } from '../common/level-flow.js';
+import { showLevelIntroWithVoiceover, showEndMessage } from '../common/level-flow.js';
 import { playCorrectSound, playWrongSound } from '../common/audio-manager.js';
 // const textStyleConfig = {
 //   fontSize: '40px',
@@ -116,7 +116,7 @@ export class GameScene3 extends Phaser.Scene {
   }
 
   create() {
-    showLevelIntro(this, ASSET_KEYS.STAGE3_LOGO,'Βοήθησε τον Ευζούλη να κάνει διατάσεις. Μέσω των ενδείξεων κούνησε τα χέρια και τα πόδια του ώστε να ηρεμήσει.', () => this.#startLevel());
+    showLevelIntroWithVoiceover(this, { levelNumber: 3, logoAssetKey: ASSET_KEYS.STAGE3_LOGO, onComplete: () => this.#startLevel() });
   }
 
   #startLevel() {

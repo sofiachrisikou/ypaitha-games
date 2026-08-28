@@ -4,7 +4,7 @@ import { ASSET_KEYS } from '../common/assets.js';
 import { ProgressBar } from '../common/progress-bar.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
 import { spawnRiveAnimation, removeRiveAnimation, setStateMachineInput } from '../common/rive-stage.js';
-import { showLevelIntro, showCelebrationSequence } from '../common/level-flow.js';
+import { showLevelIntroWithVoiceover, showCelebrationSequence } from '../common/level-flow.js';
 import { playCorrectSound, playWrongSound } from '../common/audio-manager.js';
 
 // const textStyleConfig = {
@@ -157,7 +157,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   create() {
-    showLevelIntro(this, ASSET_KEYS.STAGE1_LOGO,'Σβήσε το κερί', () => this.#startLevel());
+    showLevelIntroWithVoiceover(this, { levelNumber: 1, logoAssetKey: ASSET_KEYS.STAGE1_LOGO, onComplete: () => this.#startLevel() });
   }
 
   #startLevel() {

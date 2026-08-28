@@ -34,6 +34,15 @@ export const TEXT_STYLES = {
     align: 'center',
     wordWrap: { width: 320, useAdvancedWrap: true },
   },
+  // Smaller variant of SPEECH_BUBBLE — the Stage 2 persistent guide
+  // character's speech bubble (level-flow.js showPersistentGuideCharacter).
+  SPEECH_BUBBLE_SMALL: {
+    fontFamily: FONT_FAMILY,
+    fontSize: '32px',
+    color: '#A36155',
+    align: 'center',
+    wordWrap: { width: 240, useAdvancedWrap: true },
+  },
   BUBBLE_POPPED: {
     fontFamily: FONT_FAMILY,
     fontSize: '40px',
