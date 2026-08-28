@@ -16,8 +16,9 @@ export const BEAR_RIVE_MAX_DPR = 1;
  * @param {boolean} loop - default false
  * @param {boolean} isStateMachine - default true (matches your existing intro/level1 files); pass false for files like this one where the runtime reports it's a plain Animation, not a State Machine
  * @param {number} [maxDevicePixelRatio] - caps the raster resolution below the screen's real devicePixelRatio (e.g. 1 or 1.5) without changing the canvas's CSS size/position/crop — use this to cut render cost on a spot where the canvas box is much bigger than the visible artwork. Omit to use the screen's real devicePixelRatio (previous/default behavior).
+ * @param {() => void} [onReady] - called once the .riv file has actually finished loading. Rive loads asynchronously, so calling setStateMachineInput right after spawnRiveAnimation returns can fire before the state machine exists yet and throws — put any initial setStateMachineInput calls in here instead.
  */
-export function spawnRiveAnimation(buffer, name, cssClass, loop = false, isStateMachine = true, maxDevicePixelRatio) {
+export function spawnRiveAnimation(buffer, name, cssClass, loop = false, isStateMachine = true, maxDevicePixelRatio, onReady) {
   const canvas = document.getElementById('rive-stage');
   canvas.classList.add(cssClass);
 
@@ -27,7 +28,10 @@ export function spawnRiveAnimation(buffer, name, cssClass, loop = false, isState
     autoplay: true,
     ...(isStateMachine ? { stateMachines: name } : { animations: name }),
     layout: new Layout({ fit: Fit.Contain, alignment: Alignment.Center }),
-    onLoad: () => instance.resizeDrawingSurfaceToCanvas(maxDevicePixelRatio),
+    onLoad: () => {
+      instance.resizeDrawingSurfaceToCanvas(maxDevicePixelRatio);
+      onReady?.();
+    },
   });
 
   if (loop) {

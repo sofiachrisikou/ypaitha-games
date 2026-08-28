@@ -18,14 +18,6 @@ export const TEXT_STYLES = {
     strokeThickness: 6,
     wordWrap: { width: 760, useAdvancedWrap: true },
   },
-  // Text inside a bubble — thought-cloud-scene.js
-  BUBBLE: {
-    fontFamily: FONT_FAMILY,
-    fontSize: '36px',
-    color: '#000000',
-    align: 'center',
-    wordWrap: { width: 220, useAdvancedWrap: true },
-  },
   // Text inside the character's speech bubbles — intro-scene.js, outro-scene.js
   SPEECH_BUBBLE: {
     fontFamily: FONT_FAMILY,
@@ -43,9 +35,17 @@ export const TEXT_STYLES = {
     align: 'center',
     wordWrap: { width: 240, useAdvancedWrap: true },
   },
+  // Text inside a bubble — thought-cloud-scene.js - scene 2
+  BUBBLE: {
+    fontFamily: FONT_FAMILY,
+    fontSize: '32px',
+    color: '#000000',
+    align: 'center',
+    wordWrap: { width: 220, useAdvancedWrap: true },
+  },
   BUBBLE_POPPED: {
     fontFamily: FONT_FAMILY,
-    fontSize: '40px',
+    fontSize: '32px',
     color: '#2EB000',
     align: 'center',
     wordWrap: { width: 260, useAdvancedWrap: true },

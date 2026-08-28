@@ -3,7 +3,7 @@ import { SCENE_KEYS } from '../common/scene-keys.js';
 import { ASSET_KEYS } from '../common/assets.js';
 import { ProgressBar } from '../common/progress-bar.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
-import { spawnRiveAnimation, removeRiveAnimation, setStateMachineInput } from '../common/rive-stage.js';
+import { spawnRiveAnimation, removeRiveAnimation, setStateMachineInput, BEAR_RIVE_MAX_DPR, getRiveAnchorScenePosition } from '../common/rive-stage.js';
 import { showLevelIntroWithVoiceover, showCelebrationSequence } from '../common/level-flow.js';
 import { playCorrectSound, playWrongSound } from '../common/audio-manager.js';
 
@@ -15,6 +15,19 @@ import { playCorrectSound, playWrongSound } from '../common/audio-manager.js';
 // };
 
 const BEAR_STATE_MACHINE = 'StateMachine_Bear_Breathing';
+
+const TUTORIAL_RIVE_CSS_CLASS = 'rive-stage--level1-tutorial';
+const TUTORIAL_BUBBLE_SCALE = 0.35;
+const TUTORIAL_BUBBLE_OFFSET_X = -340; // pixels, negative = left of character
+const TUTORIAL_BUBBLE_OFFSET_Y = -400; // pixels, negative = above character
+
+// Placeholder until the real tutorial .riv (int-driven state machine) exists —
+// reuses the breathing character, looping idle. LVL1_VO_03/04/05, in order.
+const TUTORIAL_STEPS = [
+  { text: 'TODO: tutorial βήμα 1', audioKey: ASSET_KEYS.LVL1_VO_03, durationSeconds: 4, animationParam: 0 },
+  { text: 'TODO: tutorial βήμα 2', audioKey: ASSET_KEYS.LVL1_VO_04, durationSeconds: 4, animationParam: 1 },
+  { text: 'TODO: tutorial βήμα 3', audioKey: ASSET_KEYS.LVL1_VO_05, durationSeconds: 4, animationParam: 2 },
+];
 
 const SWIPE_STATE = {
   WAITING: 'WAITING',
@@ -47,6 +60,10 @@ export class GameScene extends Phaser.Scene {
 
   //CHARACTER
   #riveInstance;
+
+  //TUTORIAL
+  #tutorialRiveInstance;
+  #tutorialBubbleContainer;
 
   //INHALE EXHALE
   #breathImageGO;
@@ -157,7 +174,11 @@ export class GameScene extends Phaser.Scene {
   }
 
   create() {
-    showLevelIntroWithVoiceover(this, { levelNumber: 1, logoAssetKey: ASSET_KEYS.STAGE1_LOGO, onComplete: () => this.#startLevel() });
+    showLevelIntroWithVoiceover(this, {
+      levelNumber: 1,
+      logoAssetKey: ASSET_KEYS.STAGE1_LOGO,
+      onComplete: () => this.#startLevel(),
+    });
   }
 
   #startLevel() {
@@ -224,22 +245,26 @@ export class GameScene extends Phaser.Scene {
       TEXT_STYLES.DEFAULT,
     );
 
-    //Events
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
+
+    // Timer/input/main character all wait for the tutorial to finish.
+    this.#showTutorial(() => this.#beginGameplay());
+  }
+
+  /** Runs once the tutorial finishes — this is what used to be the tail of #startLevel(). */
+  #beginGameplay() {
     this.input.on(Phaser.Input.Events.POINTER_DOWN, this.#handlePointerDown, this);
     this.input.on(Phaser.Input.Events.POINTER_MOVE, this.#handlePointerMove, this);
     this.input.on(Phaser.Input.Events.POINTER_UP, this.#handlePointerUp, this);
     this.input.on(Phaser.Input.Events.POINTER_UP_OUTSIDE, this.#handlePointerUp, this);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
 
-    //timer start
-       this.#countdownTimerEvent = this.time.addEvent({
+    this.#countdownTimerEvent = this.time.addEvent({
       delay: 1000,
       callback: this.#tickCountdown,
       callbackScope: this,
       loop: true,
     });
 
-    //rive
     this.#createCharacterAnimation();
   }
 
@@ -248,6 +273,73 @@ export class GameScene extends Phaser.Scene {
     // machine is entirely event-driven from pointerdown/move/up below, and
     // the hold duration is a Timer Event. Left here so the Scene lifecycle
     // stays complete and consistent with the rest of the project.
+  }
+
+  //#endregion
+
+  //#region Tutorial
+
+  /**
+   * Walks TUTORIAL_STEPS in order: each step shows its text + plays its
+   * audio for durationSeconds, then advances. After the last step, tears
+   * down and calls onComplete (normal #startLevel()).
+   * @param {() => void} onComplete
+   */
+  #showTutorial(onComplete) {
+    const riveInstance = spawnRiveAnimation(
+      this.cache.binary.get(ASSET_KEYS.RIVE_BEAR_BREATHING),
+      BEAR_STATE_MACHINE,
+      TUTORIAL_RIVE_CSS_CLASS,
+      false,
+      true,
+      BEAR_RIVE_MAX_DPR,
+      () => {
+        setStateMachineInput(riveInstance, BEAR_STATE_MACHINE, 'IsIdle', true);
+        setStateMachineInput(riveInstance, BEAR_STATE_MACHINE, 'IsBreathing', false);
+      },
+    );
+
+    this.#tutorialRiveInstance = riveInstance;
+
+    const anchor = getRiveAnchorScenePosition(this);
+    const bubbleX = anchor.x + TUTORIAL_BUBBLE_OFFSET_X;
+    const bubbleY = anchor.y + TUTORIAL_BUBBLE_OFFSET_Y;
+    const bubbleImage = this.add.image(0, 0, ASSET_KEYS.SPEECH_BUBBLE).setScale(TUTORIAL_BUBBLE_SCALE);
+    const bubbleText = this.add.text(0, -20, TUTORIAL_STEPS[0].text, TEXT_STYLES.SPEECH_BUBBLE).setOrigin(0.5);
+    const bubbleContainer = this.add.container(bubbleX, bubbleY, [bubbleImage, bubbleText]).setDepth(1002);
+    this.#tutorialBubbleContainer = bubbleContainer;
+
+    /** @type {Phaser.Sound.BaseSound | null} */
+    let currentVoiceover = null;
+    /** @param {{ text: string, audioKey: string, durationSeconds: number, animationParam: number }} step */
+    const playStep = (step) => {
+      currentVoiceover?.stop();
+      bubbleText.setText(step.text);
+      // Real int-driven state machine, once the tutorial .riv exists:
+      // setStateMachineInput(riveInstance, BEAR_STATE_MACHINE, 'AnimationIndex', step.animationParam);
+      currentVoiceover = this.sound.add(step.audioKey);
+      currentVoiceover.play();
+    };
+
+    playStep(TUTORIAL_STEPS[0]);
+
+    let elapsedMs = 0;
+    TUTORIAL_STEPS.forEach((step, index) => {
+      elapsedMs += step.durationSeconds * 1000;
+      const nextStep = TUTORIAL_STEPS[index + 1];
+      this.time.delayedCall(elapsedMs, () => {
+        if (nextStep) {
+          playStep(nextStep);
+          return;
+        }
+        currentVoiceover?.stop();
+        bubbleContainer.destroy();
+        this.#tutorialBubbleContainer = null;
+        removeRiveAnimation(riveInstance, TUTORIAL_RIVE_CSS_CLASS);
+        this.#tutorialRiveInstance = null;
+        onComplete();
+      });
+    });
   }
 
   //#endregion
@@ -347,6 +439,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   #startBreathImageWobble() {
+    if (!this.#breathImageGO) {
+      return;
+    }
     this.#breathImageWobbleTween = this.tweens.add({
       targets: this.#breathImageGO,
       angle: { from: -4, to: 4 },
@@ -379,6 +474,9 @@ export class GameScene extends Phaser.Scene {
       duration: 450,
       ease: 'Sine.easeIn',
       onComplete: () => {
+        if (!this.#breathImageGO) {
+          return;
+        }
         const nextKey =
           this.#breathImageGO.texture.key === ASSET_KEYS.INHALE ? ASSET_KEYS.EXHALE : ASSET_KEYS.INHALE;
         this.#breathImageGO.setTexture(nextKey);
@@ -451,7 +549,12 @@ export class GameScene extends Phaser.Scene {
       }
 
       if (this.#isWithinEndZone(pointer)) {
-        this.#startHold();
+        // OUT counts the instant it reaches the target — no hold. IN still holds.
+        if (this.#currentBreathDirection === BREATH_DIRECTION.OUT) {
+          this.#handleBreathSuccess();
+        } else {
+          this.#startHold();
+        }
       }
       return;
     }
@@ -761,6 +864,17 @@ export class GameScene extends Phaser.Scene {
     if (this.#riveInstance) {
       removeRiveAnimation(this.#riveInstance, 'rive-stage--level1');
       this.#riveInstance = null;
+    }
+
+    // Covers leaving mid-tutorial (e.g. scene restarted before it finished) —
+    // the shared #rive-stage canvas would otherwise be left bound to it.
+    if (this.#tutorialBubbleContainer) {
+      this.#tutorialBubbleContainer.destroy();
+      this.#tutorialBubbleContainer = null;
+    }
+    if (this.#tutorialRiveInstance) {
+      removeRiveAnimation(this.#tutorialRiveInstance, TUTORIAL_RIVE_CSS_CLASS);
+      this.#tutorialRiveInstance = null;
     }
   }
 

@@ -91,14 +91,22 @@ body,
 }
 
 /* Level 2 gameplay-only guide (level-flow.js showPersistentGuideCharacter) —
-   reads --char-guide-* above. Also see GUIDE_SCALE in level-flow.js, which
-   independently scales the character's SPEECH BUBBLE to match (the bubble
-   isn't CSS, it's a Phaser game object, so it needs its own number, but
-   GUIDE_SCALE is the one place to change both together). */
+   reads --char-guide-* above. Bubble scale/position is separate, in
+   level-flow.js (GUIDE_BUBBLE_SCALE/OFFSET_X/OFFSET_Y). */
 .rive-stage--level-guide {
   width: var(--char-guide-scale);
   height: var(--char-guide-scale);
   left: var(--char-guide-left);
   top: var(--char-guide-top);
+  transform: translate(-50%, -50%);
+}
+
+/* Stage 1 tutorial character (game-scene.js #showTutorial) — plain numbers,
+   no shared variables, since nothing else needs to match this one. */
+.rive-stage--level1-tutorial {
+  width: 145%;
+  height: 145%;
+  left: 80%;
+  top: 75%;
   transform: translate(-50%, -50%);
 }

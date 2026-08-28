@@ -95,6 +95,8 @@ export const ASSET_KEYS = Object.freeze({
   LVL3_VO_02: 'LVL3_VO_02',
   //OUTRO
   BACKGROUND_OUTRO: 'BACKGROUND_OUTRO',
+  OUTRO_VO_01:'OUTRO_VO_01',
+  OUTRO_VO_02:'OUTRO_VO_02',
   //RIVE
   RIVE_BEAR_INTRO: 'RIVE_BEAR_INTRO',
   RIVE_BEAR_BREATHING: 'RIVE_BEAR_BREATHING',
@@ -382,6 +384,10 @@ export const AUDIO_ASSETS = [
   //LEVEL 3 VOICEOVER (only intro clips exist so far — rest of stage 3 VO not ready)
   { assetKey: ASSET_KEYS.LVL3_VO_01, path: 'assets/audio/Stage3/EV_Stg3_01.mp3' },
   { assetKey: ASSET_KEYS.LVL3_VO_02, path: 'assets/audio/Stage3/EV_Stg3_02.mp3' },
+
+  //LEVEL 3 VOICEOVER (only intro clips exist so far — rest of stage 3 VO not ready)
+  { assetKey: ASSET_KEYS.OUTRO_VO_01, path: 'assets/audio/Outro/EV_Outro_01.mp3' },
+  { assetKey: ASSET_KEYS.OUTRO_VO_02, path: 'assets/audio/Outro/EV_Outro_02.mp3' },
 ];
 
 // Rive files, preloaded as raw binary and handed to Rive as a buffer at
