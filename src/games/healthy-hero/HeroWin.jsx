@@ -33,11 +33,13 @@ export default function HeroWin({ className = '' }) {
     const svg = hostRef.current && hostRef.current.querySelector('svg')
     if (!svg) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    // Πιο ήρεμο pump, συγχρονισμένο με το χοροπηδητό (CSS hero-win-hop):
+    // γροθιές ψηλά στο άλμα, κάτω στην προσγείωση.
     let up = true
     iv.current = setInterval(() => {
       up = !up
       show(svg, [...BASE, ...(up ? UP : DOWN)])
-    }, 260)
+    }, 400)
     return () => clearInterval(iv.current)
   }, [])
 

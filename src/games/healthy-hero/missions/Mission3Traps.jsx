@@ -3,6 +3,7 @@ import { TRAP_ITEMS, BG_IMG, TRAP_TIME, TRAP_POINTS } from '../data/traps.js'
 import { playCorrect, playWrong, playWin } from '../../../services/sound.js'
 import { speak } from '../../../services/voice.js'
 import HeroWin from '../HeroWin.jsx'
+import Confetti from '../Confetti.jsx'
 
 const TRAPS_TOTAL = TRAP_ITEMS.filter((f) => !f.healthy).length
 const COLS = [250, 540, 830]
@@ -129,6 +130,7 @@ export default function Mission3Traps({ addScore, onProgress, onReaction, onNext
 
       {finished && (
         <div className="reward-overlay">
+          {finished === 'win' && <Confetti />}
           <div className="reward-overlay__card">
             {finished === 'win' ? (
               <HeroWin className="reward-overlay__hero" />

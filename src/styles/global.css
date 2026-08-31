@@ -1589,12 +1589,34 @@ button {
   position: absolute;
   inset: 0;
 }
-/* Κίνηση νίκης μέσα στα pop-up */
+/* Κίνηση νίκης μέσα στα pop-up: ο ήρωας χοροπηδάει (με μικρό squash) */
 .hero-win svg {
   width: 100%;
   height: auto;
   display: block;
   overflow: visible;
+  transform-origin: 50% 100%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-win svg {
+    animation: hero-win-hop 0.8s ease-in-out infinite;
+  }
+}
+@keyframes hero-win-hop {
+  0% { transform: translateY(0) scaleY(1); }
+  12% { transform: translateY(0) scaleY(0.9); } /* μάζεμα πριν το άλμα */
+  42% { transform: translateY(-46px) scaleY(1.05); } /* άλμα */
+  68% { transform: translateY(0) scaleY(0.94); } /* προσγείωση */
+  82% { transform: translateY(0) scaleY(1.02); }
+  100% { transform: translateY(0) scaleY(1); }
+}
+/* Κομφετί γύρω από τα pop-up νίκης */
+.confetti--win {
+  z-index: 1;
+}
+.confetti--win i {
+  width: 18px;
+  height: 26px;
 }
 .reward-overlay__hero {
   width: 300px;

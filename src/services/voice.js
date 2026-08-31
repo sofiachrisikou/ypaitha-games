@@ -45,7 +45,7 @@ export const CLIPS = {
   'HH-30': 'Σ’ ευχαριστώ, ήρωα! Τα λέμε!',
 }
 
-function ttsFallback(text, onEnd) {
+function ttsFallback(text, onEnd, onActive) {
   try {
     const synth = window.speechSynthesis
     if (!synth) return onEnd && onEnd()
@@ -54,10 +54,9 @@ function ttsFallback(text, onEnd) {
     u.lang = 'el-GR'
     u.rate = 1.0
     u.pitch = 1.15
-    if (onEnd) {
-      u.onend = () => onEnd()
-      u.onerror = () => onEnd()
-    }
+    u.onstart = () => onActive && onActive() // το TTS ξεκίνησε -> περίμενε να ΤΕΛΕΙΩΣΕΙ η ατάκα
+    u.onend = () => onEnd && onEnd()
+    u.onerror = () => onEnd && onEnd()
     synth.speak(u)
   } catch {
     onEnd && onEnd()
@@ -145,20 +144,28 @@ export function speak(key, onEnd) {
   // ηχογραφημένο VO ΚΑΙ το TTS του browser δεν παίζει/δεν τελειώνει, χωρίς αυτό
   // η ροή θα κολλούσε (π.χ. δεν ολοκληρώνεται το στάδιο μετά το τελευταίο τρόφιμο).
   let done = false
+  let timer = null
   const finish = () => {
     if (done) return
     done = true
-    clearTimeout(safety)
+    clearTimeout(timer)
     onEnd && onEnd()
   }
-  // Ασφαλές όριο ανάλογο του μήκους της ατάκας· ακυρώνεται αν παίξει πραγματικό αρχείο.
-  const est = Math.min(4500, Math.max(1200, text.length * 70))
-  const safety = setTimeout(finish, est)
+  // Αν ΔΕΝ παίξει τίποτα (π.χ. iPhone χωρίς VO ούτε TTS), προχώρα μετά από estIdle.
+  const estIdle = Math.min(2600, Math.max(700, text.length * 45))
+  // Μόλις αρχίσει πραγματικός ήχος ή το TTS, περίμενε να ΤΕΛΕΙΩΣΕΙ η ατάκα· το
+  // estActive είναι απλώς backstop ώστε να μην κολλήσει αν δεν έρθει το 'ended'.
+  const estActive = Math.min(9000, Math.max(2500, text.length * 130 + 1800))
+  timer = setTimeout(finish, estIdle)
+  const active = () => {
+    clearTimeout(timer)
+    timer = setTimeout(finish, estActive)
+  }
 
   playFirst(
     [`${BASE}/${key}.mp3`, `${BASE}/${key}.wav`],
-    () => ttsFallback(text, finish),
+    () => ttsFallback(text, finish, active),
     finish,
-    () => clearTimeout(safety),
+    active,
   )
 }

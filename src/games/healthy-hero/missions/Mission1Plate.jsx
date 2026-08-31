@@ -4,6 +4,7 @@ import { STAGE_W } from '../../../components/Stage.jsx'
 import { playCorrect, playWrong, playWin } from '../../../services/sound.js'
 import { speak } from '../../../services/voice.js'
 import HeroWin from '../HeroWin.jsx'
+import Confetti from '../Confetti.jsx'
 
 // Γεωμετρία (συντεταγμένες stage 1080x1920)
 const CX = 540
@@ -183,6 +184,7 @@ export default function Mission1Plate({ addScore, onProgress, onReaction, onComp
 
       {won && (
         <div className="reward-overlay">
+          <Confetti />
           <div className="reward-overlay__card">
             <HeroWin className="reward-overlay__hero" />
             <h2 className="reward-overlay__title">Αποστολή 1 ολοκληρώθηκε!</h2>
