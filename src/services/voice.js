@@ -66,7 +66,7 @@ function ttsFallback(text, onEnd) {
 
 // Δοκιμάζει μια λίστα από URLs με τη σειρά· αν αποτύχουν όλα -> onFail().
 // onEnd() καλείται όταν τελειώσει το VO (για συγχρονισμό, π.χ. μετάβαση οθόνης).
-function playFirst(urls, onFail, onEnd) {
+function playFirst(urls, onFail, onEnd, onRealPlay) {
   let i = 0
   const tryNext = () => {
     if (i >= urls.length) return onFail()
@@ -82,6 +82,7 @@ function playFirst(urls, onFail, onEnd) {
       a.volume = 0.95
       a.addEventListener('playing', () => {
         advanced = true // παίζει κανονικό αρχείο -> τέλος
+        onRealPlay && onRealPlay() // ακύρωσε το safety timeout — περιμένουμε το 'ended'
       })
       a.addEventListener('ended', () => onEnd && onEnd())
       a.addEventListener('error', next)
@@ -139,5 +140,25 @@ export function speak(key, onEnd) {
   if (isMuted()) return onEnd && onEnd()
   const text = CLIPS[key]
   if (!text) return onEnd && onEnd()
-  playFirst([`${BASE}/${key}.mp3`, `${BASE}/${key}.wav`], () => ttsFallback(text, onEnd), onEnd)
+
+  // Το onEnd πρέπει να κληθεί ΠΑΝΤΑ (μία φορά). Σε iPhone/κινητά που δεν υπάρχει
+  // ηχογραφημένο VO ΚΑΙ το TTS του browser δεν παίζει/δεν τελειώνει, χωρίς αυτό
+  // η ροή θα κολλούσε (π.χ. δεν ολοκληρώνεται το στάδιο μετά το τελευταίο τρόφιμο).
+  let done = false
+  const finish = () => {
+    if (done) return
+    done = true
+    clearTimeout(safety)
+    onEnd && onEnd()
+  }
+  // Ασφαλές όριο ανάλογο του μήκους της ατάκας· ακυρώνεται αν παίξει πραγματικό αρχείο.
+  const est = Math.min(4500, Math.max(1200, text.length * 70))
+  const safety = setTimeout(finish, est)
+
+  playFirst(
+    [`${BASE}/${key}.mp3`, `${BASE}/${key}.wav`],
+    () => ttsFallback(text, finish),
+    finish,
+    () => clearTimeout(safety),
+  )
 }
