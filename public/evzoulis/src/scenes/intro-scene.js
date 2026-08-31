@@ -288,8 +288,9 @@ export class IntroScene extends Phaser.Scene {
     const bubbleY = height/2 + 200;
 
     const bubbleImage = this.add.image(0, 0, ASSET_KEYS.SPEECH_BUBBLE).setScale(0.35);
-    const bubbleText = this.add.text(0, -20, 'ΘΑ ΜΕ ΒΟΗΘΗΣΕΙΣ ;', TEXT_STYLES.SPEECH_BUBBLE).setOrigin(0.5);
+    const bubbleText = this.add.text(0, -20, 'Γεια σου! Είμαι ο Ευζούλης.', TEXT_STYLES.SPEECH_BUBBLE).setOrigin(0.5);
     this.add.container(bubbleX - 330, bubbleY, [bubbleImage, bubbleText]);
+    this.sound.add(ASSET_KEYS.EZ_01).play();
 
     const levelButtonX = bubbleX - 500;
     const levelButtonY = bubbleY + 600

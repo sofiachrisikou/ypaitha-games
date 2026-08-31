@@ -4,30 +4,42 @@ import { ASSET_KEYS } from '../common/assets.js';
 import { THOUGHT_CLOUD_LIST } from '../common/thought-cloud-data.js';
 import { ProgressBar } from '../common/progress-bar.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
-import { showLevelIntroWithVoiceover, showCelebrationSequence, showPersistentGuideCharacter } from '../common/level-flow.js';
+import { createAnimatedCharacter } from '../common/level-flow.js';
 import { playBadMoveFeedback, playBubblePopSound } from '../common/audio-manager.js';
-import { CHARACTER_LINES } from '../common/character-lines.js';
 
-// const textStyleConfig = {
-//   fontSize: '40px',
-//   color: '#043D8C',
-//   stroke: '#ffffff',
-//   strokeThickness: 6,
-// };
 
-// const bubbleTextStyleConfig = {
-//   fontSize: '30px',
-//   color: '#000000',
-//   align: 'center',
-//   wordWrap: { width: 220, useAdvancedWrap: true },
-// };
+// Stage 2's one persistent character — same rive file as Stage 1, for testing
+const STAGE2_CHARACTER_CONFIG = {
+  riveAssetKey: ASSET_KEYS.RIVE_BEAR_Stg2,
+  stateMachineName: 'Euzoulis_StateMachine',
+  animParamName: 'clipIndex',
+  idleParam: 0,
+};
 
-// const bubblePoppedTextStyleConfig = {
-//   fontSize: '30px',
-//   color: '#2EB000',
-//   align: 'center',
-//   wordWrap: { width: 220, useAdvancedWrap: true },
-// };
+// Three spots — intro, gameplay, outro — each independently adjustable.
+// bubbleX/Y are plain absolute scene coordinates, not computed from anything.
+const STAGE2_POSITION_INTRO = { cssClass: 'rive-stage--stg1-character-intro', bubbleScale: 0.35, bubbleX: 300, bubbleY: 800, textStyle: TEXT_STYLES.SPEECH_BUBBLE };
+const STAGE2_POSITION_GAMEPLAY = { cssClass: 'rive-stage--stg2-character-gameplay', bubbleScale: 0.26, bubbleX: 650, bubbleY: 1650, textStyle: TEXT_STYLES.SPEECH_BUBBLE_SMALL };
+const STAGE2_POSITION_OUTRO = { cssClass: 'rive-stage--stg2-character-gameplay', bubbleScale: 0.26, bubbleX: 759, bubbleY: 1424, textStyle: TEXT_STYLES.SPEECH_BUBBLE_SMALL };
+
+// animationParam: 1=intro (same value both lines for now, adjust freely)
+const STAGE2_INTRO_STEPS = [
+  { animationParam: 19, audioKey: ASSET_KEYS.EZ_18, durationSeconds: 7, text: 'ΣΤΑΔΙΟ 2 — Οι δύσκολες σκέψεις' },
+];
+// Played once gameplay has started and the bubbles are already on screen, on the scaled-down gameplay character — not during the intro card.
+const STAGE2_GAMEPLAY_HINT_STEP = { animationParam: 20, audioKey: ASSET_KEYS.EZ_19, durationSeconds: 4, text: 'Άγγιξε τα γκρίζα συννεφάκια με τις δύσκολες σκέψεις.' };
+const STAGE2_OUTRO_STEPS = [
+  { animationParam: 29, audioKey: ASSET_KEYS.EZ_28, durationSeconds: 10, text: 'Οι δύσκολες σκέψεις έγιναν πιο ελαφριές!' },
+];
+// Fixed clip played instead of a random good-move pick at STAGE2_MILESTONE_POP_COUNT pops (6/8)
+const STAGE2_MILESTONE_POP_COUNT = 6;
+const STAGE2_MILESTONE_STEP = { animationParam: 28, audioKey: ASSET_KEYS.EZ_27, durationSeconds: 4, text: 'Ποπς: 6 / 8' };
+// Good-move feedback: same text/audio as before, animationParam borrowed from Stage 1's good-move clips (11/12/13)
+const STAGE2_GOOD_MOVE_STEPS = [
+  { animationParam: 21, audioKey: ASSET_KEYS.EZ_20, durationSeconds: 3 },
+  { animationParam: 21, audioKey: ASSET_KEYS.EZ_21, durationSeconds: 5 },
+  { animationParam: 21, audioKey: ASSET_KEYS.EZ_22, durationSeconds: 3 },
+];
 
 const BUBBLE_STATE = {
   BAD: 'BAD',
@@ -69,13 +81,16 @@ export class GameScene2 extends Phaser.Scene {
   #burstFrameRate;
 
   //CHARACTER
-  #guideCharacter;
+  #character;
+  #introBg;
+  #introLogo;
 
   //GAMEPLAY
   #gameDurationSeconds;
   #scorePerSecond;
   #poppedCount;
   #score;
+  #inputLocked;
   #debug;
 
   //TIMER
@@ -131,6 +146,7 @@ export class GameScene2 extends Phaser.Scene {
     this.#scorePerSecond = 10;
     this.#poppedCount = 0;
     this.#score = 0;
+    this.#inputLocked = false;
     this.#remainingSeconds = this.#gameDurationSeconds;
     this.#isLevelComplete = false;
     this.#isGameOver = false;
@@ -143,7 +159,37 @@ export class GameScene2 extends Phaser.Scene {
   }
 
   create() {
-    showLevelIntroWithVoiceover(this, { levelNumber: 2, logoAssetKey: ASSET_KEYS.STAGE2_LOGO, onComplete: () => this.#startLevel() });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
+    this.#showIntroBackground();
+    // Rive loads asynchronously — wait for onReady before setting any animation param
+    this.#character = createAnimatedCharacter(this, STAGE2_CHARACTER_CONFIG, STAGE2_POSITION_INTRO, () => {
+      this.#character.setAnimationParam(0);
+      this.time.delayedCall(100, () => {
+        this.#character.playSequence(STAGE2_INTRO_STEPS, () => {
+          this.#hideIntroBackground();
+          this.#character.moveTo(STAGE2_POSITION_GAMEPLAY);
+          this.#startLevel();
+        });
+      });
+    });
+  }
+
+  #showIntroBackground() {
+    const { width, height } = this.scale;
+    this.#introBg = this.add.image(width / 2, height / 2, ASSET_KEYS.BACKGROUND_GENERIC).setDepth(1000);
+    this.#introLogo = this.add.image(width / 2, height * 0.12, ASSET_KEYS.STAGE2_LOGO).setDepth(1001).setScale(0.55);
+  }
+
+  #hideIntroBackground() {
+    this.#introBg?.destroy();
+    this.#introLogo?.destroy();
+    this.#introBg = null;
+    this.#introLogo = null;
+  }
+
+  #handleShutdown() {
+    this.#hideIntroBackground();
+    this.#character?.destroy();
   }
 
   #startLevel() {
@@ -203,14 +249,13 @@ export class GameScene2 extends Phaser.Scene {
     this.#topSpawnExclusionY = Math.max(this.#levelProgressBar.getBounds().bottom, this.#progressTextGO.getBounds().bottom) + 30;
 
     // Reserve room at the bottom for the guide character + speech bubble so
-    // clouds never spawn behind it — rough fraction of screen height. Now
-    // that the character sits lower/more off-screen (style.css), it needs
-    // less reserved space than before; tune this fraction as you go.
+    // clouds never spawn behind it — rough fraction of screen height; tune
+    // this fraction as you go.
     this.#bottomSpawnExclusionHeight = height * 0.15;
-    this.#guideCharacter = showPersistentGuideCharacter(this);
 
     this.#spawnAllBubbles();
 
+    this.#character.playFeedback(STAGE2_GAMEPLAY_HINT_STEP);
   }
 
   update(time, delta) {
@@ -349,6 +394,9 @@ export class GameScene2 extends Phaser.Scene {
     if (bubbleData.state !== BUBBLE_STATE.BAD) {
       return;
     }
+    if (this.#inputLocked) {
+      return;
+    }
     bubbleData.state = BUBBLE_STATE.POPPED;
     bubbleData.container.disableInteractive();
 
@@ -369,8 +417,19 @@ export class GameScene2 extends Phaser.Scene {
 
     if (this.#poppedCount >= this.#totalBubbles) {
       this.#handleLevelComplete();
+      return;
     }
-    this.#guideCharacter.speakRandomFrom(CHARACTER_LINES[2].goodMove);
+    // Lock bubble-popping until this feedback clip actually finishes, so a
+    // fast next pop can't cancel it early — same fix as Stage 1's swipe input.
+    this.#inputLocked = true;
+    const onFeedbackDone = () => {
+      this.#inputLocked = false;
+    };
+    if (this.#poppedCount === STAGE2_MILESTONE_POP_COUNT) {
+      this.#character.playFeedback(STAGE2_MILESTONE_STEP, onFeedbackDone);
+    } else {
+      this.#character.playFeedback(Phaser.Utils.Array.GetRandom(STAGE2_GOOD_MOVE_STEPS), onFeedbackDone);
+    }
   }
 
   /** Only called on game-over — level-complete means every bubble is already popped */
@@ -464,22 +523,15 @@ export class GameScene2 extends Phaser.Scene {
    */
   #endLevel(message, isSuccess) {
     this.#stopTimers();
-    this.#disableLevelVisuals();
 
-    showCelebrationSequence(this, {
-      message,
-      levelNumber: 2,
-      isSuccess,
-      onComplete: () => this.#goToNextLevel(),
-    });
-  }
-
-  /** Frees the shared #rive-stage canvas before showCelebrationSequence spawns its own bear on it. */
-  #disableLevelVisuals() {
-    this.#guideCharacter?.destroy();
+    // message/isSuccess aren't used yet — STAGE2_OUTRO_STEPS is one fixed
+    // sequence for now; a win/lose distinction can branch this later.
+    this.#character.moveTo(STAGE2_POSITION_OUTRO);
+    this.#character.playSequence(STAGE2_OUTRO_STEPS, () => this.#goToNextLevel());
   }
 
   #goToNextLevel() {
+    this.#character.destroy();
     this.scene.start(SCENE_KEYS.EUZOYLIS_GAME_SCENE3);
     //this.input.once(Phaser.Input.Events.POINTER_DOWN, () => {});
   }

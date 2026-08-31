@@ -3,7 +3,6 @@ import { SCENE_KEYS } from '../common/scene-keys.js';
 import { ASSET_KEYS } from '../common/assets.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
 import { spawnRiveAnimation, removeRiveAnimation, BEAR_RIVE_MAX_DPR } from '../common/rive-stage.js';
-import { playLevelSuccessFeedback } from '../common/audio-manager.js';
 
 // const speechBubbleTextStyleConfig = {
 //   fontSize: '32px',
@@ -11,6 +10,12 @@ import { playLevelSuccessFeedback } from '../common/audio-manager.js';
 //   align: 'center',
 //   wordWrap: { width: 260, useAdvancedWrap: true },
 // };
+
+// Final "whole game is done" message — two spoken lines, one bubble.
+const OUTRO_LINES = [
+  { text: 'Η τάξη ηρέμησε!', audioKey: ASSET_KEYS.EZ_39, durationSeconds: 6 },
+  { text: 'Ανάσα • Καλή σκέψη • Τέντωμα', audioKey: ASSET_KEYS.EZ_40, durationSeconds: 8 },
+];
 
 export class OutroScene extends Phaser.Scene {
   //TIMING
@@ -51,8 +56,11 @@ export class OutroScene extends Phaser.Scene {
 
     this.time.delayedCall(this.#characterAppearDelayMs, this.#showCharacterMessage, [], this);
 
+    const outroLinesTotalMs = OUTRO_LINES.reduce((sum, line) => sum + line.durationSeconds * 1000, 0);
+    // Extra breathing room so the goodbye audio isn't cropped before the voting page loads.
+    const votingPageTransitionBufferMs = 3000;
     this.time.delayedCall(
-      this.#characterAppearDelayMs + 8000,
+      this.#characterAppearDelayMs + outroLinesTotalMs + votingPageTransitionBufferMs,
       () => {
         // αλεξ εκανα το redirect για την σελιδα αξιολογησης εγω - σοφια
         window.parent.postMessage({ type: 'evzoulis:done' }, '*');
@@ -98,14 +106,9 @@ export class OutroScene extends Phaser.Scene {
     const bubbleY = height/2 + 80
 
     this.#createOutroCharacterAnimation();
-    // level 3's completion moment — game-scene3.js no longer celebrates on its own
-    playLevelSuccessFeedback(this, 3);
 
-    // TODO: replace with your real "well done" copy
     const bubbleImage = this.add.image(0, 0, ASSET_KEYS.SPEECH_BUBBLE).setScale(0.35);
-    const bubbleText = this.add
-      .text(0, -20, 'ΜΠΡΑΒΟ! ΤΑ ΚΑΤΑΦΕΡΕΣ!', TEXT_STYLES.SPEECH_BUBBLE)
-      .setOrigin(0.5);
+    const bubbleText = this.add.text(0, -20, '', TEXT_STYLES.SPEECH_BUBBLE).setOrigin(0.5);
     const bubbleContainer = this.add.container(bubblex - 260, bubbleY, [bubbleImage, bubbleText]).setAlpha(0);
 
     this.tweens.add({
@@ -113,6 +116,23 @@ export class OutroScene extends Phaser.Scene {
       alpha: 1,
       duration: this.#characterFadeInDurationMs,
       ease: 'Sine.easeOut',
+    });
+
+    this.#playOutroLines(bubbleText);
+  }
+
+  /** Plays OUTRO_LINES in order, each its own audio + bubble text for its own durationSeconds. */
+  #playOutroLines(bubbleText) {
+    let currentVoiceover = null;
+    let elapsedMs = 0;
+    OUTRO_LINES.forEach((line) => {
+      this.time.delayedCall(elapsedMs, () => {
+        currentVoiceover?.stop();
+        bubbleText.setText(line.text);
+        currentVoiceover = this.sound.add(line.audioKey);
+        currentVoiceover.play();
+      });
+      elapsedMs += line.durationSeconds * 1000;
     });
   }
 

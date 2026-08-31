@@ -50,6 +50,13 @@ export const TEXT_STYLES = {
     align: 'center',
     wordWrap: { width: 260, useAdvancedWrap: true },
   },
+  // Wobbling breath prompt (inhale/hold/exhale) — game-scene.js
+  BREATH_PROMPT: {
+    fontFamily: FONT_FAMILY,
+    fontSize: '48px',
+    color: '#A36155',
+    align: 'center',
+  },
 
 };
 

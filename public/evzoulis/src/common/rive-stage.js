@@ -48,6 +48,20 @@ export function removeRiveAnimation(riveInstance, cssClass) {
   canvas.classList.remove(cssClass);
 }
 
+/**
+ * Moves an already-spawned character to a different spot/size by swapping
+ * which CSS class is applied to the shared canvas — no respawn needed.
+ * @param {string} newCssClass
+ * @param {string} [oldCssClass]
+ */
+export function setRiveCssClass(newCssClass, oldCssClass) {
+  const canvas = /** @type {HTMLElement} */ (document.getElementById('rive-stage'));
+  if (oldCssClass) {
+    canvas.classList.remove(oldCssClass);
+  }
+  canvas.classList.add(newCssClass);
+}
+
 //#endregion
 
 //#region Anchor Position
