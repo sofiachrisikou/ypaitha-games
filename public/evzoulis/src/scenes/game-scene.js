@@ -3,18 +3,64 @@ import { SCENE_KEYS } from '../common/scene-keys.js';
 import { ASSET_KEYS } from '../common/assets.js';
 import { ProgressBar } from '../common/progress-bar.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
-import { spawnRiveAnimation, removeRiveAnimation, setStateMachineInput } from '../common/rive-stage.js';
-import { showLevelIntroWithVoiceover, showCelebrationSequence } from '../common/level-flow.js';
-import { playCorrectSound, playWrongSound } from '../common/audio-manager.js';
+import { createAnimatedCharacter } from '../common/level-flow.js';
+import { playCorrectSound, playWrongSound, playBreathInSound, playBreathOutSound } from '../common/audio-manager.js';
 
-// const textStyleConfig = {
-//   fontSize: '40px',
-//   color: '#043D8C',
-//   stroke: '#ffffff',
-//   strokeThickness: 6,
-// };
 
-const BEAR_STATE_MACHINE = 'StateMachine_Bear_Breathing';
+
+// Stage 1's one persistent character, alive for intro/tutorial/gameplay/outro
+const STAGE1_CHARACTER_CONFIG = {
+  riveAssetKey: ASSET_KEYS.RIVE_BEAR_Stg1,
+  stateMachineName: 'Euzoulis_StateMachine',
+  animParamName: 'clipIndex',
+  idleParam: 0,
+};
+const STAGE1_IDLE_PARAM = 0;
+const STAGE1_BREATHE_IN_PARAM = 8;
+const STAGE1_HOLD_PARAM = 9;
+const STAGE1_BREATHE_OUT_PARAM = 10;
+
+// Three spots for the character + bubble — intro, main (tutorial+gameplay),
+// outro — each independently adjustable. bubbleX/Y are plain absolute
+// scene coordinates, not computed from anything.
+const STAGE1_POSITION_INTRO = { cssClass: 'rive-stage--stg1-character-intro', bubbleScale: 0.35, bubbleX: 300, bubbleY: 800, textStyle: TEXT_STYLES.SPEECH_BUBBLE };
+const STAGE1_POSITION_MAIN = { cssClass: 'rive-stage--stg1-character', bubbleScale: 0.35, bubbleX: 400, bubbleY: 560, textStyle: TEXT_STYLES.SPEECH_BUBBLE };
+const STAGE1_POSITION_OUTRO = { cssClass: 'rive-stage--stg1-character', bubbleScale: 0.35, bubbleX: 400, bubbleY: 560, textStyle: TEXT_STYLES.SPEECH_BUBBLE };
+
+// animationParam: 1=intro, 4/5/6=tutorial steps, 7=ready-check (waits for the start button), 8/9/10=breathe in/hold/out
+const STAGE1_INTRO_STEPS = [
+  { animationParam: 1, audioKey: ASSET_KEYS.EZ_02, durationSeconds: 4, text: 'ΣΤΑΔΙΟ 1 — Η ανάσα μου' },
+];
+const STAGE1_TUTORIAL_STEPS = [
+  { animationParam: 4, audioKey: ASSET_KEYS.EZ_03, durationSeconds: 6, text: '1. Σύρε προς τα ΠΑΝΩ και πάρε ανάσα' },
+  { animationParam: 5, audioKey: ASSET_KEYS.EZ_04, durationSeconds: 6, text: '2. ΚΡΑΤΑ 2 δευτερόλεπτα, μέχρι να πρασινίσει' },
+  { animationParam: 6, audioKey: ASSET_KEYS.EZ_05, durationSeconds: 7, text: '3. Σύρε προς τα ΚΑΤΩ και φύσα αργά' },
+  // waitForButton: no durationSeconds — spawns a Start button instead, advances on click. x/y here are also plain, adjustable numbers.
+  { animationParam: 7, audioKey: ASSET_KEYS.EZ_06, text: 'ΠΑΜΕ!', waitForButton: { assetKey: ASSET_KEYS.BTN1, x: 540, y: 1632, scale: 0.45 } },
+];
+// TODO: real animationParam — placeholder (2 is unused so far)
+const STAGE1_OUTRO_STEPS = [
+  { animationParam: 2, audioKey: ASSET_KEYS.EZ_17, durationSeconds: 7, text: 'Τα κατάφερες!' },
+];
+
+// Good-move feedback: one picked at random after every successful breath
+const STAGE1_GOOD_MOVE_STEPS = [
+  { animationParam: 11, audioKey: ASSET_KEYS.EZ_10, durationSeconds: 3 },
+  { animationParam: 12, audioKey: ASSET_KEYS.EZ_11, durationSeconds: 3 },
+  { animationParam: 13, audioKey: ASSET_KEYS.EZ_12, durationSeconds: 3 },
+];
+// Fixed clip played instead of a random good-move pick at breathsCompleted === 4 (2/3 of 6)
+const STAGE1_MILESTONE_STEP = { animationParam: 18, audioKey: ASSET_KEYS.EZ_16, durationSeconds: 5, text: 'Αναπνοές: 4 / 6' };
+// Bad-move feedback: released/drifted out of the hold vs wrong swipe direction
+const STAGE1_BAD_MOVE_HOLD_STEP = { animationParam: 15, audioKey: ASSET_KEYS.EZ_14, durationSeconds: 4, text: 'Κράτα λίγο ακόμη' };
+const STAGE1_BAD_MOVE_DIRECTION_STEP = { animationParam: 16, audioKey: ASSET_KEYS.EZ_15, durationSeconds: 4, text: 'Ξανά, μαζί!' };
+
+// Wobbling breath prompt at the bottom of the screen (replaces the old INHALE/EXHALE image)
+const BREATH_TEXT = {
+  INHALE: 'ΕΙΣΠΝΟΗ — σύρε πάνω',
+  HOLD: 'ΚΡΑΤΑ — μέχρι να πρασινίσει',
+  EXHALE: 'ΕΚΠΝΟΗ — σύρε κάτω',
+};
 
 const SWIPE_STATE = {
   WAITING: 'WAITING',
@@ -45,16 +91,17 @@ export class GameScene extends Phaser.Scene {
   #flowerStage2Threshold;
   #flowerStage3Threshold;
 
-  //CHARACTER
-  #riveInstance;
+  //STAGE 1 CHARACTER
+  #character;
+  #introBg;
+  #introLogo;
 
-  //INHALE EXHALE
-  #breathImageGO;
-  #breathImageBaseScale;
-  #breathImageStartY;
-  #breathImageEndY;
-  #breathImageWobbleTween;
-  #breathImageTransitionTween;
+  //GAMEPLAY UI (arrow + target circles — created on Start button, hidden at level complete)
+  #targetCirclesGO;
+
+  //BREATH PROMPT
+  #breathPromptGO;
+  #breathPromptWobbleTween;
 
   //GAMEPLAY
   #swipeState;
@@ -74,6 +121,7 @@ export class GameScene extends Phaser.Scene {
   #swipeGestureBarWidth;
   #requiredBreaths;
   #maxFailedBreaths;
+  #inputLocked;
   #debug;
 
   //TIMER
@@ -112,8 +160,8 @@ export class GameScene extends Phaser.Scene {
     this.#maxSwipeHorizontalDrift = 110;
     this.#swipeBackslideTolerance = 40;
     this.#swipeHoldDurationMs = 2000;
-    // "after 1 second the flame comes back"
-    this.#candleRelightDelayMs = 1000;
+    // "after 2 seconds the flame comes back" (bumped from 1s — stay out at least a second longer)
+    this.#candleRelightDelayMs = 2000;
     // Sizes are ratios, not pixels, so this stays correct regardless of the
     // real dimensions of whatever PNGs get loaded into these texture keys.
     this.#swipeArrowHeightRatio = 0.09; // fraction of screen height
@@ -125,6 +173,7 @@ export class GameScene extends Phaser.Scene {
     this.#breathsCompleted = 0;
     this.#failedBreaths = 0;
     this.#swipeState = SWIPE_STATE.WAITING;
+    this.#inputLocked = false;
     // First breath is always an inhale; flips after each success in
     // #handleBreathSuccess, never on failure (a failed attempt retries the
     // same direction, it doesn't advance to the next one).
@@ -157,7 +206,36 @@ export class GameScene extends Phaser.Scene {
   }
 
   create() {
-    showLevelIntroWithVoiceover(this, { levelNumber: 1, logoAssetKey: ASSET_KEYS.STAGE1_LOGO, onComplete: () => this.#startLevel() });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
+    this.#showIntroBackground();
+    // Rive loads asynchronously — wait for onReady before setting any animation param
+    this.#character = createAnimatedCharacter(this, STAGE1_CHARACTER_CONFIG, STAGE1_POSITION_INTRO, () => {
+      // Force idle first and give Rive a beat to actually settle there
+      // before the first real clip — jumping straight to clip 1 from frame
+      // zero skips the state machine's own Entry->Idle transition, which
+      // may be the only path with a working way back out.
+      this.#character.setAnimationParam(STAGE1_IDLE_PARAM);
+      this.time.delayedCall(100, () => {
+        this.#character.playSequence(STAGE1_INTRO_STEPS, () => {
+          this.#hideIntroBackground();
+          this.#character.moveTo(STAGE1_POSITION_MAIN);
+          this.#startLevel();
+        });
+      });
+    });
+  }
+
+  #showIntroBackground() {
+    const { width, height } = this.scale;
+    this.#introBg = this.add.image(width / 2, height / 2, ASSET_KEYS.BACKGROUND_GENERIC).setDepth(1000);
+    this.#introLogo = this.add.image(width / 2, height * 0.16, ASSET_KEYS.STAGE1_LOGO).setDepth(1001).setScale(0.55);
+  }
+
+  #hideIntroBackground() {
+    this.#introBg?.destroy();
+    this.#introLogo?.destroy();
+    this.#introBg = null;
+    this.#introLogo = null;
   }
 
   #startLevel() {
@@ -182,29 +260,13 @@ export class GameScene extends Phaser.Scene {
     this.#candleFlame = this.add.image(this.#candleX, this.#candleTopY, ASSET_KEYS.CANDLE_FLAME).setOrigin(0.5, 1);
     this.#scaleImageToHeight(this.#candleFlame, candleDisplayHeight * this.#candleFlameHeightRatio);
 
-    if (this.#debug) {
-      const debugGraphics = this.add.graphics();
-      debugGraphics.lineStyle(2, 0x00ff00, 0.8);
-      debugGraphics.strokeCircle(this.#candleX, this.#candleBottomY, this.#swipeZoneRadius);
-      debugGraphics.strokeCircle(this.#candleX, this.#candleTopY, this.#swipeZoneRadius);
-    }
-
-    //Swipe
-    // #startIndicatorPulse.
-    this.#swipeIndicatorGO = this.add
-    .image(this.#candleX, this.#candleBottomY, ASSET_KEYS.ARROW_UP)
-    .setOrigin(0.5, 0.5);
-    this.#swipeArrowBaseScale = this.#scaleImageToHeight(this.#swipeIndicatorGO, height * this.#swipeArrowHeightRatio);
-
+    // Arrow + target circles + breath prompt are created later, when the
+    // Start button is pressed (#showGameplayUI, called from #beginGameplay) — not here.
     this.#createSwipeGestureBar();
-    this.#startIndicatorPulse();
-
 
     //Progressbar
     this.#createLevelProgressBar();
     this.#levelProgressBar.setProgress(8/8);
-    //Inhale/Exhale image
-    this.#createBreathImage();
     //Game Stats
     const labelsTop = this.#levelProgressBar.getBounds().bottom + 60;
     const breathsTextLabel = this.add.text(50, labelsTop, 'Αναπνοές:', TEXT_STYLES.DEFAULT);
@@ -224,23 +286,52 @@ export class GameScene extends Phaser.Scene {
       TEXT_STYLES.DEFAULT,
     );
 
-    //Events
+    // Timer/input wait for the tutorial to finish. The character is already
+    // alive (spawned in create()) — the sequence just moves it.
+    this.#character.playSequence(STAGE1_TUTORIAL_STEPS, () => this.#beginGameplay());
+  }
+
+  /** Runs once the tutorial finishes — this is what used to be the tail of #startLevel(). */
+  #beginGameplay() {
     this.input.on(Phaser.Input.Events.POINTER_DOWN, this.#handlePointerDown, this);
     this.input.on(Phaser.Input.Events.POINTER_MOVE, this.#handlePointerMove, this);
     this.input.on(Phaser.Input.Events.POINTER_UP, this.#handlePointerUp, this);
     this.input.on(Phaser.Input.Events.POINTER_UP_OUTSIDE, this.#handlePointerUp, this);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
 
-    //timer start
-       this.#countdownTimerEvent = this.time.addEvent({
+    this.#countdownTimerEvent = this.time.addEvent({
       delay: 1000,
       callback: this.#tickCountdown,
       callbackScope: this,
       loop: true,
     });
 
-    //rive
-    this.#createCharacterAnimation();
+    this.#showGameplayUI();
+  }
+
+  /** Arrow + target circles — created only once the player presses Start, not before. */
+  #showGameplayUI() {
+    const { height } = this.scale;
+
+    if (this.#debug) {
+      this.#targetCirclesGO = this.add.graphics();
+      this.#targetCirclesGO.lineStyle(2, 0x00ff00, 0.8);
+      this.#targetCirclesGO.strokeCircle(this.#candleX, this.#candleBottomY, this.#swipeZoneRadius);
+      this.#targetCirclesGO.strokeCircle(this.#candleX, this.#candleTopY, this.#swipeZoneRadius);
+    }
+
+    this.#swipeIndicatorGO = this.add.image(this.#candleX, this.#candleBottomY, ASSET_KEYS.ARROW_UP).setOrigin(0.5, 0.5);
+    this.#swipeArrowBaseScale = this.#scaleImageToHeight(this.#swipeIndicatorGO, height * this.#swipeArrowHeightRatio);
+    this.#createBreathPromptText();
+    this.#startIndicatorPulse();
+  }
+
+  /** Hides the arrow + target circles once the final breath-out completes, so they don't show during the outro. */
+  #hideGameplayUI() {
+    this.#stopIndicatorPulse();
+    this.#swipeIndicatorGO?.destroy();
+    this.#swipeIndicatorGO = null;
+    this.#targetCirclesGO?.destroy();
+    this.#targetCirclesGO = null;
   }
 
   update(time, delta) {
@@ -255,8 +346,7 @@ export class GameScene extends Phaser.Scene {
   //#region Candle & Flame
 
   #blowOutCandle() {
-    // TODO: this is a placeholder — swap for whatever your real
-    // flame animation/particle looks like once that's designed
+
     this.tweens.add({
       targets: this.#candleFlame,
       alpha: 0,
@@ -270,7 +360,9 @@ export class GameScene extends Phaser.Scene {
       alpha: 1,
       duration: 200,
     });
-    this.#startIndicatorPulse();
+    // Next prompt/arrow comes from the good-move feedback's own completion
+    // callback (#handleBreathSuccess), not from here — this timer is purely
+    // for the flame visual and isn't tied to how long the feedback plays.
   }
 
   //#endregion
@@ -283,10 +375,10 @@ export class GameScene extends Phaser.Scene {
    */
   #createFlower() {
     const { width, height } = this.scale;
-    // TODO: placeholder position — move wherever it actually belongs
+
     const flowerX = width * 0.15;
     const flowerY = height * 0.6;
-    // TODO: swap ASSET_KEYS.FLOWER1 for your real texture key
+  
     this.#flowerGO = this.add.image(flowerX, flowerY, ASSET_KEYS.FLOWER1).setOrigin(0.5, 1).setScale(0.55);
   }
 
@@ -302,53 +394,28 @@ export class GameScene extends Phaser.Scene {
 
   //#endregion
 
-  //#region Character
-
-  #createCharacterAnimation()
-  {
-    this.#riveInstance = spawnRiveAnimation(
-    this.cache.binary.get(ASSET_KEYS.RIVE_BEAR_BREATHING),
-    BEAR_STATE_MACHINE,
-    'rive-stage--level1',
-  );
-  }
-
-  #setBreathing(isBreathing,isIdle)
-  {
-    setStateMachineInput(this.#riveInstance, BEAR_STATE_MACHINE, 'IsIdle', isIdle);
-    setStateMachineInput(this.#riveInstance, BEAR_STATE_MACHINE, 'IsBreathing', isBreathing);
-  }
-
-  //#endregion
-
-  //#region Inhale Exhale
+  //#region Breath Prompt
 
   /**
-   * INHALE/EXHALE swap image shown above the character/Rive animation and
-   * below the progress bar. Idles wobbling at full size/position; each
-   * successful breath (#handleBreathSuccess) plays #playBreathImageSwap to
-   * shrink+fade it down, swap texture, then grow+fade it back up to rest.
+   * Light-brown wobbling text at the bottom of the screen — replaces the
+   * old INHALE/EXHALE image swap. Text content is updated from
+   * #startIndicatorPulse (INHALE/EXHALE) and #startHold (HOLD); the wobble
+   * itself never stops.
    */
-  #createBreathImage() {
-    const { width } = this.scale;
-    const progressBarBottom = this.#levelProgressBar.getBounds().bottom;
-
-    const x = width / 2;
-    this.#breathImageStartY = progressBarBottom + 200;
-    this.#breathImageEndY = this.#breathImageStartY + 200;
-
-    this.#breathImageBaseScale = 0.55;
-    this.#breathImageGO = this.add
-      .image(x, this.#breathImageStartY, ASSET_KEYS.INHALE)
-      .setOrigin(0.5, 0.5)
-      .setScale(this.#breathImageBaseScale);
-
-    this.#startBreathImageWobble();
+  #createBreathPromptText() {
+    const { width, height } = this.scale;
+    this.#breathPromptGO = this.add
+      .text(width / 2, height - 150, BREATH_TEXT.INHALE, TEXT_STYLES.BREATH_PROMPT)
+      .setOrigin(0.5);
+    this.#startBreathPromptWobble();
   }
 
-  #startBreathImageWobble() {
-    this.#breathImageWobbleTween = this.tweens.add({
-      targets: this.#breathImageGO,
+  #startBreathPromptWobble() {
+    if (!this.#breathPromptGO) {
+      return;
+    }
+    this.#breathPromptWobbleTween = this.tweens.add({
+      targets: this.#breathPromptGO,
       angle: { from: -4, to: 4 },
       duration: 900,
       yoyo: true,
@@ -357,46 +424,12 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  #stopBreathImageWobble() {
-    if (this.#breathImageWobbleTween) {
-      this.#breathImageWobbleTween.stop();
-      this.#breathImageWobbleTween = null;
+  /** @param {string} text */
+  #setBreathPromptText(text) {
+    if (!this.#breathPromptGO) {
+      return;
     }
-    this.#breathImageGO.setAngle(0);
-  }
-
-  /** Shrinks+fades the current breath image down, swaps INHALE<->EXHALE mid-flight, then grows+fades it back up to rest and resumes wobbling. */
-  #playBreathImageSwap() {
-    this.#stopBreathImageWobble();
-
-    const shrinkScale = this.#breathImageBaseScale * 0.6;
-
-    this.#breathImageTransitionTween = this.tweens.add({
-      targets: this.#breathImageGO,
-      y: this.#breathImageEndY,
-      scale: shrinkScale,
-      alpha: 0,
-      duration: 450,
-      ease: 'Sine.easeIn',
-      onComplete: () => {
-        const nextKey =
-          this.#breathImageGO.texture.key === ASSET_KEYS.INHALE ? ASSET_KEYS.EXHALE : ASSET_KEYS.INHALE;
-        this.#breathImageGO.setTexture(nextKey);
-
-        this.#breathImageTransitionTween = this.tweens.add({
-          targets: this.#breathImageGO,
-          y: this.#breathImageStartY,
-          scale: this.#breathImageBaseScale,
-          alpha: 1,
-          duration: 450,
-          ease: 'Sine.easeOut',
-          onComplete: () => {
-            this.#breathImageTransitionTween = null;
-            this.#startBreathImageWobble();
-          },
-        });
-      },
-    });
+    this.#breathPromptGO.setText(text);
   }
 
   //#endregion
@@ -405,6 +438,9 @@ export class GameScene extends Phaser.Scene {
 
   #handlePointerDown(pointer) {
     if (this.#isLevelComplete || this.#isGameOver) {
+      return;
+    }
+    if (this.#inputLocked) {
       return;
     }
     if (this.#swipeState !== SWIPE_STATE.WAITING) {
@@ -419,6 +455,13 @@ export class GameScene extends Phaser.Scene {
     this.#stopIndicatorPulse();
     this.#swipeGestureBarGraphics.setVisible(true);
     this.#updateSwipeGestureBar(0, false);
+    if (this.#currentBreathDirection === BREATH_DIRECTION.IN) {
+      this.#character.setAnimationParam(STAGE1_BREATHE_IN_PARAM);
+      playBreathInSound(this);
+    } else {
+      this.#character.setAnimationParam(STAGE1_BREATHE_OUT_PARAM);
+      playBreathOutSound(this);
+    }
   }
 
   #handlePointerMove(pointer) {
@@ -451,7 +494,12 @@ export class GameScene extends Phaser.Scene {
       }
 
       if (this.#isWithinEndZone(pointer)) {
-        this.#startHold();
+        // OUT counts the instant it reaches the target — no hold. IN still holds.
+        if (this.#currentBreathDirection === BREATH_DIRECTION.OUT) {
+          this.#handleBreathSuccess();
+        } else {
+          this.#startHold();
+        }
       }
       return;
     }
@@ -514,6 +562,8 @@ export class GameScene extends Phaser.Scene {
 
   #startHold() {
     this.#swipeState = SWIPE_STATE.HOLDING;
+    this.#setBreathPromptText(BREATH_TEXT.HOLD);
+    this.#character.setAnimationParam(STAGE1_HOLD_PARAM);
     this.#holdTimerEvent = this.time.delayedCall(this.#swipeHoldDurationMs, this.#handleBreathSuccess, [], this);
   }
 
@@ -531,15 +581,21 @@ export class GameScene extends Phaser.Scene {
     if (this.#debug) {
       console.log(`Breath failed (${this.#currentBreathDirection}): ${reason}`);
     }
+    // capture before resetting below — was the failure during the hold, or during the swipe itself?
+    const wasHolding = this.#swipeState === SWIPE_STATE.HOLDING;
     this.#stopHoldTimer();
     this.#swipeState = SWIPE_STATE.WAITING;
     this.#failedBreaths += 1;
     this.#hideSwipeGestureBar();
 
     playWrongSound(this);
-
-    // direction does NOT change on failure — same breath is retried
-    this.#startIndicatorPulse();
+    // direction does NOT change on failure — same breath is retried. Input
+    // stays locked until this feedback finishes, so a fast retry can't cancel it early.
+    this.#inputLocked = true;
+    this.#character.playFeedback(wasHolding ? STAGE1_BAD_MOVE_HOLD_STEP : STAGE1_BAD_MOVE_DIRECTION_STEP, () => {
+      this.#inputLocked = false;
+      this.#startIndicatorPulse();
+    });
 
     if (this.#failedBreaths >= this.#maxFailedBreaths) {
       //this.#handleGameOver();
@@ -554,7 +610,6 @@ export class GameScene extends Phaser.Scene {
     this.#breathsTextGO.setText(`${this.#breathsCompleted} / ${this.#requiredBreaths}`);
 
     playCorrectSound(this);
-    this.#playBreathImageSwap();
 
     const wasBreathOut = this.#currentBreathDirection === BREATH_DIRECTION.OUT;
 
@@ -562,6 +617,20 @@ export class GameScene extends Phaser.Scene {
       this.#cyclesCompleted += 1;
       this.#updateFlowerStage();
 
+      // Lock input until the feedback clip actually finishes, so a fast next
+      // swipe can't cancel it early — the arrow/prompt only comes back once
+      // this callback fires, not immediately like before.
+      this.#inputLocked = true;
+      const onGoodMoveFeedbackDone = () => {
+        this.#inputLocked = false;
+        this.#startIndicatorPulse();
+      };
+      // praise only after a breath OUT — mid breath-IN he's holding his breath, he can't be talking
+      if (this.#breathsCompleted === 4) {
+        this.#character.playFeedback(STAGE1_MILESTONE_STEP, onGoodMoveFeedbackDone);
+      } else {
+        this.#character.playFeedback(Phaser.Utils.Array.GetRandom(STAGE1_GOOD_MOVE_STEPS), onGoodMoveFeedbackDone);
+      }
     }
 
     if (this.#debug) {
@@ -575,32 +644,39 @@ export class GameScene extends Phaser.Scene {
     if (wasBreathOut) {
       // only a breath-OUT blows out the candle
       this.#blowOutCandle();
-      this.time.delayedCall(this.#candleRelightDelayMs, this.#relightCandle, [], this);
-      this.#setBreathing(false,false);
-      this.time.delayedCall(2000, ()=>{
-        if(this.#riveInstance!=null)
-          {
-            this.#setBreathing(false,true);
-          }
-      });
+      // Skip the relight entirely on the breath that completes the level —
+      // stays off through the outro instead of flickering back on right before it.
+      if (this.#breathsCompleted < this.#requiredBreaths) {
+        this.time.delayedCall(this.#candleRelightDelayMs, this.#relightCandle, [], this);
+      }
+      // no explicit reset to idle here — the good-move feedback just above
+      // already takes the animation over, and returns to idle itself once
+      // its own duration ends. The next prompt/arrow is shown by
+      // onGoodMoveFeedbackDone above, not by #relightCandle.
     } else {
       // breath-IN doesn't touch the flame — just get the next prompt ready
       this.#startIndicatorPulse();
-      this.#setBreathing(true,false);
     }
 
     //this.#levelProgressBar.setProgress(this.#breathsCompleted / this.#requiredBreaths);
 
     if (this.#breathsCompleted >= this.#requiredBreaths) {
+      this.#hideGameplayUI();
       this.#handleLevelComplete();
       return;
     }
   }
 
   #startIndicatorPulse() {
+    // no-op once #hideGameplayUI has run (e.g. a delayed #relightCandle call
+    // firing after the level's already complete)
+    if (!this.#swipeIndicatorGO) {
+      return;
+    }
     const arrowY = this.#getStartZoneY();
     // ARROW_UP art reused rotated 180° for OUT instead of a second asset
     const arrowAngle = this.#currentBreathDirection === BREATH_DIRECTION.IN ? 0 : 180;
+    this.#setBreathPromptText(this.#currentBreathDirection === BREATH_DIRECTION.IN ? BREATH_TEXT.INHALE : BREATH_TEXT.EXHALE);
 
     this.#swipeIndicatorGO
       .setPosition(this.#candleX, arrowY)
@@ -624,7 +700,7 @@ export class GameScene extends Phaser.Scene {
       this.#swipeIndicatorTween.stop();
       this.#swipeIndicatorTween = null;
     }
-    this.#swipeIndicatorGO.setVisible(false);
+    this.#swipeIndicatorGO?.setVisible(false);
   }
 
   /** Vertical bar next to the candle that fills as the player swipes/holds through one breath gesture. */
@@ -738,33 +814,26 @@ export class GameScene extends Phaser.Scene {
     this.#stopIndicatorPulse();
     this.#disableLevelVisuals();
 
-    showCelebrationSequence(this, {
-      message,
-      levelNumber: 1,
-      isSuccess,
-      onComplete: () => this.#goToNextLevel(),
-    });
+    // message/isSuccess aren't used yet — STAGE1_OUTRO_STEPS is one fixed
+    // sequence for now; a win/lose distinction can branch this later.
+    this.#character.moveTo(STAGE1_POSITION_OUTRO);
+    this.#character.playSequence(STAGE1_OUTRO_STEPS, () => this.#goToNextLevel());
   }
 
-  /** Clears level-1 visuals before the celebration shows. Flower/candle left alone. Safe to call more than once. */
+  /** Clears level-1 visuals before the outro shows. Flower/candle/Stage 1 character left alone (character survives through the outro). Safe to call more than once. */
   #disableLevelVisuals() {
-    if (this.#breathImageGO) {
-      this.#stopBreathImageWobble();
-      if (this.#breathImageTransitionTween) {
-        this.#breathImageTransitionTween.stop();
-        this.#breathImageTransitionTween = null;
+    if (this.#breathPromptGO) {
+      if (this.#breathPromptWobbleTween) {
+        this.#breathPromptWobbleTween.stop();
+        this.#breathPromptWobbleTween = null;
       }
-      this.#breathImageGO.destroy();
-      this.#breathImageGO = null;
-    }
-
-    if (this.#riveInstance) {
-      removeRiveAnimation(this.#riveInstance, 'rive-stage--level1');
-      this.#riveInstance = null;
+      this.#breathPromptGO.destroy();
+      this.#breathPromptGO = null;
     }
   }
 
   #goToNextLevel() {
+    this.#character.destroy();
     this.scene.start(SCENE_KEYS.EUZOYLIS_GAME_SCENE2);
   }
 
@@ -776,6 +845,9 @@ export class GameScene extends Phaser.Scene {
     this.#stopHoldTimer();
     this.#stopIndicatorPulse();
     this.#disableLevelVisuals();
+    this.#hideIntroBackground();
+    // covers leaving early, before #goToNextLevel runs
+    this.#character?.destroy();
   }
 
   //#endregion

@@ -114,7 +114,7 @@ function getOrCreateJingle(scene, assetKey) {
     sound = scene.sound.add(assetKey);
     jingleSoundCache[assetKey] = sound;
   }
-  return sound;
+  return sound; 
 }
 
 /** @param {Phaser.Scene} scene */
@@ -130,6 +130,16 @@ export function playWrongSound(scene) {
 /** @param {Phaser.Scene} scene */
 export function playBubblePopSound(scene) {
   getOrCreateJingle(scene, ASSET_KEYS.BUBBLE_POP_SOUND).play();
+}
+
+/** @param {Phaser.Scene} scene */
+export function playBreathInSound(scene) {
+  getOrCreateJingle(scene, ASSET_KEYS.SFX_BREATH_IN).play();
+}
+
+/** @param {Phaser.Scene} scene */
+export function playBreathOutSound(scene) {
+  getOrCreateJingle(scene, ASSET_KEYS.SFX_BREATH_OUT).play();
 }
 
 //#endregion
