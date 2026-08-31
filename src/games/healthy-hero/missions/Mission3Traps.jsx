@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { TRAP_ITEMS, BG_IMG, TRAP_TIME, TRAP_POINTS } from '../data/traps.js'
 import { playCorrect, playWrong, playWin } from '../../../services/sound.js'
 import { speak } from '../../../services/voice.js'
+import HeroWin from '../HeroWin.jsx'
 
 const TRAPS_TOTAL = TRAP_ITEMS.filter((f) => !f.healthy).length
 const COLS = [250, 540, 830]
@@ -31,9 +32,11 @@ export default function Mission3Traps({ addScore, onProgress, onReaction, onNext
     setFinished(kind)
     if (kind === 'win') {
       playWin()
-      speak('HH-25') // «Τα κατάφερες! Τα ξεχώρισες όλα!»
+      // Το pop-up μένει όσο παίζει το VO· προχωράμε ΑΦΟΥ τελειώσει.
+      speak('HH-25', () => setTimeout(() => onNext && onNext(), 900))
+    } else {
+      setTimeout(() => onNext && onNext(), 1900)
     }
-    setTimeout(() => onNext && onNext(), 1900)
   }
 
   useEffect(() => {
@@ -57,16 +60,21 @@ export default function Mission3Traps({ addScore, onProgress, onReaction, onNext
     if (finishedRef.current || found.has(item.id)) return
 
     if (!item.healthy) {
+      const willWin = found.size + 1 >= TRAPS_TOTAL
       setFound((prev) => {
         const next = new Set(prev)
         next.add(item.id)
         if (onProgress) onProgress(next.size)
-        if (next.size >= TRAPS_TOTAL) finish('win')
         return next
       })
       addScore(TRAP_POINTS)
       playCorrect()
-      onReaction && onReaction("correct")
+      if (willWin) {
+        // Τελευταίο: reaction VO -> (τέλος) -> finish (HH-25 + pop-up)
+        onReaction && onReaction('correct', () => finish('win'))
+      } else {
+        onReaction && onReaction('correct')
+      }
       setPts((p) => p + TRAP_POINTS)
       const id = ++floatId.current
       setFloats((f) => [...f, { id, x: pos.x, y: pos.y }])
@@ -122,12 +130,16 @@ export default function Mission3Traps({ addScore, onProgress, onReaction, onNext
       {finished && (
         <div className="reward-overlay">
           <div className="reward-overlay__card">
-            <div className="reward-overlay__emoji">{finished === 'win' ? '🥳' : '⏰'}</div>
+            {finished === 'win' ? (
+              <HeroWin className="reward-overlay__hero" />
+            ) : (
+              <div className="reward-overlay__emoji">⏰</div>
+            )}
             <h2 className="reward-overlay__title">
-              {finished === 'win' ? 'Τις βρήκες όλες!' : 'Ο χρόνος τελείωσε!'}
+              {finished === 'win' ? 'Αποστολή 3 ολοκληρώθηκε!' : 'Ο χρόνος τελείωσε!'}
             </h2>
             <p className="reward-overlay__text">
-              Βρήκες {found.size} από {TRAPS_TOTAL} παγίδες.
+              Ξεχώρισες {found.size} από {TRAPS_TOTAL}!
             </p>
           </div>
         </div>

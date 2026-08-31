@@ -520,7 +520,7 @@ button {
 .reward-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(11, 16, 32, 0.55);
+  background: rgba(11, 16, 32, 0.78); /* σκοτεινιάζει το στάδιο -> δεν φαίνεται ο mascot (2 ήρωες) */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -590,6 +590,51 @@ button {
   gap: 90px;
   padding: 80px;
   background: radial-gradient(circle at 50% 30%, #fff6da, #ffe9c9 70%);
+}
+/* Οθόνη αξιολόγησης — inline Rate_Screen.svg, μπλε φόντο σε όλη τη σελίδα,
+   αιωρούμενες κάρτες με press όπως στην αρχική. */
+.rating-svg {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse 72% 42% at 50% 50%, #1ebcef 30%, #129ed9 60%, #006bb5 100%);
+}
+.rating-svg__art,
+.rating-svg__art svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.rate-card {
+  animation: rate-bob 3.4s ease-in-out infinite;
+}
+.rate-card.is-press {
+  animation: none;
+  transform: scale(0.95);
+}
+.rate-card.is-picked {
+  animation: none;
+  transform: scale(1.06);
+}
+.rate-card.is-dim {
+  animation: none;
+  opacity: 0.4;
+}
+@keyframes rate-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.rating-svg__thanks {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 14%;
+  text-align: center;
+  font-size: 54px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+  animation: fade-in 0.35s ease;
 }
 .rating__title {
   font-size: 84px;
@@ -965,6 +1010,14 @@ button {
   pointer-events: none;
   animation: fade-in 0.2s ease;
 }
+/* Σκούρο φόντο για το pop-up νίκης του κολατσιού (κρύβει τον mascot) */
+.stage-dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 16, 32, 0.78);
+  z-index: 140;
+  animation: fade-in 0.3s ease;
+}
 .lunchbox-done {
   position: absolute;
   left: 0;
@@ -1034,6 +1087,89 @@ button {
   height: 800px;
   display: block;
   filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.2));
+}
+/* Flipbook ήρωα (HeroRig) — καρέ-καρέ animation με τα σχεδιασμένα frames */
+.hero-rig {
+  pointer-events: none;
+}
+.hero-rig__svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+  transform-origin: 50% 70%;
+}
+/* Flipbook: κρυφά όλα τα frames· ο κώδικας δείχνει ένα-ένα */
+.hero-rig [data-frame] {
+  display: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* Πριν μπει: κρυμμένος & παρκαρισμένος εκτός οθόνης (κάτω-αριστερά) */
+  .hero-rig.is-waiting .hero-rig__svg {
+    opacity: 0;
+    transform: translate(-380px, 340px) rotate(16deg) scale(0.72);
+  }
+  /* Πετάει μέσα διαγώνια, μικρό overshoot, ισιώνει */
+  .hero-rig.is-flying .hero-rig__svg {
+    animation: hero-travel 1.5s cubic-bezier(0.3, 0, 0.25, 1) both;
+  }
+  /* Κατά την πτήση: η κάπα ανεμίζει (τα χέρια αλλάζουν με swap, όχι περιστροφή) */
+  .hero-rig.is-flying #cape {
+    animation: hero-flycape 1.5s cubic-bezier(0.3, 0, 0.25, 1) both;
+  }
+  /* Ήρεμη αιώρηση (hover) — συνεχής, smooth */
+  .hero-rig.is-idle .hero-rig__svg {
+    animation: hero-float 3.6s ease-in-out infinite;
+  }
+  .hero-rig.is-idle #cape {
+    animation: hero-cape 2.8s ease-in-out infinite;
+  }
+  .hero-rig.is-idle #eye_left,
+  .hero-rig.is-idle #eye_right {
+    animation: hero-blink 5s ease-in-out infinite;
+  }
+  /* Απογείωση προς τα πάνω-δεξιά (πιο αργή) */
+  .hero-rig.is-leaving .hero-rig__svg {
+    animation: hero-flyout 1.2s cubic-bezier(0.5, 0, 0.75, 0) forwards;
+  }
+}
+@keyframes hero-travel {
+  0% { opacity: 0; transform: translate(-380px, 340px) rotate(16deg) scale(0.72); }
+  15% { opacity: 1; }
+  65% { transform: translate(12px, -18px) rotate(-6deg) scale(1.04); }
+  82% { transform: translate(-4px, 6px) rotate(3deg) scale(0.99); }
+  100% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+}
+@keyframes hero-flyout {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+  16% { transform: translate(-12px, 22px) rotate(-6deg) scale(0.98); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translate(260px, -1300px) rotate(24deg) scale(0.55); }
+}
+@keyframes hero-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-11px); }
+}
+/* Χέρια: γρήγορο opacity-crossfade (χωρίς «διπλά χέρια»).
+   ΠΡΟΣΟΧΗ: όχι transition στο transform των SVG groups (bug στο rendering) —
+   η κλίση «στη μέση» μπαίνει inline από το component (setAkimbo). */
+.hero-rig [id^="arm_"] {
+  transition: opacity 0.1s linear;
+}
+@keyframes hero-flycape {
+  0% { transform: rotate(24deg) scaleX(1.15); }
+  60% { transform: rotate(-6deg) scaleX(1.04); }
+  100% { transform: rotate(0deg) scaleX(1); }
+}
+/* Idle sway — όλα ξεκινούν/τελειώνουν στο 0 ώστε το handoff από την πτήση να είναι seamless */
+@keyframes hero-cape {
+  0%, 100% { transform: rotate(0deg); }
+  30% { transform: rotate(4deg); }
+  70% { transform: rotate(-4deg); }
+}
+@keyframes hero-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); }
 }
 .rive-canvas {
   display: block;
@@ -1321,8 +1457,26 @@ button {
 .mission-intro__hero {
   width: 360px;
   height: auto;
+  transform-origin: 50% 100%;
   filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.35));
   animation: bob 2.4s ease-in-out infinite;
+}
+.mission-intro__hero svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+/* HH-04: μικρή αναπήδηση όταν πατηθεί «Πάμε!» */
+.mission-intro__hero.is-jump {
+  animation: hero-mini-jump 0.42s ease;
+}
+@keyframes hero-mini-jump {
+  0% { transform: translateY(0) scaleY(1); }
+  22% { transform: translateY(0) scaleY(0.9); }
+  55% { transform: translateY(-46px) scaleY(1.06); }
+  80% { transform: translateY(0) scaleY(0.94); }
+  100% { transform: translateY(0) scaleY(1); }
 }
 .mission-intro__bubble {
   background: #fff;
@@ -1382,16 +1536,82 @@ button {
   position: absolute;
   inset: 0;
 }
+/* Idle «δείχνει»: γεμίζει το ίδιο zoom-container με το Rive (ίδιο crop/κέντρο) */
+.mascot__point {
+  position: absolute;
+  inset: 0;
+}
+.mascot__point svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+/* Κοινό: ο ήρωας που «δείχνει» + χοροπηδάει */
+.hero-point {
+  transform-origin: 50% 100%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-point.is-bounce {
+    animation: hero-hop 1.15s ease-in-out infinite;
+  }
+}
+@keyframes hero-hop {
+  0%, 100% { transform: translateY(0); }
+  45% { transform: translateY(-16px); }
+}
 .mascot__rive {
   position: absolute;
   inset: 0;
   display: block;
 }
-.mascot__hero--correct {
+/* Πανηγυρισμός σε κάθε σωστή αντίδραση, τράνταγμα σε κάθε λάθος */
+.mascot__hero--thumbs,
+.mascot__hero--hh06,
+.mascot__hero--hh07 {
   animation: mascot-jump 0.7s ease;
 }
-.mascot__hero--wrong {
+.mascot__hero--touch,
+.mascot__hero--hh09,
+.mascot__hero--hh16 {
   animation: mascot-shake 0.5s ease;
+}
+/* Οι SVG πόζες (δείχνει / 06 / 07) είναι καθαρές φιγούρες -> ΟΧΙ crop (αλλιώς κόβονται τα μαλλιά).
+   Μόνο το Rive (05 / wrong) χρειάζεται overflow hidden για το padding του. */
+.mascot__hero--point,
+.mascot__hero--hh06,
+.mascot__hero--hh07,
+.mascot__hero--hh09,
+.mascot__hero--hh16 {
+  overflow: visible;
+}
+/* Στατικές πόζες αντίδρασης (Pt03) — γεμίζουν το ίδιο zoom-container */
+.hero-react {
+  position: absolute;
+  inset: 0;
+}
+/* Κίνηση νίκης μέσα στα pop-up */
+.hero-win svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+.reward-overlay__hero {
+  width: 300px;
+  max-width: 70%;
+  margin: 0 auto 6px;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.25));
+}
+.lunchbox-done__hero {
+  width: 300px;
+  max-width: 70%;
+  margin: 0 auto 10px;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.25));
+}
+.hero-react svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 .mascot__bubble {
   position: absolute;

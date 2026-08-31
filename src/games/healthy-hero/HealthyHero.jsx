@@ -6,6 +6,7 @@ import Mission2LunchBox from './missions/Mission2LunchBox.jsx'
 import Mission3Traps from './missions/Mission3Traps.jsx'
 import MissionIntro from './MissionIntro.jsx'
 import RiveHero from '../../components/RiveHero.jsx'
+import HeroRig from './HeroRig.jsx'
 import MascotCompanion from './MascotCompanion.jsx'
 import TunePanel from './TunePanel.jsx'
 import { playWin } from '../../services/sound.js'
@@ -17,37 +18,38 @@ const TUNE = PARAMS.get('tune') === '1'
 
 // Αντιδράσεις ανά αποστολή (επίσημο script HH-XX):
 // key = κωδικός VO (φωνή), bubble = σύντομο κείμενο στην οθόνη.
+// Οι σωστές αντιδράσεις δεν έχουν κείμενο οθόνης («—» στο script) — μόνο animation.
 const REACTIONS = {
   m1: {
     correct: [
-      { key: 'HH-05', bubble: 'Τέλεια επιλογή!' },
-      { key: 'HH-06', bubble: 'Δύναμη! 💪' },
-      { key: 'HH-07', bubble: 'Κι άλλο ένα!' },
+      { key: 'HH-05', bubble: '' },
+      { key: 'HH-06', bubble: '' },
+      { key: 'HH-07', bubble: '' },
     ],
     wrong: [
-      { key: 'HH-08', bubble: 'Όχι αυτό!' },
-      { key: 'HH-09', bubble: 'Δοκίμασε ξανά' },
-      { key: 'HH-10', bubble: 'Ψάξε ξανά' },
+      { key: 'HH-08', bubble: 'Δοκίμασε ξανά' },
+      { key: 'HH-09', bubble: 'Ψάξε ξανά' },
+      { key: 'HH-10', bubble: 'Σχεδόν!' },
     ],
   },
   m2: {
     correct: [
-      { key: 'HH-14', bubble: 'Ωραίο κολατσιό!' },
-      { key: 'HH-15', bubble: 'Ενέργεια! ⚡' },
+      { key: 'HH-14', bubble: '' },
+      { key: 'HH-15', bubble: '' },
     ],
     wrong: [
-      { key: 'HH-16', bubble: 'Όχι αυτό!' },
-      { key: 'HH-17', bubble: 'Δοκίμασε ξανά' },
+      { key: 'HH-16', bubble: 'Δοκίμασε ξανά' },
+      { key: 'HH-17', bubble: 'Ψάξε ξανά' },
     ],
   },
   m3: {
     correct: [
-      { key: 'HH-20', bubble: 'Σωστά!' },
-      { key: 'HH-21', bubble: 'Το εντόπισες!' },
+      { key: 'HH-20', bubble: '' },
+      { key: 'HH-21', bubble: '' },
     ],
     wrong: [
-      { key: 'HH-22', bubble: 'Αυτό το τρώμε συχνά!' },
-      { key: 'HH-23', bubble: 'Κοίτα καλύτερα' },
+      { key: 'HH-22', bubble: 'Πιο συχνά!' },
+      { key: 'HH-23', bubble: 'Κοίτα ξανά' },
     ],
   },
 }
@@ -93,6 +95,7 @@ export default function HealthyHero() {
   const [score, setScore] = useState(0)
   const [ready, setReady] = useState(TUNE) // σε tune mode ξεκίνα κατευθείαν στην αποστολή
   const [reaction, setReaction] = useState(null)
+  const [leaving, setLeaving] = useState(false) // απογείωση ήρωα στο πάτημα ΕΝΑΡΞΗ
   const [tunePos, setTunePos] = useState(() => MASCOT_POS[(TUNE && PARAMS.get('stage')) || 'm1'] || MASCOT_POS.m1)
   const rIdx = useRef({ correct: 0, wrong: 0 })
 
@@ -102,19 +105,19 @@ export default function HealthyHero() {
 
   // Αντίδραση μασκότ: φράση+φωνή ανάλογα με την τρέχουσα αποστολή.
   const onReaction = useCallback(
-    (type) => {
+    (type, onEnd) => {
       const set = (REACTIONS[stage] && REACTIONS[stage][type]) || []
-      if (!set.length) return
+      if (!set.length) return onEnd && onEnd()
       const item = set[rIdx.current[type]++ % set.length]
-      speak(item.key)
+      speak(item.key, onEnd) // onEnd() -> όταν τελειώσει το VO της αντίδρασης (για chaining με το VO νίκης)
       setReaction({ type, text: item.bubble, n: Date.now() })
     },
     [stage],
   )
 
-  // Προχώρα στην επόμενη αποστολή, λέγοντας το VO ολοκλήρωσης.
+  // Προχώρα στην επόμενη αποστολή. (Το VO ολοκλήρωσης λέγεται πλέον ΑΜΕΣΩΣ
+  // μόλις εμφανιστεί το pop-up νίκης, μέσα σε κάθε αποστολή.)
   const advance = useCallback((from, to) => {
-    if (DONE_VO[from]) speak(DONE_VO[from])
     setStage(to)
   }, [])
 
@@ -122,6 +125,7 @@ export default function HealthyHero() {
   useEffect(() => {
     if (MISSIONS[stage]) {
       if (!TUNE) setReady(false)
+      setReaction(null) // καθάρισε την τελευταία αντίδραση -> ο ήρωας ξεκινά «δείχνει»
       setTunePos(MASCOT_POS[stage] || MASCOT_POS.m1)
     }
     if (stage === 'intro') speak('HH-01')
@@ -144,13 +148,36 @@ export default function HealthyHero() {
             draggable="false"
           />
         ))}
-        <RiveHero src="/hh/rive/Hero_Screen01.riv" className="hh-intro__hero" fallback={`${E}/Hero.png`} />
+        <HeroRig className="hh-intro__hero" leaving={leaving} />
         <button
           type="button"
           className="hh-start-btn"
+          disabled={leaving}
           onClick={() => {
-            speak('HH-02')
-            setStage('m1')
+            if (leaving) return
+            setLeaving(true) // ο ήρωας απογειώνεται (αργά) και μετά η οθόνη μένει σκέτη
+            let moved = false
+            const go = () => {
+              if (moved) return
+              moved = true
+              setStage('m1')
+            }
+            // Πήγαινε στην αποστολή ΜΟΝΟ όταν: (α) τελειώσει το VO ΚΑΙ
+            // (β) περάσει λίγη ώρα ώστε να μείνει σκέτη η οθόνη. Με ασφαλές όριο.
+            let voDone = false
+            let minDone = false
+            const maybeGo = () => {
+              if (voDone && minDone) go()
+            }
+            speak('HH-02', () => {
+              voDone = true
+              maybeGo()
+            })
+            setTimeout(() => {
+              minDone = true
+              maybeGo()
+            }, 2600) // λίγα δευτ. σκέτη οθόνη αφού φύγει ο ήρωας
+            setTimeout(go, 5000) // ασφαλές όριο
           }}
           aria-label="Έναρξη"
         >

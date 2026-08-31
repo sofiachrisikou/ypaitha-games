@@ -45,23 +45,28 @@ export const CLIPS = {
   'HH-30': 'Σ’ ευχαριστώ, ήρωα! Τα λέμε!',
 }
 
-function ttsFallback(text) {
+function ttsFallback(text, onEnd) {
   try {
     const synth = window.speechSynthesis
-    if (!synth) return
+    if (!synth) return onEnd && onEnd()
     synth.cancel()
     const u = new SpeechSynthesisUtterance(text)
     u.lang = 'el-GR'
     u.rate = 1.0
     u.pitch = 1.15
+    if (onEnd) {
+      u.onend = () => onEnd()
+      u.onerror = () => onEnd()
+    }
     synth.speak(u)
   } catch {
-    // αγνόησε
+    onEnd && onEnd()
   }
 }
 
 // Δοκιμάζει μια λίστα από URLs με τη σειρά· αν αποτύχουν όλα -> onFail().
-function playFirst(urls, onFail) {
+// onEnd() καλείται όταν τελειώσει το VO (για συγχρονισμό, π.χ. μετάβαση οθόνης).
+function playFirst(urls, onFail, onEnd) {
   let i = 0
   const tryNext = () => {
     if (i >= urls.length) return onFail()
@@ -78,6 +83,7 @@ function playFirst(urls, onFail) {
       a.addEventListener('playing', () => {
         advanced = true // παίζει κανονικό αρχείο -> τέλος
       })
+      a.addEventListener('ended', () => onEnd && onEnd())
       a.addEventListener('error', next)
       const p = a.play()
       if (p && typeof p.catch === 'function') p.catch(next)
@@ -88,11 +94,50 @@ function playFirst(urls, onFail) {
   tryNext()
 }
 
+// «Ξεκλείδωμα» φωνής σε κινητά: το HTML Audio ΚΑΙ το speechSynthesis (TTS)
+// απαιτούν να ξεκινήσουν μία φορά ΜΕΣΑ σε άγγιγμα, αλλιώς δεν ακούγονται.
+// Το τρέχουμε στο πρώτο άγγιγμα (σιωπηλά).
+let voiceUnlocked = false
+export function unlockVoice() {
+  if (voiceUnlocked) return
+  voiceUnlocked = true
+  // 1) Ξεκλείδωμα HTML Audio με σιωπηλό clip
+  try {
+    const silence =
+      'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAgD4AAIA+AAABAAgAZGF0YQAAAAA='
+    const a = new Audio(silence)
+    a.volume = 0
+    const p = a.play()
+    if (p && typeof p.catch === 'function') p.catch(() => {})
+  } catch {
+    // αγνόησε
+  }
+  // 2) Priming του TTS με άδεια, αθόρυβη εκφώνηση
+  try {
+    const synth = window.speechSynthesis
+    if (synth) {
+      const u = new SpeechSynthesisUtterance(' ')
+      u.volume = 0
+      synth.speak(u)
+    }
+  } catch {
+    // αγνόησε
+  }
+}
+
+if (typeof window !== 'undefined') {
+  const onFirst = () => unlockVoice()
+  window.addEventListener('pointerdown', onFirst, { passive: true })
+  window.addEventListener('touchstart', onFirst, { passive: true })
+  window.addEventListener('click', onFirst, { passive: true })
+}
+
 // Παίζει μια ατάκα με βάση τον κωδικό HH-XX. Δέχεται mp3 Ή wav·
 // αλλιώς πέφτει σε Ελληνικό TTS του browser.
-export function speak(key) {
-  if (isMuted()) return
+// Προαιρετικό onEnd: καλείται όταν τελειώσει η ατάκα (ή αμέσως αν είναι muted/κενή).
+export function speak(key, onEnd) {
+  if (isMuted()) return onEnd && onEnd()
   const text = CLIPS[key]
-  if (!text) return
-  playFirst([`${BASE}/${key}.mp3`, `${BASE}/${key}.wav`], () => ttsFallback(text))
+  if (!text) return onEnd && onEnd()
+  playFirst([`${BASE}/${key}.mp3`, `${BASE}/${key}.wav`], () => ttsFallback(text, onEnd), onEnd)
 }

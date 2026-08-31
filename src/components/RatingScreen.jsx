@@ -1,68 +1,76 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { saveVote } from '../services/votes.js'
 import { speak } from '../services/voice.js'
+import rateSvg from '../../public/rate-screen.svg?raw'
 
-const FACES = [
-  { rating: 1, emoji: '😣', label: 'Πολύ δυσαρεστημένος' },
-  { rating: 2, emoji: '😕', label: 'Δυσαρεστημένος' },
-  { rating: 3, emoji: '🙂', label: 'Ευχαριστημένος' },
-  { rating: 4, emoji: '😄', label: 'Πολύ ευχαριστημένος' },
-]
+// Σειρά των top-level <g> στο Rate_Screen.svg -> rating (g[0] = φόντο/τίτλος).
+// g[1]=πορτοκαλί(2), g[2]=κίτρινη(3), g[3]=κόκκινη(1), g[4]=πράσινη(4).
+const CARD_RATING = [null, 2, 3, 1, 4]
 
-// Οθόνη αξιολόγησης που εμφανίζεται στο τέλος κάθε παιχνιδιού.
-// - tap σε φατσούλα -> αποθήκευση ψήφου (game, 1-4, timestamp) + ευχαριστίες 2s -> onDone
-// - καμία ψήφος σε 15s -> onDone χωρίς ψήφο
 export default function RatingScreen({ game, onDone }) {
-  const [thanks, setThanks] = useState(false)
+  const [picked, setPicked] = useState(null)
+  const hostRef = useRef(null)
   const timeoutRef = useRef(null)
   const doneRef = useRef(onDone)
+  const pickedRef = useRef(false)
   doneRef.current = onDone
 
   useEffect(() => {
-    // VO μόνο για το Healthy Hero (δεν επηρεάζει τον Ευζούλη).
     if (game === 'healthy-hero') speak('HH-29')
-    // Αυτόματη επιστροφή μετά από 15s χωρίς ψήφο.
     timeoutRef.current = setTimeout(() => doneRef.current && doneRef.current(), 15000)
     return () => clearTimeout(timeoutRef.current)
   }, [game])
 
   const pick = (rating) => {
-    if (thanks) return
+    if (pickedRef.current) return
+    pickedRef.current = true
     clearTimeout(timeoutRef.current)
-    setThanks(true)
+    setPicked(rating)
     if (game === 'healthy-hero') speak('HH-30')
-    // Αποθήκευση χωρίς να μπλοκάρει το UI.
     saveVote({ game, rating }).catch(() => {})
-    setTimeout(() => doneRef.current && doneRef.current(), 2000)
+    setTimeout(() => doneRef.current && doneRef.current(), 1600)
   }
 
-  if (thanks) {
-    return (
-      <div className="screen rating rating--thanks">
-        <div className="rating__thanks-emoji">💚</div>
-        <h1 className="rating__thanks-title">Ευχαριστούμε!</h1>
-        <p className="rating__thanks-sub">Η γνώμη σου καταγράφηκε.</p>
-      </div>
-    )
-  }
+  // Κάνε τις 4 κάρτες να αιωρούνται + clickable (press όπως στην αρχική).
+  useLayoutEffect(() => {
+    const svg = hostRef.current && hostRef.current.querySelector('svg')
+    if (!svg) return
+    svg.setAttribute('preserveAspectRatio', 'none')
+    svg.removeAttribute('width')
+    svg.removeAttribute('height')
+    const gs = svg.querySelectorAll(':scope > g')
+    gs.forEach((g, i) => {
+      const rating = CARD_RATING[i]
+      if (!rating) return
+      g.classList.add('rate-card')
+      g.dataset.rating = String(rating)
+      g.style.transformBox = 'fill-box'
+      g.style.transformOrigin = '50% 50%'
+      g.style.animationDelay = `${(i - 1) * 0.35}s`
+      g.style.cursor = 'pointer'
+      const press = () => g.classList.add('is-press')
+      const release = () => g.classList.remove('is-press')
+      g.addEventListener('pointerdown', press)
+      g.addEventListener('pointerup', release)
+      g.addEventListener('pointerleave', release)
+      g.addEventListener('click', () => pick(rating))
+    })
+  }, [])
+
+  // Επισήμανση επιλεγμένης κάρτας + θάμπωμα των υπολοίπων.
+  useEffect(() => {
+    const svg = hostRef.current && hostRef.current.querySelector('svg')
+    if (!svg) return
+    svg.querySelectorAll('.rate-card').forEach((g) => {
+      g.classList.toggle('is-picked', picked != null && Number(g.dataset.rating) === picked)
+      g.classList.toggle('is-dim', picked != null && Number(g.dataset.rating) !== picked)
+    })
+  }, [picked])
 
   return (
-    <div className="screen rating">
-      <h1 className="rating__title">Πώς σου φάνηκε το παιχνίδι;</h1>
-      <div className="rating__faces">
-        {FACES.map((f) => (
-          <button
-            key={f.rating}
-            type="button"
-            className="rating__face"
-            onClick={() => pick(f.rating)}
-            aria-label={f.label}
-          >
-            <span className="rating__face-emoji">{f.emoji}</span>
-            <span className="rating__face-label">{f.label}</span>
-          </button>
-        ))}
-      </div>
+    <div className="screen rating-svg">
+      <div className="rating-svg__art" ref={hostRef} dangerouslySetInnerHTML={{ __html: rateSvg }} />
+      {picked && <div className="rating-svg__thanks">Ευχαριστούμε!</div>}
     </div>
   )
 }

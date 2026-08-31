@@ -3,6 +3,7 @@ import { FOODS, PLATE_IMG, BG_IMG, GOAL } from '../data/foods.js'
 import { STAGE_W } from '../../../components/Stage.jsx'
 import { playCorrect, playWrong, playWin } from '../../../services/sound.js'
 import { speak } from '../../../services/voice.js'
+import HeroWin from '../HeroWin.jsx'
 
 // Γεωμετρία (συντεταγμένες stage 1080x1920)
 const CX = 540
@@ -68,22 +69,27 @@ export default function Mission1Plate({ addScore, onProgress, onReaction, onComp
     const overPlate = Math.hypot(d.x - CX, d.y - CY) < HIT_R
 
     if (overPlate && food.healthy) {
+      const willComplete = placed.length + 1 >= GOAL
       setTray((t) => t.filter((f) => f.id !== d.id))
       setPlaced((pl) => {
         const next = [...pl, food]
         if (onProgress) onProgress(next.length)
         if (next.length === GOAL - 2) speak('HH-11') // «Άλλα δύο και το πιάτο είναι έτοιμο!»
-        if (next.length >= GOAL) {
-          setTimeout(() => {
-            setWon(true)
-            playWin()
-          }, 500)
-        }
         return next
       })
       addScore(10)
       playCorrect()
-      onReaction && onReaction('correct')
+      if (willComplete) {
+        // Τελευταίο φαγητό: πρώτα τελειώνει το VO της αντίδρασης, ΜΕΤΑ το VO νίκης + pop-up.
+        onReaction &&
+          onReaction('correct', () => {
+            setWon(true)
+            playWin()
+            speak('HH-12') // «Μπράβο, ήρωα! Το πιάτο είναι γεμάτο δύναμη!»
+          })
+      } else {
+        onReaction && onReaction('correct')
+      }
       setGlow(true)
       setTimeout(() => setGlow(false), 600)
       dragRef.current = null
@@ -178,9 +184,8 @@ export default function Mission1Plate({ addScore, onProgress, onReaction, onComp
       {won && (
         <div className="reward-overlay">
           <div className="reward-overlay__card">
-            <div className="reward-overlay__emoji">🎉</div>
-            <h2 className="reward-overlay__title">Μπράβο, ήρωα!</h2>
-            <p className="reward-overlay__text">Γέμισες το πιάτο σωστά!</p>
+            <HeroWin className="reward-overlay__hero" />
+            <h2 className="reward-overlay__title">Αποστολή 1 ολοκληρώθηκε!</h2>
             <button type="button" className="big-button big-button--primary" onClick={onComplete}>
               Επόμενη αποστολή →
             </button>

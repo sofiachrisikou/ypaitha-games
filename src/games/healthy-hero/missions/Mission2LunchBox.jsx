@@ -2,6 +2,8 @@ import { useRef, useState } from 'react'
 import { LUNCHBOX_ITEMS, BG_IMG, LUNCHBOX_GOAL as GOAL } from '../data/lunchbox.js'
 import { STAGE_W } from '../../../components/Stage.jsx'
 import { playCorrect, playWrong, playWin } from '../../../services/sound.js'
+import { speak } from '../../../services/voice.js'
+import HeroWin from '../HeroWin.jsx'
 
 // Το κουτί + το badge είναι ήδη ζωγραφισμένα στο Background.png.
 // Εδώ βάζουμε μόνο τα draggable φαγητά και τα ρίχνουμε στις θήκες.
@@ -76,22 +78,26 @@ export default function Mission2LunchBox({ addScore, onProgress, onReaction, onN
     const inBox = overBox(d.x, d.y)
 
     if (inBox && food.healthy) {
+      const willComplete = placed.length + 1 >= GOAL
       setTray((t) => t.filter((f) => f.id !== d.id))
       setPlaced((pl) => {
         const next = [...pl, food]
         if (onProgress) onProgress(next.length)
-        if (next.length >= GOAL) {
-          setTimeout(() => {
-            setDone(true)
-            playWin()
-          }, 400)
-          setTimeout(() => onNext && onNext(), 2100)
-        }
         return next
       })
       addScore(10)
       playCorrect()
-      onReaction && onReaction('correct')
+      if (willComplete) {
+        // Τελευταίο: reaction VO -> win VO + pop-up -> (τέλος) -> επόμενη αποστολή.
+        onReaction &&
+          onReaction('correct', () => {
+            setDone(true)
+            playWin()
+            speak('HH-18', () => onNext && onNext())
+          })
+      } else {
+        onReaction && onReaction('correct')
+      }
       setFlash(true)
       setTimeout(() => setFlash(false), 500)
       dragRef.current = null
@@ -177,10 +183,13 @@ export default function Mission2LunchBox({ addScore, onProgress, onReaction, onN
       })}
 
       {done && (
-        <div className="lunchbox-done">
-          <div className="lunchbox-done__emoji">🎉</div>
-          <p className="lunchbox-done__text">Το κολατσιό είναι έτοιμο!</p>
-        </div>
+        <>
+          <div className="stage-dim" />
+          <div className="lunchbox-done">
+            <HeroWin className="lunchbox-done__hero" />
+            <p className="lunchbox-done__text">Αποστολή 2 ολοκληρώθηκε!</p>
+          </div>
+        </>
       )}
     </div>
   )
