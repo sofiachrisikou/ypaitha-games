@@ -1,17 +1,20 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Rive, Layout, Fit, Alignment } from '@rive-app/canvas'
 
 // Ήρωας καλωσορίσματος (welcome) από το Rive του γραφίστα (Hero_Mascot_02.riv).
-// Η state machine κάνει τα πάντα με triggers:
-//   coming  -> μπαίνει πετώντας και προσγειώνεται σε idle (default: Idle)
-//   leaving -> στο «Πάμε» πετάει και φεύγει από την οθόνη
+//   coming  -> μπαίνει πετώντας και προσγειώνεται σε idle
+//   idle    -> ελαφρύ hover όσο περιμένει το «Πάμε» (CSS)
+//   ΕΝΑΡΞΗ  -> φεύγει ευθεία διαγώνια εκτός οθόνης (CSS)
 const SRC = '/hh/rive/Hero_Mascot_02.riv'
 const SM = 'Hero_StateMachine'
+const IDLE_AFTER = 2000 // πότε τελειώνει η είσοδος -> ξεκινά το hover
 
 export default function HeroWelcomeRive({ className = '', leaving = false }) {
   const canvasRef = useRef(null)
   const inputs = useRef({})
   const imgRef = useRef(null)
+  const timers = useRef([])
+  const [idle, setIdle] = useState(false)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -39,9 +42,13 @@ export default function HeroWelcomeRive({ className = '', leaving = false }) {
           } catch {
             /* noop */
           }
-          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            setIdle(true)
+            return
+          }
           const t = inputs.current.coming
           if (t && t.fire) t.fire() // είσοδος
+          timers.current.push(setTimeout(() => setIdle(true), IDLE_AFTER)) // μετά -> hover
         },
         onLoadError: () => {
           if (imgRef.current) imgRef.current.style.display = 'block'
@@ -61,6 +68,8 @@ export default function HeroWelcomeRive({ className = '', leaving = false }) {
     window.addEventListener('resize', onResize)
     return () => {
       alive = false
+      timers.current.forEach(clearTimeout)
+      timers.current = []
       window.removeEventListener('resize', onResize)
       try {
         rive && rive.cleanup()
@@ -70,15 +79,12 @@ export default function HeroWelcomeRive({ className = '', leaving = false }) {
     }
   }, [])
 
-  // ΕΝΑΡΞΗ («Πάμε»): ο ήρωας πετάει και φεύγει.
-  useEffect(() => {
-    if (!leaving) return
-    const t = inputs.current.leaving
-    if (t && t.fire) t.fire()
-  }, [leaving])
-
   return (
-    <span className={`hero-rive ${className} ${leaving ? 'is-leaving' : ''}`}>
+    <span
+      className={`hero-rive ${className} ${idle && !leaving ? 'is-idle' : ''} ${
+        leaving ? 'is-leaving' : ''
+      }`}
+    >
       <canvas ref={canvasRef} className="rive-canvas" width={640} height={800} />
       <img
         ref={imgRef}
