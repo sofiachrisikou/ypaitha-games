@@ -560,6 +560,9 @@ button {
   align-items: flex-end;
   justify-content: center;
   pointer-events: none;
+  /* Λίγο μεγαλύτερος ήρωας, με τα πόδια σταθερά (μεγαλώνει προς τα πάνω). */
+  transform: scale(1.12);
+  transform-origin: bottom center;
 }
 .popup-frame__hero img {
   height: 100%;
@@ -1573,7 +1576,7 @@ button {
   animation: pop-plain 0.4s ease;
 }
 .mission-intro__hero {
-  width: 360px;
+  width: 405px;
   height: auto;
   transform-origin: 50% 100%;
   filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.35));
@@ -1777,8 +1780,8 @@ button {
 }
 /* Τα GIF νίκης (στάδια 2 & 3) — μεγαλύτερα, ο ήρωας γεμίζει καλύτερα την κάρτα. */
 .win-gif {
-  width: 480px;
-  max-width: 88%;
+  width: 540px;
+  max-width: 92%;
   height: auto;
 }
 .hero-react svg {
