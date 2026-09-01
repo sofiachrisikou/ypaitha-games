@@ -3,6 +3,7 @@ import { TRAP_ITEMS, BG_IMG, TRAP_TIME, TRAP_POINTS } from '../data/traps.js'
 import { playCorrect, playWrong, playWin } from '../../../services/sound.js'
 import { speak } from '../../../services/voice.js'
 import Confetti from '../Confetti.jsx'
+import PopupFrame from '../PopupFrame.jsx'
 
 const TRAPS_TOTAL = TRAP_ITEMS.filter((f) => !f.healthy).length
 const COLS = [250, 540, 830]
@@ -134,18 +135,21 @@ export default function Mission3Traps({ addScore, onProgress, onReaction, onNext
       {finished && (
         <div className="reward-overlay">
           {finished === 'win' && <Confetti />}
-          <div className="reward-overlay__card">
+          <div className={`reward-overlay__card ${finished === 'win' ? 'reward-overlay__card--frame' : ''}`}>
             {finished === 'win' ? (
-              <img src="/hh/Win3.gif" alt="" className="reward-overlay__hero win-gif" draggable="false" />
+              <>
+                <img src="/hh/Win3.gif" alt="" className="reward-overlay__hero win-gif" draggable="false" />
+                <PopupFrame frame="win_m3" className="win-frame" />
+              </>
             ) : (
-              <div className="reward-overlay__emoji">⏰</div>
+              <>
+                <div className="reward-overlay__emoji">⏰</div>
+                <h2 className="reward-overlay__title">Ο χρόνος τελείωσε!</h2>
+                <p className="reward-overlay__text">
+                  Ξεχώρισες {found.size} από {TRAPS_TOTAL}!
+                </p>
+              </>
             )}
-            <h2 className="reward-overlay__title">
-              {finished === 'win' ? 'Αποστολή 3 ολοκληρώθηκε!' : 'Ο χρόνος τελείωσε!'}
-            </h2>
-            <p className="reward-overlay__text">
-              Ξεχώρισες {found.size} από {TRAPS_TOTAL}!
-            </p>
           </div>
         </div>
       )}
