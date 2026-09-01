@@ -188,7 +188,7 @@ export const IMAGE_ASSETS = [
   },
   {
     assetKey: ASSET_KEYS.BOOK,
-    path: 'assets/images/Book.png',
+    path: 'assets/images/Book1.png',
   },
   {
     assetKey: ASSET_KEYS.BELL,
