@@ -137,7 +137,7 @@ export default function Mission3Traps({ addScore, onProgress, onReaction, onNext
           {finished === 'win' ? (
             <>
               <Confetti />
-              <PopupFrame frame="win_m3" className="win-frame">
+              <PopupFrame frame="win_m3" className="win-frame win-frame--m3">
                 <img src="/hh/Win3.gif" alt="" className="win-frame__gif" draggable="false" />
               </PopupFrame>
             </>
