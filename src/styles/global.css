@@ -1210,7 +1210,7 @@ button {
   }
   /* ΕΝΑΡΞΗ: φεύγει ΕΥΘΕΙΑ διαγώνια, τελείως εκτός οθόνης (πάνω-δεξιά). */
   .hero-rive.is-leaving .rive-canvas {
-    animation: hero-rive-out 1.1s cubic-bezier(0.45, 0.1, 0.9, 0.7) forwards;
+    animation: hero-rive-out 0.85s cubic-bezier(0.45, 0.1, 0.9, 0.7) forwards;
   }
 }
 @keyframes hero-rive-in {
