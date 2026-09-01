@@ -1199,9 +1199,9 @@ button {
   transform: translateX(-50%);
 }
 @media (prefers-reduced-motion: no-preference) {
-  /* Είσοδος: ξεκινά ΕΚΤΟΣ οθόνης κάτω-αριστερά και φτάνει στη θέση του — ΜΟΝΟ όταν
-     φορτώσει ο ήρωας (is-entering), ώστε να μη «ποπάρει» στη μέση της κίνησης. */
-  .hero-rive.is-entering .rive-canvas {
+  /* Είσοδος: ξεκινά ΕΚΤΟΣ οθόνης κάτω-αριστερά (από το mount, ώστε να μη φανεί
+     ποτέ στη θέση του πριν ξεκινήσει) και ολισθαίνει στη θέση του. */
+  .hero-rive .rive-canvas {
     animation: hero-rive-in 1.9s cubic-bezier(0.22, 0.72, 0.3, 1) both;
   }
   /* Όσο περιμένει το «Πάμε»: ελαφρύ hover (πάνω-κάτω). */

@@ -4,7 +4,9 @@ import HeroPoint from './HeroPoint.jsx'
 
 // Σαφείς οδηγίες πριν από κάθε αποστολή: ο ήρωας ΔΕΙΧΝΕΙ (HH-03) τι να κάνει.
 // Στο «Πάμε!» κάνει μικρή αναπήδηση + χαρούμενο πρόσωπο (HH-04).
-export default function MissionIntro({ bg, text, voiceKey, onStart }) {
+export default function MissionIntro({ bg, text, voiceKey, onStart, stage }) {
+  // Στα στάδια 2 & 3 ο γραφίστας έστειλε animated GIF αντί για το pointing hero.
+  const useGif = stage === 'm2' || stage === 'm3'
   const [jumping, setJumping] = useState(false)
 
   useEffect(() => {
@@ -22,7 +24,16 @@ export default function MissionIntro({ bg, text, voiceKey, onStart }) {
     <div className="mission-intro" style={{ backgroundImage: `url(${bg})` }}>
       <div className="mission-intro__dim" />
       <div className="mission-intro__card">
-        <HeroPoint className={`mission-intro__hero${jumping ? ' is-jump' : ''}`} happy={jumping} />
+        {useGif ? (
+          <img
+            src="/hh/Instructions.gif"
+            alt=""
+            className={`mission-intro__hero${jumping ? ' is-jump' : ''}`}
+            draggable="false"
+          />
+        ) : (
+          <HeroPoint className={`mission-intro__hero${jumping ? ' is-jump' : ''}`} happy={jumping} />
+        )}
         <div className="mission-intro__bubble">
           <p className="mission-intro__text">{text}</p>
         </div>
