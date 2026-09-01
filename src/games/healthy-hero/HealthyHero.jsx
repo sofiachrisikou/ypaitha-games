@@ -114,11 +114,18 @@ export default function HealthyHero() {
 
   // Αντίδραση μασκότ: φράση+φωνή ανάλογα με την τρέχουσα αποστολή.
   const onReaction = useCallback(
-    (type, onEnd, silent) => {
+    (type, onEnd, opts = {}) => {
+      const { silent = false, anim: fixedAnim } = opts
+      // fixedAnim: σταθερή κίνηση ΧΩΡΙΣ να «καταναλώνει» τον κύκλο ούτε να παίζει VO
+      // (π.χ. στο «άλλα 2», ώστε το head-shake+«Ναι!» να πέσει σε φωνητικό τρόφιμο).
+      if (fixedAnim) {
+        setReaction({ type, anim: fixedAnim, text: '', n: Date.now() })
+        return onEnd && onEnd()
+      }
       const set = (REACTIONS[stage] && REACTIONS[stage][type]) || []
       if (!set.length) return onEnd && onEnd()
       const item = set[rIdx.current[type]++ % set.length]
-      // silent: κάνε μόνο την κίνηση της μασκότ, χωρίς VO (π.χ. όταν παίζει ήδη άλλη ατάκα).
+      // silent: κάνε μόνο την κίνηση (από τον κύκλο), χωρίς VO.
       if (silent) onEnd && onEnd()
       else speak(item.key, onEnd) // onEnd() -> όταν τελειώσει το VO (για chaining με το VO νίκης)
       setReaction({ type, anim: item.anim, text: silent ? '' : item.bubble, n: Date.now() })

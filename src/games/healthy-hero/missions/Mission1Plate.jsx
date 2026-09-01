@@ -91,8 +91,9 @@ export default function Mission1Plate({ addScore, onProgress, onReaction, onComp
             speak('HH-12') // «Μπράβο, ήρωα! Το πιάτο είναι γεμάτο δύναμη!»
           })
       } else if (isAlmost) {
-        // Κίνηση μασκότ χωρίς VO αντίδρασης + μόνο η ατάκα «Άλλα δύο…».
-        onReaction && onReaction('correct', null, true)
+        // «Άλλα δύο…»: απλό thumbs (χωρίς VO, χωρίς να προχωράει ο κύκλος) + μόνο το HH-11,
+        // ώστε το head-shake+«Ναι!» να μη «χαθεί» πάνω σε αυτό το σιωπηλό σημείο.
+        onReaction && onReaction('correct', null, { anim: 'thumbs' })
         speak('HH-11')
       } else {
         onReaction && onReaction('correct')
