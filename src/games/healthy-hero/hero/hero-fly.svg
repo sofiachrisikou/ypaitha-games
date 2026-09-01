@@ -1,101 +1,83 @@
-<svg id="HEROFLY" xmlns="http://www.w3.org/2000/svg" viewBox="864 339 258 390"><defs>
+<svg data-hhs="hero-fly" id="HEROFLY" xmlns="http://www.w3.org/2000/svg" viewBox="864 339 258 390"><defs>
     <style>
-      .st0 {
+[data-hhs="hero-fly"] .st0 {
         fill: #f8d319;
       }
-
-      .st1 {
+[data-hhs="hero-fly"] .st1 {
         fill: #583019;
       }
-
-      .st2 {
+[data-hhs="hero-fly"] .st2 {
         fill: #279a4b;
       }
-
-      .st3 {
+[data-hhs="hero-fly"] .st3 {
         stroke-linecap: round;
         stroke-width: 3px;
       }
-
-      .st3, .st4 {
+[data-hhs="hero-fly"] .st3,
+[data-hhs="hero-fly"] .st4 {
         stroke: #261f19;
       }
-
-      .st3, .st4, .st5 {
+[data-hhs="hero-fly"] .st3,
+[data-hhs="hero-fly"] .st4,
+[data-hhs="hero-fly"] .st5 {
         fill: none;
         stroke-miterlimit: 10;
       }
-
-      .st6 {
+[data-hhs="hero-fly"] .st6 {
         fill: #1d1d1b;
         font-family: MyriadPro-Regular, 'Myriad Pro';
         font-size: 24.5px;
       }
-
-      .st4 {
+[data-hhs="hero-fly"] .st4 {
         stroke-width: 4px;
       }
-
-      .st7 {
+[data-hhs="hero-fly"] .st7 {
         fill: #f3c19e;
       }
-
-      .st8 {
+[data-hhs="hero-fly"] .st8 {
         fill: #f2f2f0;
       }
-
-      .st9 {
+[data-hhs="hero-fly"] .st9 {
         fill: #42ad4e;
       }
-
-      .st10 {
+[data-hhs="hero-fly"] .st10 {
         fill: #7f4c2a;
       }
-
-      .st11 {
+[data-hhs="hero-fly"] .st11 {
         fill: #ea7a1d;
       }
-
-      .st12 {
+[data-hhs="hero-fly"] .st12 {
         fill: #fff;
       }
-
-      .st13 {
+[data-hhs="hero-fly"] .st13 {
         fill: #261f19;
       }
-
-      .st14 {
+[data-hhs="hero-fly"] .st14 {
         fill: #b66930;
       }
-
-      .st15 {
+[data-hhs="hero-fly"] .st15 {
         fill: #1d783c;
       }
-
-      .st16 {
+[data-hhs="hero-fly"] .st16 {
         fill: #d85417;
       }
-
-      .st5 {
+[data-hhs="hero-fly"] .st5 {
         stroke: #1d1d1b;
       }
-
-      .st17 {
+[data-hhs="hero-fly"] .st17 {
         fill: #e5a27f;
       }
-
-      .st18 {
+[data-hhs="hero-fly"] .st18 {
         fill: #e14b60;
       }
-
-      .st19 {
+[data-hhs="hero-fly"] .st19 {
         fill: #231b14;
       }
-
-      .st20 {
+[data-hhs="hero-fly"] .st20 {
         display: none;
       }
-    </style>
+    
+</style>
   </defs><g data-frame="6">
     <g>
       <g>

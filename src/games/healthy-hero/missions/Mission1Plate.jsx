@@ -192,10 +192,9 @@ export default function Mission1Plate({ addScore, onProgress, onReaction, onComp
       {won && (
         <div className="reward-overlay">
           <Confetti />
-          <div className="reward-overlay__card reward-overlay__card--frame">
-            <HeroWin className="reward-overlay__hero" />
-            <PopupFrame frame="win_m1" onButton={onComplete} className="win-frame" />
-          </div>
+          <PopupFrame frame="win_m1" onButton={onComplete} className="win-frame">
+            <HeroWin />
+          </PopupFrame>
         </div>
       )}
     </div>

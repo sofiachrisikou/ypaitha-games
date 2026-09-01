@@ -1,100 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1190.6 841.9">
+<svg data-hhs="hero-hurry" id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1190.6 841.9">
   <!-- Generator: Adobe Illustrator 30.4.0, SVG Export Plug-In . SVG Version: 2.1.4 Build 226)  -->
   <defs>
     <style>
-      .st0 {
+[data-hhs="hero-hurry"] .st0 {
         fill: #f8d319;
       }
-
-      .st1 {
+[data-hhs="hero-hurry"] .st1 {
         fill: #583019;
       }
-
-      .st2 {
+[data-hhs="hero-hurry"] .st2 {
         fill: #279a4b;
       }
-
-      .st3 {
+[data-hhs="hero-hurry"] .st3 {
         stroke-linecap: round;
       }
-
-      .st3, .st4, .st5 {
+[data-hhs="hero-hurry"] .st3,
+[data-hhs="hero-hurry"] .st4,
+[data-hhs="hero-hurry"] .st5 {
         stroke: #261f19;
         stroke-miterlimit: 10;
       }
-
-      .st3, .st6, .st5 {
+[data-hhs="hero-hurry"] .st3,
+[data-hhs="hero-hurry"] .st6,
+[data-hhs="hero-hurry"] .st5 {
         fill: #fff;
       }
-
-      .st7 {
+[data-hhs="hero-hurry"] .st7 {
         fill: #1d1d1b;
         font-family: MyriadPro-Regular, 'Myriad Pro';
         font-size: 24.5px;
       }
-
-      .st4 {
+[data-hhs="hero-hurry"] .st4 {
         fill: none;
         stroke-width: 4.7px;
       }
-
-      .st8 {
+[data-hhs="hero-hurry"] .st8 {
         fill: #f3c19e;
       }
-
-      .st9 {
+[data-hhs="hero-hurry"] .st9 {
         fill: #1a1210;
       }
-
-      .st10 {
+[data-hhs="hero-hurry"] .st10 {
         fill: #f2f2f0;
       }
-
-      .st11 {
+[data-hhs="hero-hurry"] .st11 {
         fill: #266e31;
       }
-
-      .st12 {
+[data-hhs="hero-hurry"] .st12 {
         fill: #ea7a1d;
       }
-
-      .st13 {
+[data-hhs="hero-hurry"] .st13 {
         fill: #817464;
       }
-
-      .st14 {
+[data-hhs="hero-hurry"] .st14 {
         fill: #261f19;
       }
-
-      .st15 {
+[data-hhs="hero-hurry"] .st15 {
         fill: #1d783c;
       }
-
-      .st16 {
+[data-hhs="hero-hurry"] .st16 {
         fill: #d85417;
       }
-
-      .st17 {
+[data-hhs="hero-hurry"] .st17 {
         fill: #0c1412;
       }
-
-      .st18 {
+[data-hhs="hero-hurry"] .st18 {
         fill: #e5a27f;
       }
-
-      .st19 {
+[data-hhs="hero-hurry"] .st19 {
         fill: #231b14;
       }
-
-      .st5 {
+[data-hhs="hero-hurry"] .st5 {
         stroke-width: 2px;
       }
-
-      .st20 {
+[data-hhs="hero-hurry"] .st20 {
         fill: #eb670d;
       }
-    </style>
+    
+</style>
   </defs>
   <g>
     <g>

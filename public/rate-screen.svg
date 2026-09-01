@@ -1,67 +1,54 @@
-<?xml version="1.0" ?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="Layer_1" version="1.1" viewBox="0 0 552.8 943.7">
+<?xml version="1.0" ?><svg data-hhs="rate-screen" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="Layer_1" version="1.1" viewBox="0 0 552.8 943.7">
   <!-- Generator: Adobe Illustrator 30.4.0, SVG Export Plug-In . SVG Version: 2.1.4 Build 226)  -->
   <defs>
     <style>
-      .st0 {
+[data-hhs="rate-screen"] .st0 {
         fill: #f9da1b;
       }
-
-      .st1 {
+[data-hhs="rate-screen"] .st1 {
         fill: #fdcd38;
       }
-
-      .st2 {
+[data-hhs="rate-screen"] .st2 {
         fill: #f4ab1d;
       }
-
-      .st3 {
+[data-hhs="rate-screen"] .st3 {
         fill: #be1622;
       }
-
-      .st4 {
+[data-hhs="rate-screen"] .st4 {
         fill: url(#radial-gradient);
       }
-
-      .st5 {
+[data-hhs="rate-screen"] .st5 {
         fill: #f39200;
       }
-
-      .st6 {
+[data-hhs="rate-screen"] .st6 {
         fill: #1d1d1b;
       }
-
-      .st7 {
+[data-hhs="rate-screen"] .st7 {
         fill: #008d36;
       }
-
-      .st8 {
+[data-hhs="rate-screen"] .st8 {
         fill: #fef186;
       }
-
-      .st9 {
+[data-hhs="rate-screen"] .st9 {
         fill: #312616;
       }
-
-      .st10 {
+[data-hhs="rate-screen"] .st10 {
         fill: #fff;
       }
-
-      .st11 {
+[data-hhs="rate-screen"] .st11 {
         fill: #feecb1;
       }
-
-      .st12 {
+[data-hhs="rate-screen"] .st12 {
         fill: #e30613;
       }
-
-      .st13 {
+[data-hhs="rate-screen"] .st13 {
         fill: #95c11f;
       }
-
-      .st14 {
+[data-hhs="rate-screen"] .st14 {
         fill: #fcea10;
       }
-    </style>
+    
+</style>
     <radialGradient id="radial-gradient" cx="276" cy="471.7" fx="276" fy="471.7" r="400.2" gradientUnits="userSpaceOnUse">
       <stop offset=".3" stop-color="#1ebcef"/>
       <stop offset=".6" stop-color="#129ed9"/>

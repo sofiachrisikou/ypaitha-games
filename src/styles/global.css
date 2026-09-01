@@ -552,15 +552,32 @@ button {
   gap: 0;
   animation: pop-plain 0.4s ease;
 }
-.reward-overlay__card--frame .reward-overlay__hero {
+/* Ο ήρωας κάθεται ΜΕΣΑ στο κενό πάνω μέρος της κάρτας νίκης (heroZone). */
+.popup-frame__hero {
   position: absolute;
-  top: -22%;
-  left: 50%;
-  transform: translateX(-50%);
   z-index: 2;
-  width: 300px;
-  max-width: 66%;
-  margin: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+.popup-frame__hero img {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.22));
+}
+.popup-frame__hero .hero-win {
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+.popup-frame__hero .hero-win svg {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
 }
 /* Πλαίσια pop-up (SVG του γραφίστα) — κείμενο & κουμπί ζωγραφισμένα μέσα. */
 .popup-frame {
@@ -591,11 +608,11 @@ button {
   max-width: 92%;
 }
 .win-frame {
-  width: 470px;
-  max-width: 84%;
+  width: 580px;
+  max-width: 90%;
 }
 .win-frame--pill {
-  width: 440px;
+  width: 520px;
   filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.25));
 }
 .reward-overlay__emoji {

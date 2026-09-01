@@ -134,23 +134,22 @@ export default function Mission3Traps({ addScore, onProgress, onReaction, onNext
 
       {finished && (
         <div className="reward-overlay">
-          {finished === 'win' && <Confetti />}
-          <div className={`reward-overlay__card ${finished === 'win' ? 'reward-overlay__card--frame' : ''}`}>
-            {finished === 'win' ? (
-              <>
-                <img src="/hh/Win3.gif" alt="" className="reward-overlay__hero win-gif" draggable="false" />
-                <PopupFrame frame="win_m3" className="win-frame" />
-              </>
-            ) : (
-              <>
-                <div className="reward-overlay__emoji">⏰</div>
-                <h2 className="reward-overlay__title">Ο χρόνος τελείωσε!</h2>
-                <p className="reward-overlay__text">
-                  Ξεχώρισες {found.size} από {TRAPS_TOTAL}!
-                </p>
-              </>
-            )}
-          </div>
+          {finished === 'win' ? (
+            <>
+              <Confetti />
+              <PopupFrame frame="win_m3" className="win-frame">
+                <img src="/hh/Win3.gif" alt="" className="win-frame__gif" draggable="false" />
+              </PopupFrame>
+            </>
+          ) : (
+            <div className="reward-overlay__card">
+              <div className="reward-overlay__emoji">⏰</div>
+              <h2 className="reward-overlay__title">Ο χρόνος τελείωσε!</h2>
+              <p className="reward-overlay__text">
+                Ξεχώρισες {found.size} από {TRAPS_TOTAL}!
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

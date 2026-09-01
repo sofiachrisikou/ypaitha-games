@@ -1,91 +1,79 @@
-<svg id="HERO_REACT_W" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1912.7 841.9">
+<svg data-hhs="hero-react-wrong" id="HERO_REACT_W" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1912.7 841.9">
   <!-- Generator: Adobe Illustrator 30.4.0, SVG Export Plug-In . SVG Version: 2.1.4 Build 226)  -->
   <defs>
     <style>
-      .st0 {
+[data-hhs="hero-react-wrong"] .st0 {
         fill: #f8d319;
       }
-
-      .st1, .st2, .st3 {
+[data-hhs="hero-react-wrong"] .st1,
+[data-hhs="hero-react-wrong"] .st2,
+[data-hhs="hero-react-wrong"] .st3 {
         fill: none;
       }
-
-      .st4 {
+[data-hhs="hero-react-wrong"] .st4 {
         fill: #583019;
       }
-
-      .st5 {
+[data-hhs="hero-react-wrong"] .st5 {
         fill: #279a4b;
       }
-
-      .st6 {
+[data-hhs="hero-react-wrong"] .st6 {
         fill: #1d1d1b;
         font-family: MyriadPro-Regular, 'Myriad Pro';
         font-size: 24.5px;
       }
-
-      .st2 {
+[data-hhs="hero-react-wrong"] .st2 {
         stroke: #261f19;
         stroke-width: 4.7px;
       }
-
-      .st2, .st3 {
+[data-hhs="hero-react-wrong"] .st2,
+[data-hhs="hero-react-wrong"] .st3 {
         stroke-miterlimit: 10;
       }
-
-      .st3 {
+[data-hhs="hero-react-wrong"] .st3 {
         stroke: #9d9d9c;
         stroke-width: 7px;
       }
-
-      .st7 {
+[data-hhs="hero-react-wrong"] .st7 {
         fill: #f3c19e;
       }
-
-      .st8 {
+[data-hhs="hero-react-wrong"] .st8 {
         fill: #281d17;
       }
-
-      .st9 {
+[data-hhs="hero-react-wrong"] .st9 {
         fill: #f2f2f0;
       }
-
-      .st10 {
+[data-hhs="hero-react-wrong"] .st10 {
         fill: #ea7a1d;
       }
-
-      .st11 {
+[data-hhs="hero-react-wrong"] .st11 {
         fill: #261f19;
       }
-
-      .st12 {
+[data-hhs="hero-react-wrong"] .st12 {
         fill: #1d783c;
       }
-
-      .st13 {
+[data-hhs="hero-react-wrong"] .st13 {
         fill: #d85417;
       }
-
-      .st14 {
+[data-hhs="hero-react-wrong"] .st14 {
         fill: #e5a27f;
       }
-
-      .st15 {
+[data-hhs="hero-react-wrong"] .st15 {
         fill: #9d9d9c;
       }
-
-      .st16 {
+[data-hhs="hero-react-wrong"] .st16 {
         fill: #231b14;
       }
-
-      .st17 {
+[data-hhs="hero-react-wrong"] .st17 {
         clip-path: url(#clippath);
       }
-    </style>
+    
+</style>
     <clipPath id="clippath">
       <path class="st1" d="M1226.3,408.7c0,3.2-6.7,5.7-14.9,5.7s-14.9-2.6-14.9-5.7,6.7-5.7,14.9-5.7,14.9,2.6,14.9,5.7ZM1281,403c-8.3,0-14.9,2.6-14.9,5.7s6.7,5.7,14.9,5.7,14.9-2.6,14.9-5.7-6.7-5.7-14.9-5.7Z"/>
     </clipPath>
-  <style>text{display:none!important}</style></defs>
+  <style>
+[data-hhs="hero-react-wrong"] text {display:none!important}
+</style></defs>
   <text class="st6" transform="translate(274.6 189.9)"><tspan x="0" y="0">HH - 09 | όπως ΗΗ-03 και μετά:</tspan></text>
   <text class="st6" transform="translate(1340.05 189.9401)"><tspan x="0" y="0">HH - 16</tspan></text>
   <text class="st6" transform="translate(222 274.9)"><tspan x="0" y="0">HH - 03</tspan></text>

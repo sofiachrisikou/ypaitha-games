@@ -1,87 +1,71 @@
-<svg id="HERO_POINT" xmlns="http://www.w3.org/2000/svg" viewBox="337 692 269 392">
+<svg data-hhs="hero-point" id="HERO_POINT" xmlns="http://www.w3.org/2000/svg" viewBox="337 692 269 392">
   <!-- Generator: Adobe Illustrator 30.4.0, SVG Export Plug-In . SVG Version: 2.1.4 Build 226)  -->
   <defs>
     <style>
-      .st0 {
+[data-hhs="hero-point"] .st0 {
         fill: #f8d319;
       }
-
-      .st1 {
+[data-hhs="hero-point"] .st1 {
         fill: #583019;
       }
-
-      .st2 {
+[data-hhs="hero-point"] .st2 {
         fill: #279a4b;
       }
-
-      .st3 {
+[data-hhs="hero-point"] .st3 {
         fill: #1d1d1b;
         font-family: MyriadPro-Regular, 'Myriad Pro';
         font-size: 24.5px;
       }
-
-      .st4 {
+[data-hhs="hero-point"] .st4 {
         stroke: #261f19;
         stroke-width: 4.7px;
       }
-
-      .st4, .st5 {
+[data-hhs="hero-point"] .st4,
+[data-hhs="hero-point"] .st5 {
         fill: none;
         stroke-miterlimit: 10;
       }
-
-      .st6 {
+[data-hhs="hero-point"] .st6 {
         fill: #f3c19e;
       }
-
-      .st7 {
+[data-hhs="hero-point"] .st7 {
         fill: #281d17;
       }
-
-      .st8 {
+[data-hhs="hero-point"] .st8 {
         fill: #f2f2f0;
       }
-
-      .st9 {
+[data-hhs="hero-point"] .st9 {
         fill: #7f4c2a;
       }
-
-      .st10 {
+[data-hhs="hero-point"] .st10 {
         fill: #ea7a1d;
       }
-
-      .st11 {
+[data-hhs="hero-point"] .st11 {
         fill: #fff;
       }
-
-      .st12 {
+[data-hhs="hero-point"] .st12 {
         fill: #261f19;
       }
-
-      .st13 {
+[data-hhs="hero-point"] .st13 {
         fill: #1d783c;
       }
-
-      .st14 {
+[data-hhs="hero-point"] .st14 {
         fill: #d85417;
       }
-
-      .st5 {
+[data-hhs="hero-point"] .st5 {
         stroke: #1d1d1b;
       }
-
-      .st15 {
+[data-hhs="hero-point"] .st15 {
         fill: #e5a27f;
       }
-
-      .st16 {
+[data-hhs="hero-point"] .st16 {
         fill: #e14b60;
       }
-
-      .st17 {
+[data-hhs="hero-point"] .st17 {
         fill: #231b14;
       }
-    </style>
+    
+</style>
   </defs>
   <g>
     <g>
