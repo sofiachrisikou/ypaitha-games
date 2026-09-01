@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { speak } from '../../services/voice.js'
+import { speak, stopVoice } from '../../services/voice.js'
 import HeroPoint from './HeroPoint.jsx'
 
 // Σαφείς οδηγίες πριν από κάθε αποστολή: ο ήρωας ΔΕΙΧΝΕΙ (HH-03) τι να κάνει.
@@ -13,6 +13,7 @@ export default function MissionIntro({ bg, text, voiceKey, onStart }) {
 
   const handleStart = () => {
     if (jumping) return
+    stopVoice() // σταμάτα την ατάκα οδηγιών ώστε να μην ακούγεται πάνω στην αποστολή
     setJumping(true)
     setTimeout(() => onStart(), 420)
   }

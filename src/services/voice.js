@@ -69,7 +69,7 @@ function ttsFallback(text, onEnd, onActive) {
 
 // Δοκιμάζει μια λίστα από URLs με τη σειρά· αν αποτύχουν όλα -> onFail().
 // onEnd() καλείται όταν τελειώσει το VO (για συγχρονισμό, π.χ. μετάβαση οθόνης).
-function playFirst(urls, onFail, onEnd, onRealPlay) {
+function playFirst(urls, onFail, onEnd, onRealPlay, ctrl) {
   let i = 0
   const tryNext = () => {
     if (i >= urls.length) return onFail()
@@ -83,6 +83,7 @@ function playFirst(urls, onFail, onEnd, onRealPlay) {
     try {
       const a = new Audio(url)
       a.volume = 0.95
+      if (ctrl) ctrl.audio = a // ώστε να μπορεί να διακοπεί από νέα ατάκα/κουμπί
       a.addEventListener('playing', () => {
         advanced = true // παίζει κανονικό αρχείο -> τέλος
         onRealPlay && onRealPlay() // ακύρωσε το safety timeout — περιμένουμε το 'ended'
@@ -136,25 +137,57 @@ if (typeof window !== 'undefined') {
   window.addEventListener('click', onFirst, { passive: true })
 }
 
+// Η τρέχουσα ατάκα (για barge-in: διακοπή όταν ξεκινά νέα ή πατηθεί κουμπί).
+let stopCurrent = null
+
+// Σταματάει άμεσα ό,τι ατάκα παίζει τώρα (χωρίς να καλέσει το onEnd της).
+// Χρήσιμο σε κουμπιά που αλλάζουν οθόνη χωρίς να λένε αμέσως νέα ατάκα.
+export function stopVoice() {
+  const s = stopCurrent
+  stopCurrent = null
+  if (s) s()
+}
+
 // Παίζει μια ατάκα με βάση τον κωδικό HH-XX. Δέχεται mp3 Ή wav·
 // αλλιώς πέφτει σε Ελληνικό TTS του browser.
 // Προαιρετικό onEnd: καλείται όταν τελειώσει η ατάκα (ή αμέσως αν είναι muted/κενή).
 export function speak(key, onEnd) {
+  // Διέκοψε τυχόν προηγούμενη ατάκα ώστε να μη μιλάνε δύο μαζί.
+  stopVoice()
+
   if (isMuted()) return onEnd && onEnd()
   const text = CLIPS[key]
   if (!text) return onEnd && onEnd()
 
-  // Το onEnd πρέπει να κληθεί ΠΑΝΤΑ (μία φορά). Σε iPhone/κινητά που δεν υπάρχει
-  // ηχογραφημένο VO ΚΑΙ το TTS του browser δεν παίζει/δεν τελειώνει, χωρίς αυτό
-  // η ροή θα κολλούσε (π.χ. δεν ολοκληρώνεται το στάδιο μετά το τελευταίο τρόφιμο).
   let done = false
   let timer = null
+  const ctrl = { audio: null } // η τρέχουσα ηχητική πηγή (για διακοπή)
+  // Διακοπή: σταμάτα ήχο/TTS, μην καλέσεις το onEnd (η νέα ατάκα/οθόνη αναλαμβάνει).
+  const stop = () => {
+    if (done) return
+    done = true
+    clearTimeout(timer)
+    try {
+      if (ctrl.audio) ctrl.audio.pause()
+    } catch {
+      // αγνόησε
+    }
+    try {
+      if (window.speechSynthesis) window.speechSynthesis.cancel()
+    } catch {
+      // αγνόησε
+    }
+  }
+  // Το onEnd πρέπει να κληθεί ΠΑΝΤΑ (μία φορά) όταν ΤΕΛΕΙΩΣΕΙ κανονικά η ατάκα.
   const finish = () => {
     if (done) return
     done = true
     clearTimeout(timer)
+    if (stopCurrent === stop) stopCurrent = null
     onEnd && onEnd()
   }
+  stopCurrent = stop
+
   // Αν ΔΕΝ παίξει τίποτα (π.χ. iPhone χωρίς VO ούτε TTS), προχώρα μετά από estIdle.
   const estIdle = Math.min(2600, Math.max(700, text.length * 45))
   // Μόλις αρχίσει πραγματικός ήχος ή το TTS, περίμενε να ΤΕΛΕΙΩΣΕΙ η ατάκα· το
@@ -171,5 +204,6 @@ export function speak(key, onEnd) {
     () => ttsFallback(text, finish, active),
     finish,
     active,
+    ctrl,
   )
 }

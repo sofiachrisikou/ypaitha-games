@@ -10,7 +10,7 @@ import HeroRig from './HeroRig.jsx'
 import MascotCompanion from './MascotCompanion.jsx'
 import TunePanel from './TunePanel.jsx'
 import { playWin } from '../../services/sound.js'
-import { speak } from '../../services/voice.js'
+import { speak, stopVoice } from '../../services/voice.js'
 
 // Κρυφή λειτουργία ρύθμισης: ?tune=1 (και ?stage=m1/m2/m3 για μετάβαση).
 const PARAMS = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()
@@ -226,7 +226,7 @@ export default function HealthyHero() {
         <img src={`${E}/Ribon.png`} alt="Συγχαρητήρια! Έγινες Super Healthy Hero!" className="hh-finale__ribbon" draggable="false" />
         <RiveHero src="/hh/rive/Hero_Screen01.riv" className="hh-finale__hero" fallback={`${E}/Hero.png`} />
         <div className="hh-finale__score">Σκορ: ⭐ {score}</div>
-        <button type="button" className="big-button big-button--primary hh-finale__btn" onClick={() => setStage('rating')}>
+        <button type="button" className="big-button big-button--primary hh-finale__btn" onClick={() => { stopVoice(); setStage('rating') }}>
           Συνέχεια →
         </button>
       </div>
