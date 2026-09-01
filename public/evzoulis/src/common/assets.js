@@ -3,7 +3,7 @@ export const ASSET_KEYS = Object.freeze({
   BACKGROUND_GENERIC: 'BACKGROUND_GENERIC',
   PROGRESSBAR_FG: 'PROGRESSBAR_FG',
   PROGRESSBAR_BG: 'PROGRESSBAR_BG',
-  FONT1:'FONT1',
+  //FONT1:'FONT1', // unused — never loaded, main font is loadFont('GameFont', .../ComicSansMSBold.ttf) in preload-scene.js
   BTN1: 'BTN1',
   SPEECH_BUBBLE: 'SPEECH_BUBBLE',
   CORRECTSOUND: 'CORRECTSOUND',
@@ -43,8 +43,6 @@ export const ASSET_KEYS = Object.freeze({
   FLOWER1: 'FLOWER1',
   FLOWER2: 'FLOWER2',
   FLOWER3: 'FLOWER3',
-  INHALE:'INHALE',
-  EXHALE:'EXHALE',
   //LEVEL 1 VOICEOVER (assets/audio/Stage1/EZ-XX.mp3 — global clip numbering, clips 2-17)
   EZ_02: 'EZ_02',
   EZ_03: 'EZ_03',
@@ -118,18 +116,18 @@ export const ASSET_KEYS = Object.freeze({
   RIVE_BEAR_Stg1: 'RIVE_BEAR_Stg1',
   RIVE_BEAR_Stg2: 'RIVE_BEAR_Stg2',
   RIVE_BEAR_Stg3_HEAD: 'RIVE_BEAR_Stg3_HEAD',
-  RIVE_BEAR_BREATHING: 'RIVE_BEAR_BREATHING',
-  RIVE_BEAR_SMILE: 'RIVE_BEAR_SMILE',
   RIVE_BEAR_OUTRO: 'RIVE_BEAR_OUTRO',
 });
 
-export const FONT_ASSETS = 
-[
-   {
-    assetKey: ASSET_KEYS.FONT1,
-    path: 'assets/fonts/Comic Sans MS Bold.ttf',
-  },
-];
+// Unused — never imported/loaded by preload-scene.js. Main font is GameFont
+// (assets/fonts/ComicSansMSBold.ttf), loaded via loadFont() instead.
+// export const FONT_ASSETS =
+// [
+//    {
+//     assetKey: ASSET_KEYS.FONT1,
+//     path: 'assets/fonts/Comic Sans MS Bold.ttf',
+//   },
+// ];
 
 export const IMAGE_ASSETS = [
   //SHARED
@@ -156,7 +154,6 @@ export const IMAGE_ASSETS = [
   //INTRO
   {
     assetKey: ASSET_KEYS.BACKGROUND_INTRO,
-    //path: 'assets/images/01.png',
     path: 'assets/images/Classroom_Unhappy.png',
   },
   {
@@ -232,14 +229,6 @@ export const IMAGE_ASSETS = [
   {
     assetKey: ASSET_KEYS.FLOWER3,
     path: 'assets/images/flower03.png',
-  },
-  {
-    assetKey: ASSET_KEYS.INHALE,
-    path: 'assets/images/Inhale.png',
-  },
-  {
-    assetKey: ASSET_KEYS.EXHALE,
-    path: 'assets/images/Exhale.png',
   },
   //LEVEL 2
   {
@@ -444,14 +433,6 @@ export const RIVE_ASSETS = [
   {
     assetKey: ASSET_KEYS.RIVE_BEAR_Stg3_HEAD,
     path: 'assets/rive/Euzoulis_Mascot_Head.riv',
-  },
-  {
-    assetKey: ASSET_KEYS.RIVE_BEAR_BREATHING,
-    path: 'assets/rive/Bear_StateMachine_Breathing.riv',
-  },
-  {
-    assetKey: ASSET_KEYS.RIVE_BEAR_SMILE,
-    path: 'assets/rive/Bear_StateMachine_Smile.riv',
   },
   {
     assetKey: ASSET_KEYS.RIVE_BEAR_OUTRO,

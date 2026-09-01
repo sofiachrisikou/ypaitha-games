@@ -16,9 +16,10 @@ export class PreloadScene extends Phaser.Scene {
     IMAGE_ASSETS.forEach((asset) => {
       this.load.image(asset.assetKey, asset.path);
     });
-    TEXTURE_ATLAS_ASSETS.forEach((asset) => {
-      this.load.atlas(asset.assetKey, asset.textureURL, asset.atlasURL);
-    });
+    // Unused — ASSET_KEYS.OBJECTS spritesheet isn't referenced by any scene right now.
+    // TEXTURE_ATLAS_ASSETS.forEach((asset) => {
+    //   this.load.atlas(asset.assetKey, asset.textureURL, asset.atlasURL);
+    // });
 
     AUDIO_ASSETS.forEach((asset) => {
       this.load.audio(asset.assetKey, asset.path);
@@ -31,7 +32,7 @@ export class PreloadScene extends Phaser.Scene {
 
   async create() {
     await loadFont('GameFont', 'assets/fonts/ComicSansMSBold.ttf');
-    this.scene.start(SCENE_KEYS.EUZOYLIS_INTRO_SCENE);
+    this.scene.start(SCENE_KEYS.EUZOYLIS_GAME_SCENE2);
   }
 
   //#endregion
