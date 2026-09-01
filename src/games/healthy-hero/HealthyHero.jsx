@@ -6,7 +6,7 @@ import Mission2LunchBox from './missions/Mission2LunchBox.jsx'
 import Mission3Traps from './missions/Mission3Traps.jsx'
 import MissionIntro from './MissionIntro.jsx'
 import RiveHero from '../../components/RiveHero.jsx'
-import HeroRig from './HeroRig.jsx'
+import HeroWelcomeRive from './HeroWelcomeRive.jsx'
 import MascotCompanion from './MascotCompanion.jsx'
 import TunePanel from './TunePanel.jsx'
 import { playWin } from '../../services/sound.js'
@@ -167,7 +167,7 @@ export default function HealthyHero() {
             draggable="false"
           />
         ))}
-        <HeroRig className="hh-intro__hero" leaving={leaving} />
+        <HeroWelcomeRive className="hh-intro__hero" leaving={leaving} />
         <button
           type="button"
           className="hh-start-btn"
