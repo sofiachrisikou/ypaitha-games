@@ -1199,10 +1199,10 @@ button {
   transform: translateX(-50%);
 }
 @media (prefers-reduced-motion: no-preference) {
-  /* Είσοδος: ξεκινά ΕΚΤΟΣ οθόνης κάτω-δεξιά και φτάνει αργά στη θέση του
-     (το Rive «coming» παίζει την πόζα πτήσης + προσγείωση). */
+  /* Είσοδος: ξεκινά ΕΚΤΟΣ οθόνης κάτω-αριστερά και φτάνει στη θέση του
+     (ενδιάμεση ταχύτητα· το Rive «coming» παίζει την πόζα πτήσης + προσγείωση). */
   .hero-rive .rive-canvas {
-    animation: hero-rive-in 2.4s cubic-bezier(0.22, 0.72, 0.3, 1) both;
+    animation: hero-rive-in 1.9s cubic-bezier(0.22, 0.72, 0.3, 1) both;
   }
   /* ΕΝΑΡΞΗ: ξεκινά αργά και μετά πετάει ΤΕΛΕΙΩΣ εκτός οθόνης (πάνω-δεξιά). */
   /* ΕΝΑΡΞΗ: πετάει ΤΕΛΕΙΩΣ εκτός οθόνης (πάνω-δεξιά), κανονική ταχύτητα. */
@@ -1211,7 +1211,7 @@ button {
   }
 }
 @keyframes hero-rive-in {
-  0% { transform: translate(calc(-50% + 660px), 900px) scale(0.82); }
+  0% { transform: translate(calc(-50% - 660px), 900px) scale(0.82); }
   100% { transform: translate(-50%, 0) scale(1); }
 }
 @keyframes hero-rive-out {
