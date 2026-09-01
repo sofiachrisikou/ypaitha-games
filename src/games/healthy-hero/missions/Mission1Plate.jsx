@@ -5,6 +5,7 @@ import { playCorrect, playWrong, playWin } from '../../../services/sound.js'
 import { speak } from '../../../services/voice.js'
 import HeroWin from '../HeroWin.jsx'
 import Confetti from '../Confetti.jsx'
+import PopupFrame from '../PopupFrame.jsx'
 
 // Γεωμετρία (συντεταγμένες stage 1080x1920)
 const CX = 540
@@ -191,12 +192,9 @@ export default function Mission1Plate({ addScore, onProgress, onReaction, onComp
       {won && (
         <div className="reward-overlay">
           <Confetti />
-          <div className="reward-overlay__card">
+          <div className="reward-overlay__card reward-overlay__card--frame">
             <HeroWin className="reward-overlay__hero" />
-            <h2 className="reward-overlay__title">Αποστολή 1 ολοκληρώθηκε!</h2>
-            <button type="button" className="big-button big-button--primary" onClick={onComplete}>
-              Επόμενη αποστολή →
-            </button>
+            <PopupFrame frame="win_m1" onButton={onComplete} className="win-frame" />
           </div>
         </div>
       )}

@@ -540,6 +540,64 @@ button {
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
   animation: pop-plain 0.4s ease;
 }
+/* Όταν χρησιμοποιούμε το πλαίσιο του γραφίστα, η λευκή κάρτα γίνεται διάφανη
+   και ο ήρωας ΕΠΙΚΑΛΥΠΤΕΙ το κενό πάνω μέρος της κάρτας. */
+.reward-overlay__card--frame {
+  position: relative;
+  display: block;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  width: auto;
+  gap: 0;
+  animation: pop-plain 0.4s ease;
+}
+.reward-overlay__card--frame .reward-overlay__hero {
+  position: absolute;
+  top: -22%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: 300px;
+  max-width: 66%;
+  margin: 0;
+}
+/* Πλαίσια pop-up (SVG του γραφίστα) — κείμενο & κουμπί ζωγραφισμένα μέσα. */
+.popup-frame {
+  position: relative;
+  display: block;
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.28));
+  animation: pop-plain 0.4s ease;
+}
+.popup-frame__svg,
+.popup-frame__svg svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.popup-frame__btn {
+  position: absolute;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 40px;
+}
+.popup-frame__btn:active {
+  transform: translateY(4px) scale(0.97);
+}
+.mission-intro__frame {
+  width: 640px;
+  max-width: 92%;
+}
+.win-frame {
+  width: 470px;
+  max-width: 84%;
+}
+.win-frame--pill {
+  width: 440px;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.25));
+}
 .reward-overlay__emoji {
   font-size: 200px;
   animation: bob 1.8s ease-in-out infinite;

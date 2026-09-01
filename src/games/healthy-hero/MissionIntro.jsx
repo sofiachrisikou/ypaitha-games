@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { speak, stopVoice } from '../../services/voice.js'
 import HeroPoint from './HeroPoint.jsx'
+import PopupFrame from './PopupFrame.jsx'
 
 // Σαφείς οδηγίες πριν από κάθε αποστολή: ο ήρωας ΔΕΙΧΝΕΙ (HH-03) τι να κάνει.
 // Στο «Πάμε!» κάνει μικρή αναπήδηση + χαρούμενο πρόσωπο (HH-04).
@@ -35,16 +36,8 @@ export default function MissionIntro({ bg, text, voiceKey, onStart, stage }) {
         ) : (
           <HeroPoint className={`mission-intro__hero${jumping ? ' is-jump' : ''}`} happy={jumping} />
         )}
-        <div className="mission-intro__bubble">
-          <p className="mission-intro__text">{text}</p>
-        </div>
-        <button
-          type="button"
-          className="big-button big-button--primary mission-intro__btn"
-          onClick={handleStart}
-        >
-          Πάμε! ▶
-        </button>
+        {/* Πλαίσιο οδηγιών του γραφίστα (κείμενο + κουμπί ΠΑΜΕ ζωγραφισμένα μέσα). */}
+        <PopupFrame frame={`instr_${stage}`} onButton={handleStart} className="mission-intro__frame" />
       </div>
     </div>
   )
