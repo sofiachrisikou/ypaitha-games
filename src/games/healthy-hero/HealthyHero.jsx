@@ -133,7 +133,8 @@ export default function HealthyHero() {
     if (stage === 'intro') speak('HH-01')
     if (stage === 'finale') {
       playWin()
-      speak('HH-26')
+      // HH-26 «Έγινες Super Healthy Hero!» -> σερί το HH-27 για το σκορ.
+      speak('HH-26', () => speak('HH-27'))
     }
   }, [stage])
 
