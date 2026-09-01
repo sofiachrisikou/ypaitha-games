@@ -5,7 +5,6 @@ import Mission1Plate from './missions/Mission1Plate.jsx'
 import Mission2LunchBox from './missions/Mission2LunchBox.jsx'
 import Mission3Traps from './missions/Mission3Traps.jsx'
 import MissionIntro from './MissionIntro.jsx'
-import RiveHero from '../../components/RiveHero.jsx'
 import HeroWelcomeRive from './HeroWelcomeRive.jsx'
 import MascotCompanion from './MascotCompanion.jsx'
 import TunePanel from './TunePanel.jsx'
@@ -224,7 +223,7 @@ export default function HealthyHero() {
         </div>
         <img src={`${E}/Trophy.png`} alt="" className="hh-finale__trophy" draggable="false" />
         <img src={`${E}/Ribon.png`} alt="Συγχαρητήρια! Έγινες Super Healthy Hero!" className="hh-finale__ribbon" draggable="false" />
-        <RiveHero src="/hh/rive/Hero_Screen01.riv" className="hh-finale__hero" fallback={`${E}/Hero.png`} />
+        <img src={`${E}/Celebration.gif`} alt="" className="hh-finale__hero" draggable="false" />
         <div className="hh-finale__score">Σκορ: ⭐ {score}</div>
         <button type="button" className="big-button big-button--primary hh-finale__btn" onClick={() => { stopVoice(); setStage('rating') }}>
           Συνέχεια →
