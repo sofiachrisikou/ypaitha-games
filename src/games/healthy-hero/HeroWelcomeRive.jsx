@@ -2,16 +2,15 @@ import { useEffect, useRef } from 'react'
 import { Rive, Layout, Fit, Alignment } from '@rive-app/canvas'
 
 // Ήρωας καλωσορίσματος (welcome) από το Rive του γραφίστα (Hero_Mascot_01.riv).
-// Ροή: πετάει μέσα από κάτω (trigger «flying») -> προσγειώνεται σε idle («landing»).
-// Στην ΕΝΑΡΞΗ (leaving): thumbs-up + φεύγει προς τα πάνω (CSS).
+// Οδηγούμε τη state machine: fire «flying» -> ο ήρωας πετάει/αιωρείται (smooth loop)
+// ως idle καλωσορίσματος. Η CSS φέρνει τον καμβά από κάτω-δεξιά, και στην ΕΝΑΡΞΗ
+// (leaving) φεύγει πάνω-αριστερά + thumbs-up.
 const SRC = '/hh/rive/Hero_Mascot_01.riv'
 const SM = 'Hero_StateMachine'
-const LAND_DELAY = 1700 // πόσο κρατάει το πέταγμα πριν προσγειωθεί
 
 export default function HeroWelcomeRive({ className = '', leaving = false }) {
   const canvasRef = useRef(null)
   const inputs = useRef({})
-  const timers = useRef([])
   const imgRef = useRef(null)
 
   useEffect(() => {
@@ -28,6 +27,7 @@ export default function HeroWelcomeRive({ className = '', leaving = false }) {
         src: SRC,
         canvas,
         autoplay: true,
+        autoBind: true, // δέσε το ViewModel (αλλιώς ζωγραφίζει κενό)
         stateMachines: SM,
         layout: new Layout({ fit: Fit.Cover, alignment: Alignment.Center }),
         onLoad: () => {
@@ -44,10 +44,7 @@ export default function HeroWelcomeRive({ className = '', leaving = false }) {
           } catch {
             /* noop */
           }
-          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-          // Είσοδος: πέταγμα -> προσγείωση σε idle.
-          fire('flying')
-          timers.current.push(setTimeout(() => fire('landing'), LAND_DELAY))
+          fire('flying') // ο ήρωας πετάει/αιωρείται (welcome idle)
         },
         onLoadError: () => {
           if (imgRef.current) imgRef.current.style.display = 'block'
@@ -67,8 +64,6 @@ export default function HeroWelcomeRive({ className = '', leaving = false }) {
     window.addEventListener('resize', onResize)
     return () => {
       alive = false
-      timers.current.forEach(clearTimeout)
-      timers.current = []
       window.removeEventListener('resize', onResize)
       try {
         rive && rive.cleanup()
@@ -78,7 +73,7 @@ export default function HeroWelcomeRive({ className = '', leaving = false }) {
     }
   }, [])
 
-  // ΕΝΑΡΞΗ: μικρό thumbs-up καθώς φεύγει προς τα πάνω.
+  // ΕΝΑΡΞΗ: thumbs-up καθώς φεύγει πάνω-αριστερά (η κίνηση γίνεται με CSS).
   useEffect(() => {
     if (!leaving) return
     const t = inputs.current.thumbsUp

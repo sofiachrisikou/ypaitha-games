@@ -1199,9 +1199,10 @@ button {
   transform: translateX(-50%);
 }
 @media (prefers-reduced-motion: no-preference) {
-  /* Είσοδος: έρχεται από κάτω-δεξιά στη θέση του */
+  /* Είσοδος: μόνο οριζόντια ολίσθηση από τα δεξιά (το κάθετο το κάνει το Rive),
+     ίδια διάρκεια με το πέταγμα ώστε να είναι μία ενιαία, ομαλή κίνηση. */
   .hero-rive .rive-canvas {
-    animation: hero-rive-in 1.6s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+    animation: hero-rive-in 1.7s cubic-bezier(0.16, 0.84, 0.3, 1) both;
   }
   /* ΕΝΑΡΞΗ: φεύγει πάνω-αριστερά */
   .hero-rive.is-leaving .rive-canvas {
@@ -1209,12 +1210,12 @@ button {
   }
 }
 @keyframes hero-rive-in {
-  0% { transform: translate(calc(-50% + 360px), 120px) scale(0.9); }
-  100% { transform: translate(-50%, 0) scale(1); }
+  0% { transform: translate(calc(-50% + 300px), 0); }
+  100% { transform: translate(-50%, 0); }
 }
 @keyframes hero-rive-out {
   0% { transform: translate(-50%, 0) scale(1); opacity: 1; }
-  16% { transform: translate(calc(-50% + 30px), 26px) scale(0.98); opacity: 1; }
+  16% { transform: translate(calc(-50% + 26px), 24px) scale(0.98); opacity: 1; }
   100% { transform: translate(calc(-50% - 620px), -1300px) scale(0.5); opacity: 0; }
 }
 .hh-float {
