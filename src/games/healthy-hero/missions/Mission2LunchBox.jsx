@@ -3,7 +3,6 @@ import { LUNCHBOX_ITEMS, BG_IMG, LUNCHBOX_GOAL as GOAL } from '../data/lunchbox.
 import { STAGE_W } from '../../../components/Stage.jsx'
 import { playCorrect, playWrong, playWin } from '../../../services/sound.js'
 import { speak } from '../../../services/voice.js'
-import HeroWin from '../HeroWin.jsx'
 import Confetti from '../Confetti.jsx'
 
 // Το κουτί + το badge είναι ήδη ζωγραφισμένα στο Background.png.
@@ -188,7 +187,7 @@ export default function Mission2LunchBox({ addScore, onProgress, onReaction, onN
           <div className="stage-dim" />
           <Confetti />
           <div className="lunchbox-done">
-            <HeroWin className="lunchbox-done__hero" />
+            <img src="/hh/Win.gif" alt="" className="lunchbox-done__hero" draggable="false" />
             <p className="lunchbox-done__text">Αποστολή 2 ολοκληρώθηκε!</p>
           </div>
         </>

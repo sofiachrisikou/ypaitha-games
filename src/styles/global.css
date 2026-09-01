@@ -1664,12 +1664,16 @@ button {
 .reward-overlay__hero {
   width: 300px;
   max-width: 70%;
+  height: auto;
+  display: block;
   margin: 0 auto 6px;
   filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.25));
 }
 .lunchbox-done__hero {
   width: 300px;
   max-width: 70%;
+  height: auto;
+  display: block;
   margin: 0 auto 10px;
   filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.25));
 }
