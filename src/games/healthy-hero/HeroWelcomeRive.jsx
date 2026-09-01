@@ -1,11 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { Rive, Layout, Fit, Alignment } from '@rive-app/canvas'
 
-// Ήρωας καλωσορίσματος (welcome) από το Rive του γραφίστα (Hero_Mascot_01.riv).
-// Οδηγούμε τη state machine: fire «flying» -> ο ήρωας πετάει/αιωρείται (smooth loop)
-// ως idle καλωσορίσματος. Η CSS φέρνει τον καμβά από κάτω-δεξιά, και στην ΕΝΑΡΞΗ
-// (leaving) φεύγει πάνω-αριστερά + thumbs-up.
-const SRC = '/hh/rive/Hero_Mascot_01.riv'
+// Ήρωας καλωσορίσματος (welcome) από το Rive του γραφίστα (Hero_Mascot_02.riv).
+// Η state machine κάνει τα πάντα με triggers:
+//   coming  -> μπαίνει πετώντας και προσγειώνεται σε idle (default: Idle)
+//   leaving -> στο «Πάμε» πετάει και φεύγει από την οθόνη
+const SRC = '/hh/rive/Hero_Mascot_02.riv'
 const SM = 'Hero_StateMachine'
 
 export default function HeroWelcomeRive({ className = '', leaving = false }) {
@@ -18,16 +18,11 @@ export default function HeroWelcomeRive({ className = '', leaving = false }) {
     if (!canvas) return
     let alive = true
     let rive
-    const fire = (n) => {
-      const t = inputs.current[n]
-      if (t && t.fire) t.fire()
-    }
     try {
       rive = new Rive({
         src: SRC,
         canvas,
         autoplay: true,
-        autoBind: true, // δέσε το ViewModel (αλλιώς ζωγραφίζει κενό)
         stateMachines: SM,
         layout: new Layout({ fit: Fit.Cover, alignment: Alignment.Center }),
         onLoad: () => {
@@ -44,7 +39,9 @@ export default function HeroWelcomeRive({ className = '', leaving = false }) {
           } catch {
             /* noop */
           }
-          fire('flying') // ο ήρωας πετάει/αιωρείται (welcome idle)
+          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+          const t = inputs.current.coming
+          if (t && t.fire) t.fire() // είσοδος
         },
         onLoadError: () => {
           if (imgRef.current) imgRef.current.style.display = 'block'
@@ -73,15 +70,15 @@ export default function HeroWelcomeRive({ className = '', leaving = false }) {
     }
   }, [])
 
-  // ΕΝΑΡΞΗ: thumbs-up καθώς φεύγει πάνω-αριστερά (η κίνηση γίνεται με CSS).
+  // ΕΝΑΡΞΗ («Πάμε»): ο ήρωας πετάει και φεύγει.
   useEffect(() => {
     if (!leaving) return
-    const t = inputs.current.thumbsUp
+    const t = inputs.current.leaving
     if (t && t.fire) t.fire()
   }, [leaving])
 
   return (
-    <span className={`hero-rive ${className} ${leaving ? 'is-leaving' : ''}`}>
+    <span className={`hero-rive ${className}`}>
       <canvas ref={canvasRef} className="rive-canvas" width={640} height={800} />
       <img
         ref={imgRef}

@@ -1190,6 +1190,7 @@ button {
   overflow: visible;
   pointer-events: none;
 }
+/* Το Rive (state machine) κάνει μόνο του την είσοδο/έξοδο — εδώ μόνο zoom & θέση. */
 .hero-rive .rive-canvas {
   position: absolute;
   width: 170%;
@@ -1197,26 +1198,6 @@ button {
   left: 50%;
   bottom: -6%;
   transform: translateX(-50%);
-}
-@media (prefers-reduced-motion: no-preference) {
-  /* Είσοδος: μόνο οριζόντια ολίσθηση από τα δεξιά (το κάθετο το κάνει το Rive),
-     ίδια διάρκεια με το πέταγμα ώστε να είναι μία ενιαία, ομαλή κίνηση. */
-  .hero-rive .rive-canvas {
-    animation: hero-rive-in 1.7s cubic-bezier(0.16, 0.84, 0.3, 1) both;
-  }
-  /* ΕΝΑΡΞΗ: φεύγει πάνω-αριστερά */
-  .hero-rive.is-leaving .rive-canvas {
-    animation: hero-rive-out 1.1s cubic-bezier(0.5, 0, 0.75, 0) forwards;
-  }
-}
-@keyframes hero-rive-in {
-  0% { transform: translate(calc(-50% + 300px), 0); }
-  100% { transform: translate(-50%, 0); }
-}
-@keyframes hero-rive-out {
-  0% { transform: translate(-50%, 0) scale(1); opacity: 1; }
-  16% { transform: translate(calc(-50% + 26px), 24px) scale(0.98); opacity: 1; }
-  100% { transform: translate(calc(-50% - 620px), -1300px) scale(0.5); opacity: 0; }
 }
 .hh-float {
   position: absolute;
