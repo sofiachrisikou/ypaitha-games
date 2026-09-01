@@ -1255,7 +1255,7 @@ button {
 .hh-finale__trophy {
   position: absolute;
   left: 540px;
-  top: 470px;
+  top: 415px;
   transform: translate(-50%, -50%);
   width: 470px;
   height: auto;
@@ -1283,7 +1283,7 @@ button {
 .hh-finale__hero {
   position: absolute;
   left: 540px;
-  top: 1330px;
+  top: 1200px;
   transform: translate(-50%, -50%);
   width: 620px;
   height: 760px;
