@@ -5,6 +5,13 @@
 import { isMuted } from './sound.js'
 
 const BASE = '/hh/voice'
+const EZ_BASE = '/evzoulis/assets/audio/Outro' // αρχεία του Άλεξ — μόνο για αναπαραγωγή
+
+// Πηγές ήχου ανά κωδικό: τα EZ-* παίζουν από τον φάκελο του Ευζούλη.
+function urlsFor(key) {
+  if (key.startsWith('EZ-')) return [`${EZ_BASE}/${key}.mp3`]
+  return [`${BASE}/${key}.mp3`, `${BASE}/${key}.wav`]
+}
 
 // Κωδικός -> ατάκα VO (όπως στο εγκεκριμένο script).
 export const CLIPS = {
@@ -47,6 +54,10 @@ export const CLIPS = {
   'HH-S1': 'Ναι!',
   'HH-S2': 'Woohoo!',
   'HH-S3': 'Ωπ!',
+  // Ευζούλης — οθόνη αξιολόγησης (κοινό RatingScreen). Τα αρχεία είναι του Άλεξ,
+  // εδώ απλώς τα ΠΑΙΖΟΥΜΕ (δεν πειράζουμε τα αρχεία του).
+  'EZ-41': 'Πες μας πώς σου φάνηκε το παιχνίδι!',
+  'EZ-42': 'Σ’ ευχαριστώ! Τα λέμε σύντομα!',
 }
 
 function ttsFallback(text, onEnd, onActive) {
@@ -199,11 +210,5 @@ export function speak(key, onEnd) {
     timer = setTimeout(finish, estActive)
   }
 
-  playFirst(
-    [`${BASE}/${key}.mp3`, `${BASE}/${key}.wav`],
-    () => ttsFallback(text, finish, active),
-    finish,
-    active,
-    ctrl,
-  )
+  playFirst(urlsFor(key), () => ttsFallback(text, finish, active), finish, active, ctrl)
 }

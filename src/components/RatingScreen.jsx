@@ -17,6 +17,7 @@ export default function RatingScreen({ game, onDone }) {
 
   useEffect(() => {
     if (game === 'healthy-hero') speak('HH-29')
+    else if (game === 'evzoulis') speak('EZ-41') // «Πες μας πώς σου φάνηκε το παιχνίδι!»
     timeoutRef.current = setTimeout(() => doneRef.current && doneRef.current(), 15000)
     return () => clearTimeout(timeoutRef.current)
   }, [game])
@@ -27,6 +28,7 @@ export default function RatingScreen({ game, onDone }) {
     clearTimeout(timeoutRef.current)
     setPicked(rating)
     if (game === 'healthy-hero') speak('HH-30')
+    else if (game === 'evzoulis') speak('EZ-42') // «Σ’ ευχαριστώ! Τα λέμε σύντομα!»
     saveVote({ game, rating }).catch(() => {})
     setTimeout(() => doneRef.current && doneRef.current(), 1600)
   }
