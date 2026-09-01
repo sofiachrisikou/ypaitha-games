@@ -7,6 +7,7 @@ import HeroPoint from './HeroPoint.jsx'
 export default function MissionIntro({ bg, text, voiceKey, onStart, stage }) {
   // Στα στάδια 2 & 3 ο γραφίστας έστειλε animated GIF αντί για το pointing hero.
   const useGif = stage === 'm2' || stage === 'm3'
+  const gifSrc = stage === 'm3' ? '/hh/Instructions3.gif' : '/hh/Instructions.gif'
   const [jumping, setJumping] = useState(false)
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export default function MissionIntro({ bg, text, voiceKey, onStart, stage }) {
       <div className="mission-intro__card">
         {useGif ? (
           <img
-            src="/hh/Instructions.gif"
+            src={gifSrc}
             alt=""
             className={`mission-intro__hero${jumping ? ' is-jump' : ''}`}
             draggable="false"

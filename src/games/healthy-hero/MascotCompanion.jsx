@@ -3,6 +3,7 @@ import RiveHero from '../../components/RiveHero.jsx'
 import HeroPoint from './HeroPoint.jsx'
 import HeroReact from './HeroReact.jsx'
 import HeroHurry from './HeroHurry.jsx'
+import HeroAlmost from './HeroAlmost.jsx'
 
 // Ο ήρωας-σύντροφος:
 //  • idle: HH-03 (δείχνει)
@@ -77,6 +78,8 @@ export default function MascotCompanion({ reaction, pos = { w: 560, right: -30, 
             <HeroPoint className="mascot__point" bounce />
           ) : display === 'hurry' ? (
             <HeroHurry className="mascot__point" />
+          ) : display === 'almost' ? (
+            <HeroAlmost className="mascot__point" />
           ) : (
             <HeroReact type={display} className="mascot__point" />
           )}

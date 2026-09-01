@@ -1625,7 +1625,18 @@ button {
 .mascot__hero--hh07,
 .mascot__hero--hh09,
 .mascot__hero--hh16,
-.mascot__hero--hurry {
+.mascot__hero--hurry,
+.mascot__hero--almost {
+  overflow: visible;
+}
+.hero-almost {
+  position: absolute;
+  inset: 0;
+}
+.hero-almost svg {
+  width: 100%;
+  height: 100%;
+  display: block;
   overflow: visible;
 }
 /* HH-24 «βιάσου» (κοιτάει ρολόι) — γεμίζει το zoom-container σαν τις άλλες πόζες */
