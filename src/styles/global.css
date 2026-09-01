@@ -1689,6 +1689,12 @@ button {
   margin: 0 auto 10px;
   filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.25));
 }
+/* Τα GIF νίκης (στάδια 2 & 3) — μεγαλύτερα, ο ήρωας γεμίζει καλύτερα την κάρτα. */
+.win-gif {
+  width: 480px;
+  max-width: 88%;
+  height: auto;
+}
 .hero-react svg {
   width: 100%;
   height: 100%;

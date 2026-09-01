@@ -187,7 +187,7 @@ export default function Mission2LunchBox({ addScore, onProgress, onReaction, onN
           <div className="stage-dim" />
           <Confetti />
           <div className="lunchbox-done">
-            <img src="/hh/Win.gif" alt="" className="lunchbox-done__hero" draggable="false" />
+            <img src="/hh/Win.gif" alt="" className="lunchbox-done__hero win-gif" draggable="false" />
             <p className="lunchbox-done__text">Αποστολή 2 ολοκληρώθηκε!</p>
           </div>
         </>

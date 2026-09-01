@@ -136,7 +136,7 @@ export default function Mission3Traps({ addScore, onProgress, onReaction, onNext
           {finished === 'win' && <Confetti />}
           <div className="reward-overlay__card">
             {finished === 'win' ? (
-              <img src="/hh/Win3.gif" alt="" className="reward-overlay__hero" draggable="false" />
+              <img src="/hh/Win3.gif" alt="" className="reward-overlay__hero win-gif" draggable="false" />
             ) : (
               <div className="reward-overlay__emoji">⏰</div>
             )}
