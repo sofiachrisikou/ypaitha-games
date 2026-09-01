@@ -70,16 +70,18 @@ export default function Mission1Plate({ addScore, onProgress, onReaction, onComp
     const overPlate = Math.hypot(d.x - CX, d.y - CY) < HIT_R
 
     if (overPlate && food.healthy) {
-      const willComplete = placed.length + 1 >= GOAL
+      const newCount = placed.length + 1
+      const willComplete = newCount >= GOAL
+      const isAlmost = newCount === GOAL - 2 // σημείο «άλλα 2 και το πιάτο είναι έτοιμο»
       setTray((t) => t.filter((f) => f.id !== d.id))
       setPlaced((pl) => {
         const next = [...pl, food]
         if (onProgress) onProgress(next.length)
-        if (next.length === GOAL - 2) speak('HH-11') // «Άλλα δύο και το πιάτο είναι έτοιμο!»
         return next
       })
       addScore(10)
-      playCorrect()
+      // Στο «άλλα 2» ΔΕΝ παίζουμε τον ήχο correct — ακούγεται μόνο η ατάκα HH-11.
+      if (!isAlmost) playCorrect()
       if (willComplete) {
         // Τελευταίο φαγητό: πρώτα τελειώνει το VO της αντίδρασης, ΜΕΤΑ το VO νίκης + pop-up.
         onReaction &&
@@ -88,6 +90,10 @@ export default function Mission1Plate({ addScore, onProgress, onReaction, onComp
             playWin()
             speak('HH-12') // «Μπράβο, ήρωα! Το πιάτο είναι γεμάτο δύναμη!»
           })
+      } else if (isAlmost) {
+        // Κίνηση μασκότ χωρίς VO αντίδρασης + μόνο η ατάκα «Άλλα δύο…».
+        onReaction && onReaction('correct', null, true)
+        speak('HH-11')
       } else {
         onReaction && onReaction('correct')
       }
