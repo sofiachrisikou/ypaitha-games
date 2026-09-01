@@ -78,7 +78,7 @@ export default function HeroWelcomeRive({ className = '', leaving = false }) {
   }, [leaving])
 
   return (
-    <span className={`hero-rive ${className}`}>
+    <span className={`hero-rive ${className} ${leaving ? 'is-leaving' : ''}`}>
       <canvas ref={canvasRef} className="rive-canvas" width={640} height={800} />
       <img
         ref={imgRef}
