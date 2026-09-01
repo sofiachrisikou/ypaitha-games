@@ -44,10 +44,20 @@ export default function HeroWelcomeRive({ className = '', leaving = false }) {
           } catch {
             /* noop */
           }
+          const fireComing = () => {
+            try {
+              const t = (rive.stateMachineInputs(SM) || []).find((i) => i.name === 'coming')
+              if (t && t.fire) t.fire()
+            } catch {
+              /* noop */
+            }
+          }
           if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             goIdle()
+            fireComing()
             return
           }
+          fireComing() // ο ήρωας κουνάει το χέρι / πόζα εισόδου (η θέση/ταχύτητα από CSS)
           // Fallback αν χαθεί το animationend (π.χ. κρυφή καρτέλα).
           timers.current.push(setTimeout(goIdle, 2100))
         },
