@@ -3,7 +3,7 @@ import { SCENE_KEYS } from '../common/scene-keys.js';
 import { ASSET_KEYS } from '../common/assets.js';
 import { ProgressBar } from '../common/progress-bar.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
-import { showLevelIntroWithVoiceover, showEndMessage, createAnimatedCharacter } from '../common/level-flow.js';
+import { createAnimatedCharacter } from '../common/level-flow.js';
 import { playCorrectSound, playWrongSound } from '../common/audio-manager.js';
 
 
@@ -15,42 +15,66 @@ const STAGE3_HEAD_CONFIG = {
   animParamName: 'clipIndex',
   idleParam: 0,
 };
-const STAGE3_HEAD_POSITION_GAMEPLAY = { cssClass: 'rive-stage--stg3-head-gameplay', bubbleScale: 0.3, bubbleX: 700, bubbleY: 300, textStyle: TEXT_STYLES.SPEECH_BUBBLE_SMALL };
+const STAGE3_HEAD_POSITION_GAMEPLAY = { cssClass: 'rive-stage--stg3-head-gameplay', bubbleScale: 0.35, bubbleX: 250, bubbleY: 600, textStyle: TEXT_STYLES.SPEECH_BUBBLE };
+
+// Full-body character — same one used for BOTH the intro and the post-gameplay
+// celebration (spawned fresh each time, never held alive during gameplay,
+// since gameplay swaps to STAGE3_HEAD_CONFIG instead). Own CSS class since
+// RIVE_BEAR_Stg3 is a different asset with different proportions than the
+// gameplay head (never reuse a box tuned for a different .riv file).
+// ASSET_KEYS.RIVE_BEAR_Stg3 needs to be declared+loaded in assets.js.
+const STAGE3_BODY_CHARACTER_CONFIG = {
+  riveAssetKey: ASSET_KEYS.RIVE_BEAR_Stg3,
+  stateMachineName: 'Euzoulis_StateMachine',
+  animParamName: 'clipIndex',
+  idleParam: 0,
+};
+const STAGE3_BODY_POSITION = { cssClass: 'rive-stage--stg3-celebration', bubbleScale: 0.35, bubbleX: 300, bubbleY: 800, textStyle: TEXT_STYLES.SPEECH_BUBBLE };
 
 // animationParam 1 = talking, same as the other stages' intro/talk clip.
-// Text is included (the "correct" future version) but calls below use
-// withoutText() for now — bubble position isn't tuned yet. Drop the
-// withoutText(...) wrapper at each call site once it is, to show it.
-const STAGE3_RAISE_HANDS_STEP = { animationParam: 1, audioKey: ASSET_KEYS.EZ_31, durationSeconds: 3.5, text: 'Χέρια ψηλά' };
-const STAGE3_STRETCH_LEGS_STEP = { animationParam: 1, audioKey: ASSET_KEYS.EZ_32, durationSeconds: 3, text: 'Πόδια ανοιχτά' };
-const STAGE3_STRETCH_RIGHT_STEP = { animationParam: 1, audioKey: ASSET_KEYS.EZ_33, durationSeconds: 3, text: 'Τέντωμα δεξιά' };
-const STAGE3_STRETCH_LEFT_STEP = { animationParam: 1, audioKey: ASSET_KEYS.EZ_34, durationSeconds: 2.5, text: 'Τέντωμα αριστερά' };
+// Bubble now enabled — behaves like the rest of the game.
+const STAGE3_RAISE_HANDS_STEP = { animationParam: 1, audioKey: ASSET_KEYS.EZ_31, durationSeconds: 3.5, text: 'Χέρια ψηλά — άγγιξε τον κύκλο' };
+const STAGE3_STRETCH_LEGS_STEP = { animationParam: 1, audioKey: ASSET_KEYS.EZ_32, durationSeconds: 3, text: 'Πόδια ανοιχτά— άγγιξε τον κύκλο' };
+const STAGE3_STRETCH_RIGHT_STEP = { animationParam: 1, audioKey: ASSET_KEYS.EZ_33, durationSeconds: 3, text: 'Τέντωμα δεξιά— άγγιξε τον κύκλο' };
+const STAGE3_STRETCH_LEFT_STEP = { animationParam: 1, audioKey: ASSET_KEYS.EZ_34, durationSeconds: 2.5, text: 'Τέντωμα αριστερά— άγγιξε τον κύκλο' };
 
-/** Strips .text so playFeedback plays audio+animation only, no bubble. */
-function withoutText({ text, ...rest }) {
-  return rest;
-}
+// Played once by STAGE3_BODY_CHARACTER_CONFIG before moving on to outro-scene.js
+const STAGE3_CELEBRATION_STEP = { animationParam: 34, text: 'Το σώμα σου χαλάρωσε!', audioKey: ASSET_KEYS.EZ_38, durationSeconds: 6 };
 
-// Intro card lines (moved out of the now-deleted character-lines.js)
+// Intro card lines (moved out of the now-deleted character-lines.js) — played
+// on STAGE3_BODY_CHARACTER_CONFIG, same character as the celebration.
 const STAGE3_INTRO_STEPS = [
-  { text: 'ΣΤΑΔΙΟ 3 — Τεντώνομαι', audioKey: ASSET_KEYS.EZ_29, durationSeconds: 7 },
-  { text: 'Άγγιξε τους κύκλους και τέντωσε μαζί μου!', audioKey: ASSET_KEYS.EZ_30, durationSeconds: 8 },
+  { animationParam: 31, text: 'ΣΤΑΔΙΟ 3 — Τεντώνομαι', audioKey: ASSET_KEYS.EZ_29, durationSeconds: 5 },
+  { animationParam: 32, text: 'Άγγιξε τους κύκλους και τέντωσε μαζί μου!', audioKey: ASSET_KEYS.EZ_30, durationSeconds: 8 },
 ];
 
 // Head animation indices: 0 idle, 1 talking, 2 wink, 3 laugh, 4 calm.
 // One picked at random on every correct limb completion, played BEFORE the
 // next stretch prompt (see #completeLimb) — no text on these, reaction only.
 const STAGE3_LIMB_REACTION_STEPS = [
-  { animationParam: 1, audioKey: ASSET_KEYS.EZ_35, durationSeconds: 3 }, // wink — dummy sound for now
-  { animationParam: 3, audioKey: ASSET_KEYS.SFX_LAUGH, durationSeconds: 2 },
-  { animationParam: 4, audioKey: ASSET_KEYS.EZ_36, durationSeconds: 4.5}, // calm — correct sound
+  { animationParam: 28, audioKey: ASSET_KEYS.EZ_35, durationSeconds: 3 }, // wink — dummy sound for now
+  { animationParam: 29, audioKey: ASSET_KEYS.SFX_LAUGH, durationSeconds: 2 },
+  { animationParam: 30, audioKey: ASSET_KEYS.EZ_36, durationSeconds: 4.5}, // calm — correct sound
 ];
+
+// Bottom-of-screen prompt showing how many targets are left on the grabbed
+// limb — idle text while nothing's grabbed, "Τέντωμα .../X" while holding one.
+const LIMB_PROMPT_TEXT = {
+  ARM_IDLE: 'Πιάσε ένα χέρι από το κυκλάκι',
+  LEG_IDLE: 'Πιάσε ένα πόδι από το κυκλάκι',
+};
 
 const LIMB_DONE_COLOR = 0x4caf50;
 const TARGET_MARKER_COLOR = 0x0072FF;
 const TARGET_MARKER_REACHED_COLOR = 0x19FA00;
-const GRAB_INDICATOR_ARM_COLOR = 0xD19F21;
-const GRAB_INDICATOR_LEG_COLOR = 0x21C8D1;
+const TARGET_MARKER_RADIUS = 28;
+const TARGET_MARKER_STROKE_WIDTH = 8;
+const GRAB_INDICATOR_ARM_COLOR = 0x742CD1;
+//const GRAB_INDICATOR_ARM_COLOR = 0xD19F21;
+const GRAB_INDICATOR_LEG_COLOR = 0x742CD1;
+//const GRAB_INDICATOR_LEG_COLOR = 0x21C8D1;
+const GRAB_INDICATOR_RADIUS = 28;
+const GRAB_INDICATOR_STROKE_WIDTH = 8;
 // One scale factor for the whole character — body, arms, and legs all use
 // this exact same number, so whatever proportions the artist drew stay
 // intact. Do not give limbs their own independent scale.
@@ -61,11 +85,22 @@ const CHARACTER_SCALE = 2;
 // computed relative to this, so change it here, not just in setOrigin().
 const LIMB_ORIGIN_Y = 0.18;
 
+// Uniform downward shift for the whole body/limb rig — body position, every
+// limb pivot (derived from #bodyY, so they follow automatically), AND every
+// hardcoded target point's y below (added by hand since those are absolute
+// canvas coordinates, not derived from #bodyY). One number moves everything
+// together, like a box-select-drag. Does NOT move the head/rive character —
+// that's separate, left alone on purpose.
+const STAGE3_VERTICAL_SHIFT_PX = 280;
+
 export class GameScene3 extends Phaser.Scene {
   //CHARACTER
   #character;
+  #introBg;
+  #introLogo;
 
   //LIMBS
+  #bodyGO;
   #bodyX;
   #bodyY;
   #bodyWidth;
@@ -80,6 +115,7 @@ export class GameScene3 extends Phaser.Scene {
   #forbiddenZoneRecoilDeg;
   #forbiddenZoneRecoilDurationMs;
   #limbDoneTintDurationMs;
+  #limbPromptGO;
 
   //GAMEPLAY
   #gameDurationSeconds;
@@ -149,7 +185,33 @@ export class GameScene3 extends Phaser.Scene {
   }
 
   create() {
-    showLevelIntroWithVoiceover(this, { lines: STAGE3_INTRO_STEPS, logoAssetKey: ASSET_KEYS.STAGE3_LOGO, onComplete: () => this.#startLevel() });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
+    this.#showIntroBackground();
+    // Rive loads asynchronously — wait for onReady before setting any animation param
+    this.#character = createAnimatedCharacter(this, STAGE3_BODY_CHARACTER_CONFIG, STAGE3_BODY_POSITION, () => {
+      this.#character.setAnimationParam(0);
+      this.time.delayedCall(100, () => {
+        this.#character.playSequence(STAGE3_INTRO_STEPS, () => {
+          this.#hideIntroBackground();
+          this.#character.destroy();
+          this.#character = null;
+          this.#startLevel();
+        });
+      });
+    });
+  }
+
+  #showIntroBackground() {
+    const { width, height } = this.scale;
+    this.#introBg = this.add.image(width / 2, height / 2, ASSET_KEYS.BACKGROUND_GENERIC).setDepth(1000);
+    this.#introLogo = this.add.image(width / 2, height * 0.2, ASSET_KEYS.STAGE3_LOGO).setDepth(1001).setScale(0.55);
+  }
+
+  #hideIntroBackground() {
+    this.#introBg?.destroy();
+    this.#introLogo?.destroy();
+    this.#introBg = null;
+    this.#introLogo = null;
   }
 
   #startLevel() {
@@ -161,9 +223,9 @@ export class GameScene3 extends Phaser.Scene {
     this.#bodyWidth = width * 0.32;
     this.#bodyHeight = height * 0.3;
     this.#bodyX = width * 0.5;
-    this.#bodyY = height * 0.42;
+    this.#bodyY = height * 0.42 + STAGE3_VERTICAL_SHIFT_PX;
 
-    this.add.image(this.#bodyX, this.#bodyY, ASSET_KEYS.BEAR_BODY).setScale(CHARACTER_SCALE).setDepth(1);
+    this.#bodyGO = this.add.image(this.#bodyX, this.#bodyY, ASSET_KEYS.BEAR_BODY).setScale(CHARACTER_SCALE).setDepth(1);
 
     // Every target is an { x, y } point — the angle toward it is worked
     // out automatically in #pointToAngle. These starting coordinates land
@@ -179,11 +241,11 @@ export class GameScene3 extends Phaser.Scene {
         forbiddenZone: { startDeg: 80, endDeg: 290 },
         texture: ASSET_KEYS.CHAR_ARM_R,
         targets: [
-          { x: 938, y: 689 },
-          { x: 938, y: 1050 },
-          { x: 938, y: 689 },
-          { x: 938, y: 1050 },
-          { x: 938, y: 689 },
+          { x: 938, y: 689 + STAGE3_VERTICAL_SHIFT_PX },
+          { x: 938, y: 1050 + STAGE3_VERTICAL_SHIFT_PX },
+          { x: 938, y: 689 + STAGE3_VERTICAL_SHIFT_PX },
+          { x: 938, y: 1050 + STAGE3_VERTICAL_SHIFT_PX },
+          { x: 938, y: 689 + STAGE3_VERTICAL_SHIFT_PX },
         ],
       }),
       this.#createLimb({
@@ -194,11 +256,11 @@ export class GameScene3 extends Phaser.Scene {
         forbiddenZone: { startDeg: 250, endDeg: 100 },
         texture: ASSET_KEYS.CHAR_ARM_L,
         targets: [
-          { x: 142, y: 689 },
-          { x: 142, y: 1050 },
-          { x: 142, y: 689 },
-          { x: 142, y: 1050 },
-          { x: 142, y: 689 },
+          { x: 142, y: 689 + STAGE3_VERTICAL_SHIFT_PX },
+          { x: 142, y: 1050 + STAGE3_VERTICAL_SHIFT_PX },
+          { x: 142, y: 689 + STAGE3_VERTICAL_SHIFT_PX },
+          { x: 142, y: 1050 + STAGE3_VERTICAL_SHIFT_PX },
+          { x: 142, y: 689 + STAGE3_VERTICAL_SHIFT_PX },
         ],
       }),
       this.#createLimb({
@@ -210,11 +272,11 @@ export class GameScene3 extends Phaser.Scene {
         forbiddenZone: { startDeg: 120, endDeg: 340 },
         texture: ASSET_KEYS.CHAR_LEG_R,
         targets: [
-          { x: 841, y: 1074 },
-          { x: 600, y: 1400 },
-          { x: 841, y: 1074 },
-          { x: 600, y: 1400 },
-          { x: 841, y: 1074 },
+          { x: 841, y: 1074 + STAGE3_VERTICAL_SHIFT_PX },
+          { x: 600, y: 1400 + STAGE3_VERTICAL_SHIFT_PX },
+          { x: 841, y: 1074 + STAGE3_VERTICAL_SHIFT_PX },
+          { x: 600, y: 1400 + STAGE3_VERTICAL_SHIFT_PX },
+          { x: 841, y: 1074 + STAGE3_VERTICAL_SHIFT_PX },
         ],
       }),
       this.#createLimb({
@@ -227,14 +289,16 @@ export class GameScene3 extends Phaser.Scene {
         forbiddenZone: { startDeg: 210, endDeg: 60 },
         texture: ASSET_KEYS.CHAR_LEG_L,
         targets: [
-          { x: 239, y: 1074 },
-          { x: 400, y: 1400 },
-          { x: 239, y: 1074 },
-          { x: 400, y: 1400 },
-          { x: 239, y: 1074 },
+          { x: 239, y: 1074 + STAGE3_VERTICAL_SHIFT_PX },
+          { x: 400, y: 1400 + STAGE3_VERTICAL_SHIFT_PX },
+          { x: 239, y: 1074 + STAGE3_VERTICAL_SHIFT_PX },
+          { x: 400, y: 1400 + STAGE3_VERTICAL_SHIFT_PX },
+          { x: 239, y: 1074 + STAGE3_VERTICAL_SHIFT_PX },
         ],
       }),
     ];
+
+    this.#createLimbPromptText();
 
     //Progressbar
     this.#createLevelProgressBar();
@@ -268,13 +332,12 @@ export class GameScene3 extends Phaser.Scene {
     this.input.on(Phaser.Input.Events.POINTER_MOVE, this.#handlePointerMove, this);
     this.input.on(Phaser.Input.Events.POINTER_UP, this.#handlePointerUp, this);
     this.input.on(Phaser.Input.Events.POINTER_UP_OUTSIDE, this.#handlePointerUp, this);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
 
     // Rive loads asynchronously — wait for onReady before setting any animation param
     this.#character = createAnimatedCharacter(this, STAGE3_HEAD_CONFIG, STAGE3_HEAD_POSITION_GAMEPLAY, () => {
       this.#character.setAnimationParam(0);
       this.time.delayedCall(100, () => {
-        this.#character.playFeedback(withoutText(STAGE3_RAISE_HANDS_STEP));
+        this.#character.playFeedback(STAGE3_RAISE_HANDS_STEP);
       });
     });
   }
@@ -317,6 +380,7 @@ export class GameScene3 extends Phaser.Scene {
     this.#stopGrabIndicatorPulse(closestLimb);
     this.#setOtherGrabIndicatorsVisible(closestLimb, false);
     this.#showCurrentTargetMarker(closestLimb);
+    this.#updateLimbPromptForGrab(closestLimb);
 
     if (this.#debug) {
       console.log(`${closestLimb.key}: grabbed`);
@@ -461,6 +525,7 @@ export class GameScene3 extends Phaser.Scene {
       angleDeg: config.restAngleDeg,
       forbiddenZone: config.forbiddenZone ?? null,
       targetAnglesDeg: [],
+      totalTargets: config.targets.length,
       isDone: false,
       rectangleGO: limbImage,
       grabIndicatorGO: null,
@@ -475,8 +540,8 @@ export class GameScene3 extends Phaser.Scene {
 
     limb.targetAnglesDeg.forEach((targetDeg) => {
       const point = this.#limbTipPosition(limb, targetDeg);
-      const marker = this.add.circle(point.x, point.y, 20, TARGET_MARKER_COLOR, 0).setDepth(2);
-      marker.setStrokeStyle(4, TARGET_MARKER_COLOR, 1);
+      const marker = this.add.circle(point.x, point.y, TARGET_MARKER_RADIUS, TARGET_MARKER_COLOR, 0).setDepth(2);
+      marker.setStrokeStyle(TARGET_MARKER_STROKE_WIDTH, TARGET_MARKER_COLOR, 1);
       // hidden until this limb is actually grabbed — see #showCurrentTargetMarker
       marker.setVisible(false);
       limb.targetMarkerGOs.push(marker);
@@ -498,15 +563,15 @@ export class GameScene3 extends Phaser.Scene {
 
   #createGrabIndicator(limb,limbKey) {
     const tip = this.#limbTipPosition(limb, limb.angleDeg);
-    limb.grabIndicatorGO = this.add.circle(tip.x, tip.y, 14, 0xffffff, 0);
+    limb.grabIndicatorGO = this.add.circle(tip.x, tip.y, GRAB_INDICATOR_RADIUS, 0xffffff, 0);
     if(limbKey == 'RIGHT_ARM' || limbKey == 'LEFT_ARM')
     {
-      limb.grabIndicatorGO.setStrokeStyle(3, GRAB_INDICATOR_ARM_COLOR, 1).setDepth(2);
+      limb.grabIndicatorGO.setStrokeStyle(GRAB_INDICATOR_STROKE_WIDTH, GRAB_INDICATOR_ARM_COLOR, 1).setDepth(2);
 
     }
     else
     {
-      limb.grabIndicatorGO.setStrokeStyle(3, GRAB_INDICATOR_LEG_COLOR, 1).setDepth(2);
+      limb.grabIndicatorGO.setStrokeStyle(GRAB_INDICATOR_STROKE_WIDTH, GRAB_INDICATOR_LEG_COLOR, 1).setDepth(2);
     }
     // Legs start disabled — the ring shape is visible by default the instant
     // it's created (Phaser shapes default to visible), so it must be hidden
@@ -603,6 +668,7 @@ export class GameScene3 extends Phaser.Scene {
     }
 
     this.#hideCurrentTargetMarker(limb);
+    this.#resetLimbPromptText();
 
     const tip = this.#limbTipPosition(limb, landingAngleDeg);
     limb.grabIndicatorGO.setPosition(tip.x, tip.y);
@@ -657,7 +723,7 @@ export class GameScene3 extends Phaser.Scene {
     limb.targetAnglesDeg.shift();
     const reachedMarker = limb.targetMarkerGOs.shift();
     if (reachedMarker) {
-      reachedMarker.setStrokeStyle(4, TARGET_MARKER_REACHED_COLOR, 1);
+      reachedMarker.setStrokeStyle(TARGET_MARKER_STROKE_WIDTH, TARGET_MARKER_REACHED_COLOR, 1);
       this.tweens.add({
         targets: reachedMarker,
         alpha: 0,
@@ -683,6 +749,9 @@ export class GameScene3 extends Phaser.Scene {
       console.log(`${limb.key}: target reached (${limb.targetAnglesDeg.length} left)`);
     }
 
+    this.#updateLimbPromptForGrab(limb);
+    playCorrectSound(this);
+
     if (limb.targetAnglesDeg.length === 0) {
       this.#completeLimb(limb);
     }
@@ -703,15 +772,23 @@ export class GameScene3 extends Phaser.Scene {
     });
   }
 
-  /** Plays the right prompt for what to stretch next, after an arm or leg finishes. Always calls onComplete, even when there's nothing to play. */
+  /**
+   * Plays the right prompt for what to stretch next, after an arm or leg
+   * finishes. Always calls onComplete, even when there's nothing to play.
+   * The bottom prompt text is set here FIRST — before enabling the legs or
+   * starting the guide clip's own speech bubble — so it updates immediately
+   * instead of sitting on "Μπράβο!" for the whole reaction+guide-clip length.
+   */
   #playNextStretchPrompt(limb, onComplete) {
     const isArm = limb.key === 'RIGHT_ARM' || limb.key === 'LEFT_ARM';
     if (isArm) {
       if (this.#isLimbDone('RIGHT_ARM') && this.#isLimbDone('LEFT_ARM')) {
+        this.#setLimbPromptText(LIMB_PROMPT_TEXT.LEG_IDLE);
         this.#enableLegs();
-        this.#character.playFeedback(withoutText(STAGE3_STRETCH_LEGS_STEP), onComplete);
+        this.#character.playFeedback(STAGE3_STRETCH_LEGS_STEP, onComplete);
       } else {
-        this.#character.playFeedback(withoutText(limb.key === 'RIGHT_ARM' ? STAGE3_STRETCH_LEFT_STEP : STAGE3_STRETCH_RIGHT_STEP), onComplete);
+        this.#setLimbPromptText(LIMB_PROMPT_TEXT.ARM_IDLE);
+        this.#character.playFeedback(limb.key === 'RIGHT_ARM' ? STAGE3_STRETCH_LEFT_STEP : STAGE3_STRETCH_RIGHT_STEP, onComplete);
       }
       return;
     }
@@ -719,7 +796,8 @@ export class GameScene3 extends Phaser.Scene {
     if (this.#isLimbDone('RIGHT_LEG') && this.#isLimbDone('LEFT_LEG')) {
       onComplete?.();
     } else {
-      this.#character.playFeedback(withoutText(limb.key === 'RIGHT_LEG' ? STAGE3_STRETCH_LEFT_STEP : STAGE3_STRETCH_RIGHT_STEP), onComplete);
+      this.#setLimbPromptText(LIMB_PROMPT_TEXT.LEG_IDLE);
+      this.#character.playFeedback(limb.key === 'RIGHT_LEG' ? STAGE3_STRETCH_LEFT_STEP : STAGE3_STRETCH_RIGHT_STEP, onComplete);
     }
   }
 
@@ -735,6 +813,7 @@ export class GameScene3 extends Phaser.Scene {
 
     this.#limbsStretchedCount += 1;
     this.#progressTextGO.setText(`${this.#limbsStretchedCount} / ${this.#totalLimbsRequired}`);
+    this.#setLimbPromptText('ΜΠΡΑΒΟ! Έρχεται η επόμενη διάταση…!');
 
     //this.#levelProgressBar.setProgress(this.#limbsStretchedCount / this.#totalLimbsRequired);
 
@@ -750,8 +829,6 @@ export class GameScene3 extends Phaser.Scene {
         });
       });
     }
-
-    playCorrectSound(this);
   }
 
   //#endregion
@@ -800,6 +877,14 @@ export class GameScene3 extends Phaser.Scene {
     this.#isLevelComplete = true;
     this.#stopAllTimersAndIndicators();
 
+    // Frees the shared #rive-stage canvas — only one Rive instance can be on
+    // it at a time, and #showCelebration needs it next.
+    this.#character?.destroy();
+    this.#character = null;
+    this.#hideBodyAndLimbs();
+    this.#limbPromptGO?.destroy();
+    this.#limbPromptGO = null;
+
     this.events.emit('levelComplete', {
       limbsStretched: this.#limbsStretchedCount,
       secondsLeft: this.#remainingSeconds,
@@ -837,10 +922,74 @@ export class GameScene3 extends Phaser.Scene {
     });
   }
 
-  /** Panel disabled — outro scene shows its own bear + bubble instead. Same ~3s delay, uncomment below to re-enable. */
+  //#endregion
+
+  //#region Limb Prompt
+
+  #createLimbPromptText() {
+    const { width, height } = this.scale;
+    this.#limbPromptGO = this.add
+      .text(width / 2, height - 180, '', TEXT_STYLES.BREATH_PROMPT)
+      .setOrigin(0.5);
+    this.#resetLimbPromptText();
+  }
+
+  /** @param {string} text */
+  #setLimbPromptText(text) {
+    if (!this.#limbPromptGO) {
+      return;
+    }
+    this.#limbPromptGO.setText(text);
+  }
+
+  /** Arms are grabbable until both are done, legs only after — matches #enableLegs. */
+  #currentPhaseIdleText() {
+    const legsEnabled = this.#limbs.find((limb) => limb.key === 'RIGHT_LEG')?.enabled;
+    return legsEnabled ? LIMB_PROMPT_TEXT.LEG_IDLE : LIMB_PROMPT_TEXT.ARM_IDLE;
+  }
+
+  #resetLimbPromptText() {
+    this.#setLimbPromptText(this.#currentPhaseIdleText());
+  }
+
+  /** @param {object} limb */
+  #updateLimbPromptForGrab(limb) {
+    const isArm = limb.key === 'RIGHT_ARM' || limb.key === 'LEFT_ARM';
+    const word = isArm ? 'χεριού' : 'ποδιού';
+    const completed = limb.totalTargets - limb.targetAnglesDeg.length;
+    this.#setLimbPromptText(`Τέντωμα ${word} ${completed}/${limb.totalTargets}`);
+  }
+
+  //#endregion
+
+  /** Hides the body + all 4 limb sprites so only the celebration character shows, not a headless body underneath it. */
+  #hideBodyAndLimbs() {
+    this.#bodyGO?.setVisible(false);
+    this.#limbs.forEach((limb) => {
+      limb.rectangleGO.setVisible(false);
+    });
+  }
+
   #showEndMessage(title, subtitle) {
-    // showEndMessage(this, { title, subtitle, onComplete: () => this.#goToNextLevel() });
-    this.time.delayedCall(3000, () => this.#goToNextLevel());
+    this.#showCelebration(() => this.#goToNextLevel());
+  }
+
+  /**
+   * Post-gameplay celebration — same createAnimatedCharacter/clipIndex
+   * pattern as the gameplay head, own character (RIVE_BEAR_Stg3) and own
+   * CSS class/bubble spot. Body/limbs are already hidden by #hideBodyAndLimbs
+   * (called from #handleLevelComplete) before this runs.
+   */
+  #showCelebration(onComplete) {
+    this.#character = createAnimatedCharacter(this, STAGE3_BODY_CHARACTER_CONFIG, STAGE3_BODY_POSITION, () => {
+      this.#character.setAnimationParam(0);
+      this.time.delayedCall(100, () => {
+        this.#character.playFeedback(STAGE3_CELEBRATION_STEP, () => {
+          this.#character.destroy();
+          onComplete();
+        });
+      });
+    });
   }
 
   #handleShutdown() {
@@ -849,12 +998,14 @@ export class GameScene3 extends Phaser.Scene {
     this.input.off(Phaser.Input.Events.POINTER_UP, this.#handlePointerUp, this);
     this.input.off(Phaser.Input.Events.POINTER_UP_OUTSIDE, this.#handlePointerUp, this);
     this.#stopAllTimersAndIndicators();
+    this.#hideIntroBackground();
 
     this.#character?.destroy();
   }
 
   #goToNextLevel() {
-    this.#character.destroy();
+    // Already destroyed in #handleLevelComplete (freed the canvas for the celebration) on the win path — this covers the game-over path, which skips that.
+    this.#character?.destroy();
     this.scene.start(SCENE_KEYS.EUZOYLIS_OUTRO_SCENE);
     //this.input.once(Phaser.Input.Events.POINTER_DOWN, () => {});
   }

@@ -50,7 +50,7 @@ const STAGE1_GOOD_MOVE_STEPS = [
   { animationParam: 13, audioKey: ASSET_KEYS.EZ_12, durationSeconds: 3 },
 ];
 // Fixed clip played instead of a random good-move pick at breathsCompleted === 4 (2/3 of 6)
-const STAGE1_MILESTONE_STEP = { animationParam: 18, audioKey: ASSET_KEYS.EZ_16, durationSeconds: 5, text: 'Αναπνοές: 4 / 6' };
+const STAGE1_MILESTONE_STEP = { animationParam: 18, audioKey: ASSET_KEYS.EZ_16, durationSeconds: 5, text: 'ΜΠΡΑΒΟ!' };
 // Bad-move feedback: released/drifted out of the hold vs wrong swipe direction
 const STAGE1_BAD_MOVE_HOLD_STEP = { animationParam: 15, audioKey: ASSET_KEYS.EZ_14, durationSeconds: 4, text: 'Κράτα λίγο ακόμη' };
 const STAGE1_BAD_MOVE_DIRECTION_STEP = { animationParam: 16, audioKey: ASSET_KEYS.EZ_15, durationSeconds: 4, text: 'Ξανά, μαζί!' };
@@ -120,6 +120,7 @@ export class GameScene extends Phaser.Scene {
   #swipeGestureBarX;
   #swipeGestureBarWidth;
   #requiredBreaths;
+  #requiredBreathCycles;
   #maxFailedBreaths;
   #inputLocked;
   #debug;
@@ -167,6 +168,8 @@ export class GameScene extends Phaser.Scene {
     this.#swipeArrowHeightRatio = 0.09; // fraction of screen height
     this.#candleFlameHeightRatio = 0.35; // fraction of the candle's own display height
     this.#requiredBreaths = 6;
+    // Displayed stat counts a full IN+OUT cycle as one breath, not each swipe.
+    this.#requiredBreathCycles = this.#requiredBreaths / 2;
     // TODO: confirm — placeholder fail condition so #handleGameOver has a
     // real trigger. Level 1 spec doesn't define a game-over rule yet.
     this.#maxFailedBreaths = 5;
@@ -228,7 +231,7 @@ export class GameScene extends Phaser.Scene {
   #showIntroBackground() {
     const { width, height } = this.scale;
     this.#introBg = this.add.image(width / 2, height / 2, ASSET_KEYS.BACKGROUND_GENERIC).setDepth(1000);
-    this.#introLogo = this.add.image(width / 2, height * 0.16, ASSET_KEYS.STAGE1_LOGO).setDepth(1001).setScale(0.55);
+    this.#introLogo = this.add.image(width / 2, height * 0.2, ASSET_KEYS.STAGE1_LOGO).setDepth(1001).setScale(0.55);
   }
 
   #hideIntroBackground() {
@@ -267,15 +270,9 @@ export class GameScene extends Phaser.Scene {
     //Progressbar
     this.#createLevelProgressBar();
     this.#levelProgressBar.setProgress(8/8);
-    //Game Stats
+    //Game Stats — counts a full IN+OUT cycle as one breath, not each swipe
     const labelsTop = this.#levelProgressBar.getBounds().bottom + 60;
-    const breathsTextLabel = this.add.text(50, labelsTop, 'Αναπνοές:', TEXT_STYLES.DEFAULT);
-    this.#breathsTextGO = this.add.text(
-      breathsTextLabel.x + breathsTextLabel.width,
-      breathsTextLabel.y,
-      `0 / ${this.#requiredBreaths}`,
-      TEXT_STYLES.DEFAULT,
-    );
+    this.#breathsTextGO = this.add.text(50, labelsTop, `Ανάσα 1 από ${this.#requiredBreathCycles}`, TEXT_STYLES.DEFAULT);
 
     //timer text
      const timerTextLabel = this.add.text(50, labelsTop + 50, 'Χρόνος:', TEXT_STYLES.DEFAULT);
@@ -405,7 +402,7 @@ export class GameScene extends Phaser.Scene {
   #createBreathPromptText() {
     const { width, height } = this.scale;
     this.#breathPromptGO = this.add
-      .text(width / 2, height - 150, BREATH_TEXT.INHALE, TEXT_STYLES.BREATH_PROMPT)
+      .text(width / 2, height - 180, BREATH_TEXT.INHALE, TEXT_STYLES.BREATH_PROMPT)
       .setOrigin(0.5);
     this.#startBreathPromptWobble();
   }
@@ -440,9 +437,10 @@ export class GameScene extends Phaser.Scene {
     if (this.#isLevelComplete || this.#isGameOver) {
       return;
     }
-    if (this.#inputLocked) {
-      return;
-    }
+    // Input is no longer locked between moves — removed per pacing request, see #handleBreathSuccess/#handleBreathFailed.
+    // if (this.#inputLocked) {
+    //   return;
+    // }
     if (this.#swipeState !== SWIPE_STATE.WAITING) {
       return;
     }
@@ -590,12 +588,14 @@ export class GameScene extends Phaser.Scene {
 
     playWrongSound(this);
     // direction does NOT change on failure — same breath is retried. Input
-    // stays locked until this feedback finishes, so a fast retry can't cancel it early.
-    this.#inputLocked = true;
-    this.#character.playFeedback(wasHolding ? STAGE1_BAD_MOVE_HOLD_STEP : STAGE1_BAD_MOVE_DIRECTION_STEP, () => {
+    // is no longer locked while this feedback plays — removed per pacing
+    // request; arrow comes back immediately below instead of waiting for it.
+    // this.#inputLocked = true;
+    this.#character.playFeedback(wasHolding ? STAGE1_BAD_MOVE_HOLD_STEP : STAGE1_BAD_MOVE_DIRECTION_STEP /*, () => {
       this.#inputLocked = false;
       this.#startIndicatorPulse();
-    });
+    } */);
+    this.#startIndicatorPulse();
 
     if (this.#failedBreaths >= this.#maxFailedBreaths) {
       //this.#handleGameOver();
@@ -607,7 +607,6 @@ export class GameScene extends Phaser.Scene {
     this.#swipeState = SWIPE_STATE.WAITING;
     this.#hideSwipeGestureBar();
     this.#breathsCompleted += 1;
-    this.#breathsTextGO.setText(`${this.#breathsCompleted} / ${this.#requiredBreaths}`);
 
     playCorrectSound(this);
 
@@ -616,20 +615,24 @@ export class GameScene extends Phaser.Scene {
     if (wasBreathOut) {
       this.#cyclesCompleted += 1;
       this.#updateFlowerStage();
+      // "Ανάσα N από 3" — N is the cycle you're now working on, clamped so it doesn't exceed the total.
+      this.#breathsTextGO.setText(`Ανάσα ${Math.min(this.#cyclesCompleted + 1, this.#requiredBreathCycles)} από ${this.#requiredBreathCycles}`);
 
-      // Lock input until the feedback clip actually finishes, so a fast next
-      // swipe can't cancel it early — the arrow/prompt only comes back once
-      // this callback fires, not immediately like before.
-      this.#inputLocked = true;
-      const onGoodMoveFeedbackDone = () => {
-        this.#inputLocked = false;
-        this.#startIndicatorPulse();
-      };
+      // Input is no longer locked while this feedback plays — removed per
+      // pacing request (the game felt too slow waiting for each clip to
+      // finish). The arrow/prompt comes back immediately below instead of
+      // waiting for this callback. playFeedback's own "most recent call
+      // wins" logic still cuts a clip short if the player moves on fast.
+      // this.#inputLocked = true;
+      // const onGoodMoveFeedbackDone = () => {
+      //   this.#inputLocked = false;
+      //   this.#startIndicatorPulse();
+      // };
       // praise only after a breath OUT — mid breath-IN he's holding his breath, he can't be talking
       if (this.#breathsCompleted === 4) {
-        this.#character.playFeedback(STAGE1_MILESTONE_STEP, onGoodMoveFeedbackDone);
+        this.#character.playFeedback(STAGE1_MILESTONE_STEP);
       } else {
-        this.#character.playFeedback(Phaser.Utils.Array.GetRandom(STAGE1_GOOD_MOVE_STEPS), onGoodMoveFeedbackDone);
+        this.#character.playFeedback(Phaser.Utils.Array.GetRandom(STAGE1_GOOD_MOVE_STEPS));
       }
     }
 
@@ -649,10 +652,9 @@ export class GameScene extends Phaser.Scene {
       if (this.#breathsCompleted < this.#requiredBreaths) {
         this.time.delayedCall(this.#candleRelightDelayMs, this.#relightCandle, [], this);
       }
-      // no explicit reset to idle here — the good-move feedback just above
-      // already takes the animation over, and returns to idle itself once
-      // its own duration ends. The next prompt/arrow is shown by
-      // onGoodMoveFeedbackDone above, not by #relightCandle.
+      // Arrow/prompt comes back immediately (direction already flipped above) —
+      // no longer waits for the good-move feedback clip to finish.
+      this.#startIndicatorPulse();
     } else {
       // breath-IN doesn't touch the flame — just get the next prompt ready
       this.#startIndicatorPulse();
