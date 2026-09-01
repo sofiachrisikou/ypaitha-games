@@ -228,7 +228,7 @@ export class GameScene extends Phaser.Scene {
   #showIntroBackground() {
     const { width, height } = this.scale;
     this.#introBg = this.add.image(width / 2, height / 2, ASSET_KEYS.BACKGROUND_GENERIC).setDepth(1000);
-    this.#introLogo = this.add.image(width / 2, height * 0.16, ASSET_KEYS.STAGE1_LOGO).setDepth(1001).setScale(0.55);
+    this.#introLogo = this.add.image(width / 2, height * 0.2, ASSET_KEYS.STAGE1_LOGO).setDepth(1001).setScale(0.55);
   }
 
   #hideIntroBackground() {
@@ -405,7 +405,7 @@ export class GameScene extends Phaser.Scene {
   #createBreathPromptText() {
     const { width, height } = this.scale;
     this.#breathPromptGO = this.add
-      .text(width / 2, height - 150, BREATH_TEXT.INHALE, TEXT_STYLES.BREATH_PROMPT)
+      .text(width / 2, height - 180, BREATH_TEXT.INHALE, TEXT_STYLES.BREATH_PROMPT)
       .setOrigin(0.5);
     this.#startBreathPromptWobble();
   }

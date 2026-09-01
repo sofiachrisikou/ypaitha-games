@@ -100,6 +100,7 @@ export const ASSET_KEYS = Object.freeze({
   EZ_34: 'EZ_34',
   EZ_35: 'EZ_35',
   EZ_36: 'EZ_36',
+  EZ_38: 'EZ_38',
   //OUTRO
   BACKGROUND_OUTRO: 'BACKGROUND_OUTRO',
   //OUTRO VOICEOVER (assets/audio/Outro/EZ-XX.mp3 — global clip numbering; only clips 39/40 wired up so far, 41/42 exist on disk but unused)
@@ -115,6 +116,7 @@ export const ASSET_KEYS = Object.freeze({
   RIVE_BEAR_INTRO: 'RIVE_BEAR_INTRO',
   RIVE_BEAR_Stg1: 'RIVE_BEAR_Stg1',
   RIVE_BEAR_Stg2: 'RIVE_BEAR_Stg2',
+  RIVE_BEAR_Stg3: 'RIVE_BEAR_Stg3',
   RIVE_BEAR_Stg3_HEAD: 'RIVE_BEAR_Stg3_HEAD',
   RIVE_BEAR_OUTRO: 'RIVE_BEAR_OUTRO',
 });
@@ -402,6 +404,7 @@ export const AUDIO_ASSETS = [
   { assetKey: ASSET_KEYS.EZ_34, path: 'assets/audio/Stage3/EZ-34.mp3' },
   { assetKey: ASSET_KEYS.EZ_35, path: 'assets/audio/Stage3/EZ-35.mp3' },
   { assetKey: ASSET_KEYS.EZ_36, path: 'assets/audio/Stage3/EZ-36.mp3' },
+  { assetKey: ASSET_KEYS.EZ_38, path: 'assets/audio/Stage3/EZ-38.mp3' },
 
   //OUTRO VOICEOVER (only clips 39/40 wired up so far — 41/42 exist on disk but unused)
   { assetKey: ASSET_KEYS.EZ_39, path: 'assets/audio/Outro/EZ-39.mp3' },
@@ -426,13 +429,17 @@ export const RIVE_ASSETS = [
     assetKey: ASSET_KEYS.RIVE_BEAR_Stg1,
     path: 'assets/rive/Euzoulis_Mascot_Stage01 1.riv',
   },
-     {
+  {
     assetKey: ASSET_KEYS.RIVE_BEAR_Stg2,
     path: 'assets/rive/Euzoulis_Mascot_Stage02.riv',
   },
   {
+    assetKey: ASSET_KEYS.RIVE_BEAR_Stg3,
+    path: 'assets/rive/Euzoulis_Mascot_Stage02.riv',
+  },
+  {
     assetKey: ASSET_KEYS.RIVE_BEAR_Stg3_HEAD,
-    path: 'assets/rive/Euzoulis_Mascot_Head.riv',
+    path: 'assets/rive/Euzoulis_Mascot_Head 2.riv',
   },
   {
     assetKey: ASSET_KEYS.RIVE_BEAR_OUTRO,
