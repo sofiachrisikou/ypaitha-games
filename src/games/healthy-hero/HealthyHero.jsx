@@ -245,6 +245,7 @@ export default function HealthyHero() {
           hero={`${E}/Hero.png`}
           text={meta.instr}
           voiceKey={meta.voice}
+          stage={stage}
           onStart={() => setReady(true)}
         />
       )}

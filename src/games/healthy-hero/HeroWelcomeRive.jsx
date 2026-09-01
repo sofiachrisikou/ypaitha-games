@@ -2,18 +2,15 @@ import { useEffect, useRef } from 'react'
 import { Rive, Layout, Fit, Alignment } from '@rive-app/canvas'
 
 // Ήρωας καλωσορίσματος (welcome) από το Rive του γραφίστα (Hero_Mascot_02.riv).
-//   coming  -> μπαίνει πετώντας και προσγειώνεται
-//   idle    -> ελαφρύ hover όσο περιμένει το «Πάμε» (CSS)
-//   ΕΝΑΡΞΗ  -> φεύγει ευθεία διαγώνια εκτός οθόνης (CSS)
-// Το slide (CSS) ΞΕΚΙΝΑΕΙ μόλις φορτώσει ο ήρωας (is-entering στο onLoad) ώστε να
-// μη «ποπάρει» στη μέση, και περνά σε hover ΑΚΡΙΒΩΣ στο τέλος του (animationend).
+// Για να ΜΗΝ υπάρχει glitch, ο ήρωας μένει στο default Idle και η ΜΙΑ κίνηση της
+// εισόδου γίνεται καθαρά με CSS (ολίσθηση από κάτω-αριστερά), μετά ελαφρύ hover.
+// Στο «Πάμε» φεύγει ευθεία διαγώνια εκτός οθόνης (CSS).
 const SRC = '/hh/rive/Hero_Mascot_02.riv'
 const SM = 'Hero_StateMachine'
 
 export default function HeroWelcomeRive({ className = '', leaving = false }) {
   const hostRef = useRef(null)
   const canvasRef = useRef(null)
-  const inputs = useRef({})
   const imgRef = useRef(null)
   const timers = useRef([])
 
@@ -23,14 +20,10 @@ export default function HeroWelcomeRive({ className = '', leaving = false }) {
     if (!host || !canvas) return
     let alive = true
     let rive
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-    // Μόλις τελειώσει το slide εισόδου -> ήρεμο hover (συγχρονισμένα).
+    // Μόλις τελειώσει η ολίσθηση εισόδου -> ήρεμο hover.
     const goIdle = () => {
-      if (host.classList.contains('is-entering') && !host.classList.contains('is-leaving')) {
-        host.classList.remove('is-entering')
-        host.classList.add('is-idle')
-      }
+      if (!host.classList.contains('is-leaving')) host.classList.add('is-idle')
     }
     const onEnd = (e) => {
       if (e.animationName === 'hero-rive-in') goIdle()
@@ -51,27 +44,11 @@ export default function HeroWelcomeRive({ className = '', leaving = false }) {
           } catch {
             /* noop */
           }
-          try {
-            ;(rive.stateMachineInputs(SM) || []).forEach((i) => {
-              inputs.current[i.name] = i
-            })
-          } catch {
-            /* noop */
-          }
-          const fireComing = () => {
-            const t = inputs.current.coming
-            if (t && t.fire) t.fire()
-          }
-          if (reduce) {
-            host.classList.add('is-idle')
-            fireComing()
+          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            goIdle()
             return
           }
-          // Βάλε τον καμβά στη θέση εκκίνησης (εκτός οθόνης) ΠΡΙΝ εμφανιστεί ο ήρωας,
-          // μετά πυροδότησε «coming» -> ο ήρωας μπαίνει από την αρχή της διαδρομής.
-          host.classList.add('is-entering')
-          requestAnimationFrame(fireComing)
-          // Fallback: αν χαθεί το animationend, πέρνα σε hover λίγο μετά το τέλος του slide.
+          // Fallback αν χαθεί το animationend (π.χ. κρυφή καρτέλα).
           timers.current.push(setTimeout(goIdle, 2100))
         },
         onLoadError: () => {
@@ -108,7 +85,7 @@ export default function HeroWelcomeRive({ className = '', leaving = false }) {
   useEffect(() => {
     const host = hostRef.current
     if (!host || !leaving) return
-    host.classList.remove('is-entering', 'is-idle')
+    host.classList.remove('is-idle')
     host.classList.add('is-leaving')
   }, [leaving])
 
