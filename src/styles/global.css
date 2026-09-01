@@ -1283,10 +1283,11 @@ button {
 .hh-finale__hero {
   position: absolute;
   left: 540px;
-  top: 1360px;
+  top: 1330px;
   transform: translate(-50%, -50%);
-  width: 460px;
-  height: 580px;
+  width: 620px;
+  height: 760px;
+  object-fit: contain;
   display: block;
 }
 .hh-finale__score {
