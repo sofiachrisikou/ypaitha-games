@@ -39,13 +39,13 @@ const STAGE3_STRETCH_RIGHT_STEP = { animationParam: 1, audioKey: ASSET_KEYS.EZ_3
 const STAGE3_STRETCH_LEFT_STEP = { animationParam: 1, audioKey: ASSET_KEYS.EZ_34, durationSeconds: 2.5, text: 'Τέντωμα αριστερά— άγγιξε τον κύκλο' };
 
 // Played once by STAGE3_BODY_CHARACTER_CONFIG before moving on to outro-scene.js
-const STAGE3_CELEBRATION_STEP = { animationParam: 1, text: 'Το σώμα σου χαλάρωσε!', audioKey: ASSET_KEYS.EZ_38, durationSeconds: 6 };
+const STAGE3_CELEBRATION_STEP = { animationParam: 34, text: 'Το σώμα σου χαλάρωσε!', audioKey: ASSET_KEYS.EZ_38, durationSeconds: 6 };
 
 // Intro card lines (moved out of the now-deleted character-lines.js) — played
 // on STAGE3_BODY_CHARACTER_CONFIG, same character as the celebration.
 const STAGE3_INTRO_STEPS = [
-  { animationParam: 1, text: 'ΣΤΑΔΙΟ 3 — Τεντώνομαι', audioKey: ASSET_KEYS.EZ_29, durationSeconds: 5 },
-  { animationParam: 1, text: 'Άγγιξε τους κύκλους και τέντωσε μαζί μου!', audioKey: ASSET_KEYS.EZ_30, durationSeconds: 8 },
+  { animationParam: 31, text: 'ΣΤΑΔΙΟ 3 — Τεντώνομαι', audioKey: ASSET_KEYS.EZ_29, durationSeconds: 5 },
+  { animationParam: 32, text: 'Άγγιξε τους κύκλους και τέντωσε μαζί μου!', audioKey: ASSET_KEYS.EZ_30, durationSeconds: 8 },
 ];
 
 // Head animation indices: 0 idle, 1 talking, 2 wink, 3 laugh, 4 calm.
@@ -67,8 +67,14 @@ const LIMB_PROMPT_TEXT = {
 const LIMB_DONE_COLOR = 0x4caf50;
 const TARGET_MARKER_COLOR = 0x0072FF;
 const TARGET_MARKER_REACHED_COLOR = 0x19FA00;
-const GRAB_INDICATOR_ARM_COLOR = 0xD19F21;
-const GRAB_INDICATOR_LEG_COLOR = 0x21C8D1;
+const TARGET_MARKER_RADIUS = 28;
+const TARGET_MARKER_STROKE_WIDTH = 8;
+const GRAB_INDICATOR_ARM_COLOR = 0x742CD1;
+//const GRAB_INDICATOR_ARM_COLOR = 0xD19F21;
+const GRAB_INDICATOR_LEG_COLOR = 0x742CD1;
+//const GRAB_INDICATOR_LEG_COLOR = 0x21C8D1;
+const GRAB_INDICATOR_RADIUS = 28;
+const GRAB_INDICATOR_STROKE_WIDTH = 8;
 // One scale factor for the whole character — body, arms, and legs all use
 // this exact same number, so whatever proportions the artist drew stay
 // intact. Do not give limbs their own independent scale.
@@ -534,8 +540,8 @@ export class GameScene3 extends Phaser.Scene {
 
     limb.targetAnglesDeg.forEach((targetDeg) => {
       const point = this.#limbTipPosition(limb, targetDeg);
-      const marker = this.add.circle(point.x, point.y, 20, TARGET_MARKER_COLOR, 0).setDepth(2);
-      marker.setStrokeStyle(4, TARGET_MARKER_COLOR, 1);
+      const marker = this.add.circle(point.x, point.y, TARGET_MARKER_RADIUS, TARGET_MARKER_COLOR, 0).setDepth(2);
+      marker.setStrokeStyle(TARGET_MARKER_STROKE_WIDTH, TARGET_MARKER_COLOR, 1);
       // hidden until this limb is actually grabbed — see #showCurrentTargetMarker
       marker.setVisible(false);
       limb.targetMarkerGOs.push(marker);
@@ -557,15 +563,15 @@ export class GameScene3 extends Phaser.Scene {
 
   #createGrabIndicator(limb,limbKey) {
     const tip = this.#limbTipPosition(limb, limb.angleDeg);
-    limb.grabIndicatorGO = this.add.circle(tip.x, tip.y, 14, 0xffffff, 0);
+    limb.grabIndicatorGO = this.add.circle(tip.x, tip.y, GRAB_INDICATOR_RADIUS, 0xffffff, 0);
     if(limbKey == 'RIGHT_ARM' || limbKey == 'LEFT_ARM')
     {
-      limb.grabIndicatorGO.setStrokeStyle(3, GRAB_INDICATOR_ARM_COLOR, 1).setDepth(2);
+      limb.grabIndicatorGO.setStrokeStyle(GRAB_INDICATOR_STROKE_WIDTH, GRAB_INDICATOR_ARM_COLOR, 1).setDepth(2);
 
     }
     else
     {
-      limb.grabIndicatorGO.setStrokeStyle(3, GRAB_INDICATOR_LEG_COLOR, 1).setDepth(2);
+      limb.grabIndicatorGO.setStrokeStyle(GRAB_INDICATOR_STROKE_WIDTH, GRAB_INDICATOR_LEG_COLOR, 1).setDepth(2);
     }
     // Legs start disabled — the ring shape is visible by default the instant
     // it's created (Phaser shapes default to visible), so it must be hidden
@@ -717,7 +723,7 @@ export class GameScene3 extends Phaser.Scene {
     limb.targetAnglesDeg.shift();
     const reachedMarker = limb.targetMarkerGOs.shift();
     if (reachedMarker) {
-      reachedMarker.setStrokeStyle(4, TARGET_MARKER_REACHED_COLOR, 1);
+      reachedMarker.setStrokeStyle(TARGET_MARKER_STROKE_WIDTH, TARGET_MARKER_REACHED_COLOR, 1);
       this.tweens.add({
         targets: reachedMarker,
         alpha: 0,
@@ -766,14 +772,22 @@ export class GameScene3 extends Phaser.Scene {
     });
   }
 
-  /** Plays the right prompt for what to stretch next, after an arm or leg finishes. Always calls onComplete, even when there's nothing to play. */
+  /**
+   * Plays the right prompt for what to stretch next, after an arm or leg
+   * finishes. Always calls onComplete, even when there's nothing to play.
+   * The bottom prompt text is set here FIRST — before enabling the legs or
+   * starting the guide clip's own speech bubble — so it updates immediately
+   * instead of sitting on "Μπράβο!" for the whole reaction+guide-clip length.
+   */
   #playNextStretchPrompt(limb, onComplete) {
     const isArm = limb.key === 'RIGHT_ARM' || limb.key === 'LEFT_ARM';
     if (isArm) {
       if (this.#isLimbDone('RIGHT_ARM') && this.#isLimbDone('LEFT_ARM')) {
+        this.#setLimbPromptText(LIMB_PROMPT_TEXT.LEG_IDLE);
         this.#enableLegs();
         this.#character.playFeedback(STAGE3_STRETCH_LEGS_STEP, onComplete);
       } else {
+        this.#setLimbPromptText(LIMB_PROMPT_TEXT.ARM_IDLE);
         this.#character.playFeedback(limb.key === 'RIGHT_ARM' ? STAGE3_STRETCH_LEFT_STEP : STAGE3_STRETCH_RIGHT_STEP, onComplete);
       }
       return;
@@ -782,6 +796,7 @@ export class GameScene3 extends Phaser.Scene {
     if (this.#isLimbDone('RIGHT_LEG') && this.#isLimbDone('LEFT_LEG')) {
       onComplete?.();
     } else {
+      this.#setLimbPromptText(LIMB_PROMPT_TEXT.LEG_IDLE);
       this.#character.playFeedback(limb.key === 'RIGHT_LEG' ? STAGE3_STRETCH_LEFT_STEP : STAGE3_STRETCH_RIGHT_STEP, onComplete);
     }
   }
@@ -798,7 +813,7 @@ export class GameScene3 extends Phaser.Scene {
 
     this.#limbsStretchedCount += 1;
     this.#progressTextGO.setText(`${this.#limbsStretchedCount} / ${this.#totalLimbsRequired}`);
-    this.#setLimbPromptText('Μπράβο!');
+    this.#setLimbPromptText('ΜΠΡΑΒΟ! Έρχεται η επόμενη διάταση…!');
 
     //this.#levelProgressBar.setProgress(this.#limbsStretchedCount / this.#totalLimbsRequired);
 
@@ -811,7 +826,6 @@ export class GameScene3 extends Phaser.Scene {
       this.#character.playFeedback(Phaser.Utils.Array.GetRandom(STAGE3_LIMB_REACTION_STEPS), () => {
         this.#playNextStretchPrompt(limb, () => {
           this.#inputLocked = false;
-          this.#resetLimbPromptText();
         });
       });
     }

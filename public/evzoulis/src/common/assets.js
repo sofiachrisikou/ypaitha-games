@@ -427,7 +427,7 @@ export const RIVE_ASSETS = [
   },
    {
     assetKey: ASSET_KEYS.RIVE_BEAR_Stg1,
-    path: 'assets/rive/Euzoulis_Mascot_Stage01 1.riv',
+    path: 'assets/rive/Euzoulis_Mascot_Stage01.riv',
   },
   {
     assetKey: ASSET_KEYS.RIVE_BEAR_Stg2,
@@ -435,7 +435,7 @@ export const RIVE_ASSETS = [
   },
   {
     assetKey: ASSET_KEYS.RIVE_BEAR_Stg3,
-    path: 'assets/rive/Euzoulis_Mascot_Stage02.riv',
+    path: 'assets/rive/Euzoulis_Mascot_Stage03.riv',
   },
   {
     assetKey: ASSET_KEYS.RIVE_BEAR_Stg3_HEAD,
@@ -443,7 +443,7 @@ export const RIVE_ASSETS = [
   },
   {
     assetKey: ASSET_KEYS.RIVE_BEAR_OUTRO,
-    path: 'assets/rive/Bear_Outro.riv',
+    path: 'assets/rive/Euzoulis_Mascot_Outro.riv',
   },
 ];
 

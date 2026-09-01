@@ -32,7 +32,7 @@ export class PreloadScene extends Phaser.Scene {
 
   async create() {
     await loadFont('GameFont', 'assets/fonts/ComicSansMSBold.ttf');
-    this.scene.start(SCENE_KEYS.EUZOYLIS_GAME_SCENE1);
+    this.scene.start(SCENE_KEYS.EUZOYLIS_INTRO_SCENE);
   }
 
   //#endregion
