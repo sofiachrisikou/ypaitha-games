@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import RiveHero from '../../components/RiveHero.jsx'
 import HeroPoint from './HeroPoint.jsx'
 import HeroReact from './HeroReact.jsx'
+import HeroHurry from './HeroHurry.jsx'
 
 // Ο ήρωας-σύντροφος:
 //  • idle: HH-03 (δείχνει)
@@ -74,6 +75,8 @@ export default function MascotCompanion({ reaction, pos = { w: 560, right: -30, 
             <RiveHero src={riveSrc} className="mascot__rive" fallback="/hh/end/Hero.png" width={460} height={600} />
           ) : isPoint ? (
             <HeroPoint className="mascot__point" bounce />
+          ) : display === 'hurry' ? (
+            <HeroHurry className="mascot__point" />
           ) : (
             <HeroReact type={display} className="mascot__point" />
           )}

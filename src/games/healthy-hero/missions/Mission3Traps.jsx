@@ -48,7 +48,11 @@ export default function Mission3Traps({ addScore, onProgress, onReaction, onNext
           return 0
         }
         const n = s - 1
-        if (n === 10) speak('HH-24') // «Γρήγορα! Ο χρόνος τελειώνει!»
+        if (n === 10) {
+          speak('HH-24') // «10 δευτερόλεπτα! Μπορείς να ολοκληρώσεις την αποστολή!»
+          // Ο ήρωας κοιτάει το ρολόι του (HH-24 «βιάσου») — μένει μέχρι το επόμενο άγγιγμα.
+          onReaction && onReaction('correct', null, { anim: 'hurry' })
+        }
         return n
       })
     }, 1000)
