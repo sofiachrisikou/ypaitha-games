@@ -18,38 +18,47 @@ const TUNE = PARAMS.get('tune') === '1'
 
 // Αντιδράσεις ανά αποστολή (επίσημο script HH-XX):
 // key = κωδικός VO (φωνή), bubble = σύντομο κείμενο στην οθόνη.
-// Οι σωστές αντιδράσεις δεν έχουν κείμενο οθόνης («—» στο script) — μόνο animation.
+// Κάθε αντίδραση ορίζει ΚΙΝΗΣΗ (anim) + ΗΧΟ (key) + προαιρετικό κείμενο (bubble).
+// Οι σωστές δεν έχουν κείμενο («—»). Το head-shake (hh07) παίζει ΠΑΝΤΑ «Ναι!» (HH-S1).
+// Για ποικιλία μπαίνουν και επιφωνήματα: HH-S1 «Ναι!», HH-S2 «Woohoo!», HH-S3 «Ωπ!».
 const REACTIONS = {
   m1: {
     correct: [
-      { key: 'HH-05', bubble: '' },
-      { key: 'HH-06', bubble: '' },
-      { key: 'HH-07', bubble: '' },
+      { anim: 'thumbs', key: 'HH-05', bubble: '' },
+      { anim: 'hh06', key: 'HH-06', bubble: '' },
+      { anim: 'hh07', key: 'HH-S1', bubble: '' }, // head-shake + «Ναι!»
+      { anim: 'thumbs', key: 'HH-S2', bubble: '' }, // «Woohoo!»
     ],
     wrong: [
-      { key: 'HH-08', bubble: 'Δοκίμασε ξανά' },
-      { key: 'HH-09', bubble: 'Ψάξε ξανά' },
-      { key: 'HH-10', bubble: 'Σχεδόν!' },
+      { anim: 'touch', key: 'HH-08', bubble: 'Δοκίμασε ξανά' },
+      { anim: 'hh09', key: 'HH-S3', bubble: 'Ψάξε ξανά' }, // «Ωπ!» + κούνημα «όχι»
+      { anim: 'hh16', key: 'HH-10', bubble: 'Σχεδόν!' },
     ],
   },
   m2: {
     correct: [
-      { key: 'HH-14', bubble: '' },
-      { key: 'HH-15', bubble: '' },
+      { anim: 'thumbs', key: 'HH-14', bubble: '' },
+      { anim: 'hh06', key: 'HH-15', bubble: '' },
+      { anim: 'hh07', key: 'HH-S1', bubble: '' }, // head-shake + «Ναι!»
+      { anim: 'thumbs', key: 'HH-S2', bubble: '' }, // «Woohoo!»
     ],
     wrong: [
-      { key: 'HH-16', bubble: 'Δοκίμασε ξανά' },
-      { key: 'HH-17', bubble: 'Ψάξε ξανά' },
+      { anim: 'touch', key: 'HH-16', bubble: 'Δοκίμασε ξανά' },
+      { anim: 'hh09', key: 'HH-S3', bubble: 'Ψάξε ξανά' }, // «Ωπ!»
+      { anim: 'hh16', key: 'HH-17', bubble: 'Ψάξε ξανά' },
     ],
   },
   m3: {
     correct: [
-      { key: 'HH-20', bubble: '' },
-      { key: 'HH-21', bubble: '' },
+      { anim: 'thumbs', key: 'HH-20', bubble: '' },
+      { anim: 'hh06', key: 'HH-21', bubble: '' },
+      { anim: 'hh07', key: 'HH-S1', bubble: '' }, // head-shake + «Ναι!»
+      { anim: 'thumbs', key: 'HH-S2', bubble: '' }, // «Woohoo!»
     ],
     wrong: [
-      { key: 'HH-22', bubble: 'Πιο συχνά!' },
-      { key: 'HH-23', bubble: 'Κοίτα ξανά' },
+      { anim: 'touch', key: 'HH-22', bubble: 'Πιο συχνά!' },
+      { anim: 'hh09', key: 'HH-S3', bubble: 'Κοίτα ξανά' }, // «Ωπ!»
+      { anim: 'hh16', key: 'HH-23', bubble: 'Κοίτα ξανά' },
     ],
   },
 }
@@ -112,7 +121,7 @@ export default function HealthyHero() {
       // silent: κάνε μόνο την κίνηση της μασκότ, χωρίς VO (π.χ. όταν παίζει ήδη άλλη ατάκα).
       if (silent) onEnd && onEnd()
       else speak(item.key, onEnd) // onEnd() -> όταν τελειώσει το VO (για chaining με το VO νίκης)
-      setReaction({ type, text: silent ? '' : item.bubble, n: Date.now() })
+      setReaction({ type, anim: item.anim, text: silent ? '' : item.bubble, n: Date.now() })
     },
     [stage],
   )

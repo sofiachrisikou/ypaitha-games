@@ -31,8 +31,11 @@ export default function MascotCompanion({ reaction, pos = { w: 560, right: -30, 
     } else {
       setBubble(null)
     }
-    // ΜΕΝΕΙ μέχρι το επόμενο τρόφιμο (correct & wrong εναλλάξ)
-    if (reaction.type === 'correct') {
+    // Η κίνηση ορίζεται πλέον από την αντίδραση (anim) ώστε να είναι συγχρονισμένη
+    // με τον ήχο (π.χ. head-shake hh07 + «Ναι!»). Fallback: εναλλαγή cycle.
+    if (reaction.anim) {
+      setDisplay(reaction.anim)
+    } else if (reaction.type === 'correct') {
       cIdx.current += 1
       setDisplay(CORRECT_CYCLE[cIdx.current % CORRECT_CYCLE.length])
     } else if (reaction.type === 'wrong') {
