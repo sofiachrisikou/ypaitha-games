@@ -29,12 +29,12 @@ const STAGE1_POSITION_OUTRO = { cssClass: 'rive-stage--stg1-character', bubbleSc
 
 // animationParam: 1=intro, 4/5/6=tutorial steps, 7=ready-check (waits for the start button), 8/9/10=breathe in/hold/out
 const STAGE1_INTRO_STEPS = [
-  { animationParam: 1, audioKey: ASSET_KEYS.EZ_02, durationSeconds: 4.7, text: 'ΣΤΑΔΙΟ 1 — Η ανάσα μου' },
+  { animationParam: 1, audioKey: ASSET_KEYS.EZ_02, durationSeconds: 6, text: 'ΣΤΑΔΙΟ 1 — Η ανάσα μου' },
 ];
 const STAGE1_TUTORIAL_STEPS = [
   { animationParam: 4, audioKey: ASSET_KEYS.EZ_03, durationSeconds: 4.3, text: '1. Σύρε προς τα ΠΑΝΩ και πάρε ανάσα' },
   { animationParam: 5, audioKey: ASSET_KEYS.EZ_04, durationSeconds: 4.5, text: '2. ΚΡΑΤΑ 2 δευτερόλεπτα, μέχρι να πρασινίσει' },
-  { animationParam: 6, audioKey: ASSET_KEYS.EZ_05, durationSeconds: 5.2, text: '3. Σύρε προς τα ΚΑΤΩ και φύσα αργά' },
+  { animationParam: 6, audioKey: ASSET_KEYS.EZ_05, durationSeconds: 5.4, text: '3. Σύρε προς τα ΚΑΤΩ και φύσα αργά' },
   // waitForButton: no durationSeconds — spawns a Start button instead, advances on click. x/y here are also plain, adjustable numbers.
   { animationParam: 7, audioKey: ASSET_KEYS.EZ_06, text: 'ΠΑΜΕ!', waitForButton: { assetKey: ASSET_KEYS.BTN1, x: 540, y: 1632, scale: 0.45 } },
 ];
@@ -50,16 +50,20 @@ const STAGE1_GOOD_MOVE_STEPS = [
   { animationParam: 13, audioKey: ASSET_KEYS.EZ_12, durationSeconds: 3 },
 ];
 // Fixed clip played instead of a random good-move pick at breathsCompleted === 4 (2/3 of 6)
-const STAGE1_MILESTONE_STEP = { animationParam: 18, audioKey: ASSET_KEYS.EZ_16, durationSeconds: 5, text: 'ΜΠΡΑΒΟ!' };
+const STAGE1_MILESTONE_STEP = { animationParam: 18, audioKey: ASSET_KEYS.EZ_16, durationSeconds: 4, text: 'ΜΠΡΑΒΟ!' };
 // Bad-move feedback: released/drifted out of the hold vs wrong swipe direction
 const STAGE1_BAD_MOVE_HOLD_STEP = { animationParam: 15, audioKey: ASSET_KEYS.EZ_14, durationSeconds: 4, text: 'Κράτα λίγο ακόμη' };
 const STAGE1_BAD_MOVE_DIRECTION_STEP = { animationParam: 16, audioKey: ASSET_KEYS.EZ_15, durationSeconds: 4, text: 'Ξανά, μαζί!' };
 
-// Wobbling breath prompt at the bottom of the screen (replaces the old INHALE/EXHALE image)
+// Wobbling breath prompt (replaces the old INHALE/EXHALE image) — moves between these two plain spots, guesses for now
+const STAGE1_POSITION_INHALE = { x: 850, y: 1450 };
+const STAGE1_POSITION_EXHALE = { x: 850, y: 550 };
 const BREATH_TEXT = {
   INHALE: 'ΕΙΣΠΝΟΗ — σύρε πάνω',
-  HOLD: 'ΚΡΑΤΑ — μέχρι να πρασινίσει',
+  HOLD: 'ΚΡΑΤΑ για 2',
   EXHALE: 'ΕΚΠΝΟΗ — σύρε κάτω',
+  HOLD_COUNT_1: 'ΚΡΑΤΑ για 1',
+  HOLD_COUNT_2: 'ΟΚ',
 };
 
 const SWIPE_STATE = {
@@ -102,6 +106,7 @@ export class GameScene extends Phaser.Scene {
   //BREATH PROMPT
   #breathPromptGO;
   #breathPromptWobbleTween;
+  #holdCountdownTimers;
 
   //GAMEPLAY
   #swipeState;
@@ -183,6 +188,7 @@ export class GameScene extends Phaser.Scene {
     this.#currentBreathDirection = BREATH_DIRECTION.IN;
     this.#lastSwipePointerY = 0;
     this.#holdTimerEvent = null;
+    this.#holdCountdownTimers = [];
     this.#swipeIndicatorTween = null;
     this.#isLevelComplete = false;
 
@@ -373,8 +379,8 @@ export class GameScene extends Phaser.Scene {
   #createFlower() {
     const { width, height } = this.scale;
 
-    const flowerX = width * 0.15;
-    const flowerY = height * 0.6;
+    const flowerX = width * 0.2;
+    const flowerY = height * 0.7;
   
     this.#flowerGO = this.add.image(flowerX, flowerY, ASSET_KEYS.FLOWER1).setOrigin(0.5, 1).setScale(0.55);
   }
@@ -400,10 +406,9 @@ export class GameScene extends Phaser.Scene {
    * itself never stops.
    */
   #createBreathPromptText() {
-    const { width, height } = this.scale;
     this.#breathPromptGO = this.add
-      .text(width / 2, height - 180, BREATH_TEXT.INHALE, TEXT_STYLES.BREATH_PROMPT)
-      .setOrigin(0.5);
+      .text(STAGE1_POSITION_INHALE.x, STAGE1_POSITION_INHALE.y, BREATH_TEXT.INHALE, TEXT_STYLES.BREATH_PROMPT_RIGHT)
+      .setOrigin(1, 0.5);
     this.#startBreathPromptWobble();
   }
 
@@ -413,12 +418,17 @@ export class GameScene extends Phaser.Scene {
     }
     this.#breathPromptWobbleTween = this.tweens.add({
       targets: this.#breathPromptGO,
-      angle: { from: -4, to: 4 },
+      angle: { from: -1.5, to: 1.5 },
       duration: 900,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut',
     });
+  }
+
+  /** @param {{ x: number, y: number }} pos */
+  #setBreathPromptPosition(pos) {
+    this.#breathPromptGO?.setPosition(pos.x, pos.y);
   }
 
   /** @param {string} text */
@@ -451,6 +461,8 @@ export class GameScene extends Phaser.Scene {
     this.#swipeState = SWIPE_STATE.SWIPING;
     this.#lastSwipePointerY = pointer.y;
     this.#stopIndicatorPulse();
+    this.#character.cancelPendingFeedback();
+    this.#character.hideBubble();
     this.#swipeGestureBarGraphics.setVisible(true);
     this.#updateSwipeGestureBar(0, false);
     if (this.#currentBreathDirection === BREATH_DIRECTION.IN) {
@@ -560,8 +572,17 @@ export class GameScene extends Phaser.Scene {
 
   #startHold() {
     this.#swipeState = SWIPE_STATE.HOLDING;
+    this.#setBreathPromptPosition(STAGE1_POSITION_EXHALE);
     this.#setBreathPromptText(BREATH_TEXT.HOLD);
+    this.#character.cancelPendingFeedback();
     this.#character.setAnimationParam(STAGE1_HOLD_PARAM);
+    // "Κράτα" -> "1" -> "2" countdown, cancelled alongside the hold timer in #stopHoldTimer if it breaks early.
+    // Added BEFORE #holdTimerEvent below — both "2" and the success handler fire at the same 2000ms mark, and
+    // Phaser runs same-tick timers in the order they were added, so this must go first or "2" wins and sticks.
+    this.#holdCountdownTimers = [
+      this.time.delayedCall(1000, () => this.#setBreathPromptText(BREATH_TEXT.HOLD_COUNT_1)),
+      this.time.delayedCall(2000, () => this.#setBreathPromptText(BREATH_TEXT.HOLD_COUNT_2)),
+    ];
     this.#holdTimerEvent = this.time.delayedCall(this.#swipeHoldDurationMs, this.#handleBreathSuccess, [], this);
   }
 
@@ -570,6 +591,8 @@ export class GameScene extends Phaser.Scene {
       this.#holdTimerEvent.remove();
       this.#holdTimerEvent = null;
     }
+    this.#holdCountdownTimers.forEach((timer) => timer.remove());
+    this.#holdCountdownTimers = [];
   }
 
   #handleBreathFailed(reason) {
@@ -591,10 +614,15 @@ export class GameScene extends Phaser.Scene {
     // is no longer locked while this feedback plays — removed per pacing
     // request; arrow comes back immediately below instead of waiting for it.
     // this.#inputLocked = true;
-    this.#character.playFeedback(wasHolding ? STAGE1_BAD_MOVE_HOLD_STEP : STAGE1_BAD_MOVE_DIRECTION_STEP /*, () => {
-      this.#inputLocked = false;
-      this.#startIndicatorPulse();
-    } */);
+    // playFeedback resets to idle(0) when the bad-move clip ends — reverting
+    // to the in-progress breathing pose instead. Exhale failures go back to
+    // HOLD (not the breathe-out pose), same as a hold failure itself.
+    const resumeParam = wasHolding || this.#currentBreathDirection === BREATH_DIRECTION.OUT
+      ? STAGE1_HOLD_PARAM
+      : STAGE1_BREATHE_IN_PARAM;
+    this.#character.playFeedback(wasHolding ? STAGE1_BAD_MOVE_HOLD_STEP : STAGE1_BAD_MOVE_DIRECTION_STEP, () => {
+      this.#character.setAnimationParam(resumeParam);
+    });
     this.#startIndicatorPulse();
 
     if (this.#failedBreaths >= this.#maxFailedBreaths) {
@@ -678,7 +706,9 @@ export class GameScene extends Phaser.Scene {
     const arrowY = this.#getStartZoneY();
     // ARROW_UP art reused rotated 180° for OUT instead of a second asset
     const arrowAngle = this.#currentBreathDirection === BREATH_DIRECTION.IN ? 0 : 180;
-    this.#setBreathPromptText(this.#currentBreathDirection === BREATH_DIRECTION.IN ? BREATH_TEXT.INHALE : BREATH_TEXT.EXHALE);
+    const isInhale = this.#currentBreathDirection === BREATH_DIRECTION.IN;
+    this.#setBreathPromptText(isInhale ? BREATH_TEXT.INHALE : BREATH_TEXT.EXHALE);
+    this.#setBreathPromptPosition(isInhale ? STAGE1_POSITION_INHALE : STAGE1_POSITION_EXHALE);
 
     this.#swipeIndicatorGO
       .setPosition(this.#candleX, arrowY)

@@ -264,11 +264,18 @@ export class GameScene2 extends Phaser.Scene {
 
     this.#spawnAllBubbles();
 
-    // playFeedback sets idle(0) when this clip ends; switching straight to 21 right after instead.
+    // No bubble pop can trigger a reaction clip (21/22/23) until this whole
+    // intro->21->idle warm-up finishes — going straight from the hint/intro
+    // clip into 22 or 23 is what breaks the face; this known-good path first
+    // avoids that. playFeedback sets idle(0) when this clip ends; switching
+    // straight to 21 right after instead.
+    this.#inputLocked = true;
     this.#character.playFeedback(STAGE2_GAMEPLAY_HINT_STEP, () => {
       this.#character.setAnimationParam(21);
-      // TEST: check if idle(0) is broken when reached from 21, 1s later, no audio/text.
-      this.time.delayedCall(1000, () => this.#character.setAnimationParam(0));
+      this.time.delayedCall(1000, () => {
+        this.#character.setAnimationParam(0);
+        this.#inputLocked = false;
+      });
     });
   }
 
@@ -407,6 +414,10 @@ export class GameScene2 extends Phaser.Scene {
 
   #popBubble(bubbleData) {
     if (bubbleData.state !== BUBBLE_STATE.BAD) {
+      return;
+    }
+    // Only ever true during the intro->21->idle warm-up in #startLevel — never set true again after that.
+    if (this.#inputLocked) {
       return;
     }
     bubbleData.state = BUBBLE_STATE.POPPED;

@@ -50,12 +50,19 @@ export const TEXT_STYLES = {
     align: 'center',
     wordWrap: { width: 270, useAdvancedWrap: true },
   },
-  // Wobbling breath prompt (inhale/hold/exhale) — game-scene.js
+  // Wobbling breath prompt (inhale/hold/exhale) — game-scene3.js's limb prompt also uses this one
   BREATH_PROMPT: {
     fontFamily: FONT_FAMILY,
     fontSize: '48px',
     color: '#A36155',
     align: 'center',
+  },
+  // Right-aligned variant of BREATH_PROMPT — game-scene.js only, so Stage 3 stays untouched
+  BREATH_PROMPT_RIGHT: {
+    fontFamily: FONT_FAMILY,
+    fontSize: '48px',
+    color: '#A36155',
+    align: 'right',
   },
 
 };

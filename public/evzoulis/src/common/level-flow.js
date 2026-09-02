@@ -124,6 +124,8 @@ export function showLevelIntroWithVoiceover(scene, { lines, logoAssetKey, onComp
  *   playMomentAuto: (moment: { animationParam: number, audioKey: string, durationSeconds: number, text?: string }, onComplete?: () => void) => void,
  *   playSequence: (steps: { animationParam: number, audioKey: string, durationSeconds?: number, text?: string, waitForButton?: { assetKey: string, x: number, y: number, scale?: number } }[], onComplete?: () => void) => void,
  *   playFeedback: (step: { animationParam: number, audioKey: string, durationSeconds: number, text?: string }, onComplete?: () => void) => void,
+ *   hideBubble: () => void,
+ *   cancelPendingFeedback: () => void,
  *   destroy: () => void,
  * }}
  */
@@ -264,6 +266,24 @@ export function createAnimatedCharacter(scene, config, initialPosition, onReady)
     playAt(0);
   }
 
+  /** Force-hides the bubble immediately, independent of whatever moment/timer is running — e.g. dismiss it on a new player action. */
+  function hideBubble() {
+    bubbleContainer.setVisible(false);
+  }
+
+  /**
+   * Cancels whatever playMoment/playFeedback duration timer + audio is still
+   * running, without starting anything new. For real-time gesture-driven
+   * poses (raw setAnimationParam calls outside the moment system, e.g. Stage
+   * 1's swipe/hold tracking) — call this first so a stale feedback timer
+   * can't survive and later snap the pose back on its own, ignoring new input.
+   */
+  function cancelPendingFeedback() {
+    pendingTimer?.remove();
+    pendingTimer = null;
+    currentVoiceover?.stop();
+  }
+
   function destroy() {
     currentVoiceover?.stop();
     pendingTimer?.remove();
@@ -272,7 +292,7 @@ export function createAnimatedCharacter(scene, config, initialPosition, onReady)
     removeRiveAnimation(riveInstance, cssClass);
   }
 
-  return { moveTo, setAnimationParam, playMoment, playMomentWithSpeech, playMomentAuto, playSequence, playFeedback, destroy };
+  return { moveTo, setAnimationParam, playMoment, playMomentWithSpeech, playMomentAuto, playSequence, playFeedback, hideBubble, cancelPendingFeedback, destroy };
 }
 
 //#endregion

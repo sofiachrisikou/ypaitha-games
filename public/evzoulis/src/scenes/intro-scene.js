@@ -13,6 +13,9 @@ import { spawnRiveAnimation, removeRiveAnimation } from '../common/rive-stage.js
 
 const CLOUD_ANIM_KEY = 'introCloudGrow';
 
+// Welcome bubble on the intro card — same shape as the other stages' position configs, plain absolute numbers.
+const INTRO_BUBBLE_POSITION = { bubbleScale: 0.30, bubbleX: 550, bubbleY: 1200, textStyle: TEXT_STYLES.SPEECH_BUBBLE };
+
 export class IntroScene extends Phaser.Scene {
   //DECOR ANIMATIONS
   #decorAnimationsActive;
@@ -284,19 +287,16 @@ export class IntroScene extends Phaser.Scene {
   }
 
   #showCharacterPrompt() {
-    const { width, height } = this.scale;
-     this.#createIntroCharacterAnimation();
-    const bubbleX = width - 300;
-    const bubbleY = height/2 + 200;
+    this.#createIntroCharacterAnimation();
 
-    const bubbleImage = this.add.image(0, 0, ASSET_KEYS.SPEECH_BUBBLE).setScale(0.35);
-    const bubbleText = this.add.text(0, -20, 'Γεια σου! Είμαι ο Ευζούλης.', TEXT_STYLES.SPEECH_BUBBLE).setOrigin(0.5);
-    this.add.container(bubbleX - 330, bubbleY, [bubbleImage, bubbleText]);
+    const bubbleImage = this.add.image(0, 0, ASSET_KEYS.SPEECH_BUBBLE).setScale(INTRO_BUBBLE_POSITION.bubbleScale);
+    const bubbleText = this.add.text(0, -20, 'Γεια σου! Είμαι ο Ευζούλης.', INTRO_BUBBLE_POSITION.textStyle).setOrigin(0.5);
+    this.add.container(INTRO_BUBBLE_POSITION.bubbleX, INTRO_BUBBLE_POSITION.bubbleY, [bubbleImage, bubbleText]);
     this.#welcomeVoiceover = this.sound.add(ASSET_KEYS.EZ_01);
     this.#welcomeVoiceover.play();
 
-    const levelButtonX = bubbleX - 500;
-    const levelButtonY = bubbleY + 600
+    const levelButtonX = 280;
+    const levelButtonY = 1760;
 
 
     this.#levelButtonGO = this.add

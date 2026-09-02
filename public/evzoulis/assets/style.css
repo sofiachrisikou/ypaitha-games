@@ -26,8 +26,8 @@ body,
 }
 
 .rive-stage--intro {
-  width: 160%;
-  height: 160%;
+  width: 120%;
+  height: 120%;
   left: 85%;
   top:85%;
   transform: translate(-50%, -50%);
