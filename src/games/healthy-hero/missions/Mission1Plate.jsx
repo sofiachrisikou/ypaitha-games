@@ -18,7 +18,7 @@ const RY = 560 // δακτύλιος τροφίμων (κάθετα)
 // Κατανομή τροφίμων σε τόξο ~285°, αφήνοντας ΚΕΝΟ κάτω-δεξιά για τη μασκότ.
 function slotPos(i, total) {
   const startDeg = 96
-  const arcDeg = 250 // πιο κοντό τόξο: το τελευταίο φαγητό (hot dog) ανεβαίνει πάνω από τη μασκότ
+  const arcDeg = 272 // αρκετά ανοιχτό τόξο, αλλά το hot dog μένει πάνω από τη μασκότ
   const angle = (startDeg + (i * arcDeg) / (total - 1)) * (Math.PI / 180)
   return { x: CX + RX * Math.cos(angle), y: CY + RY * Math.sin(angle) }
 }
