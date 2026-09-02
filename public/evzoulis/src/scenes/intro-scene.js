@@ -36,6 +36,7 @@ export class IntroScene extends Phaser.Scene {
   //CHARACTER
   #characterGO;
   #riveInstance;
+  #welcomeVoiceover;
 
   constructor() {
     super({
@@ -102,6 +103,7 @@ export class IntroScene extends Phaser.Scene {
   }
 
   #handleShutdown() {
+    this.#welcomeVoiceover?.stop();
     this.#decorAnimationsActive = false;
     this.#decorObjects.forEach((gameObject) => this.tweens.killTweensOf(gameObject));
     if (this.#startButtonGO) {
@@ -290,7 +292,8 @@ export class IntroScene extends Phaser.Scene {
     const bubbleImage = this.add.image(0, 0, ASSET_KEYS.SPEECH_BUBBLE).setScale(0.35);
     const bubbleText = this.add.text(0, -20, 'Γεια σου! Είμαι ο Ευζούλης.', TEXT_STYLES.SPEECH_BUBBLE).setOrigin(0.5);
     this.add.container(bubbleX - 330, bubbleY, [bubbleImage, bubbleText]);
-    this.sound.add(ASSET_KEYS.EZ_01).play();
+    this.#welcomeVoiceover = this.sound.add(ASSET_KEYS.EZ_01);
+    this.#welcomeVoiceover.play();
 
     const levelButtonX = bubbleX - 500;
     const levelButtonY = bubbleY + 600
@@ -304,6 +307,7 @@ export class IntroScene extends Phaser.Scene {
   }
 
   #handleLevelButtonPressed() {
+    this.#welcomeVoiceover?.stop();
     this.scene.start(SCENE_KEYS.EUZOYLIS_GAME_SCENE1);
   }
 

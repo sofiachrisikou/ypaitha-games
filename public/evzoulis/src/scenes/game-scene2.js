@@ -29,7 +29,7 @@ const STAGE2_INTRO_STEPS = [
 // Played once gameplay has started and the bubbles are already on screen, on the scaled-down gameplay character — not during the intro card.
 const STAGE2_GAMEPLAY_HINT_STEP = { animationParam: 20, audioKey: ASSET_KEYS.EZ_19, durationSeconds: 4, text: 'Άγγιξε τα γκρίζα συννεφάκια με τις δύσκολες σκέψεις.' };
 const STAGE2_OUTRO_STEPS = [
-  { animationParam: 29, audioKey: ASSET_KEYS.EZ_28, durationSeconds: 10, text: 'Οι δύσκολες σκέψεις έγιναν πιο ελαφριές!' },
+  { animationParam: 29, audioKey: ASSET_KEYS.EZ_28, durationSeconds: 8, text: 'Οι δύσκολες σκέψεις έγιναν πιο ελαφριές!' },
 ];
 // Fixed clip played instead of a random good-move pick at STAGE2_MILESTONE_POP_COUNT pops (6/8)
 const STAGE2_MILESTONE_POP_COUNT = 6;
@@ -264,7 +264,12 @@ export class GameScene2 extends Phaser.Scene {
 
     this.#spawnAllBubbles();
 
-    this.#character.playFeedback(STAGE2_GAMEPLAY_HINT_STEP);
+    // playFeedback sets idle(0) when this clip ends; switching straight to 21 right after instead.
+    this.#character.playFeedback(STAGE2_GAMEPLAY_HINT_STEP, () => {
+      this.#character.setAnimationParam(21);
+      // TEST: check if idle(0) is broken when reached from 21, 1s later, no audio/text.
+      this.time.delayedCall(1000, () => this.#character.setAnimationParam(0));
+    });
   }
 
   update(time, delta) {
@@ -404,9 +409,6 @@ export class GameScene2 extends Phaser.Scene {
     if (bubbleData.state !== BUBBLE_STATE.BAD) {
       return;
     }
-    if (this.#inputLocked) {
-      return;
-    }
     bubbleData.state = BUBBLE_STATE.POPPED;
     bubbleData.container.disableInteractive();
 
@@ -429,25 +431,18 @@ export class GameScene2 extends Phaser.Scene {
       this.#handleLevelComplete();
       return;
     }
-    // Lock bubble-popping until this feedback clip actually finishes, so a
-    // fast next pop can't cancel it early — same fix as Stage 1's swipe input.
-    this.#inputLocked = true;
+    // No input lock — bubbles can be popped as fast as the player wants. Each
+    // pop's playFeedback call naturally interrupts whatever the previous one
+    // was doing (level-flow.js's own "most recent call wins" behavior), so
+    // only one clip is ever audible at a time instead of queuing up.
     const specialThoughtStep = STAGE2_SPECIAL_THOUGHT_STEPS[bubbleData.thoughtIndex];
-    const onFeedbackDone = () => {
-      // This bubble's own special guide clip, if it has one, plays AFTER the
-      // normal feedback — input only unlocks once that's done too.
-      if (specialThoughtStep) {
-        this.#character.playFeedback(specialThoughtStep, () => {
-          this.#inputLocked = false;
-        });
-      } else {
-        this.#inputLocked = false;
-      }
-    };
-    if (this.#poppedCount === STAGE2_MILESTONE_POP_COUNT) {
-      this.#character.playFeedback(STAGE2_MILESTONE_STEP, onFeedbackDone);
+    if (specialThoughtStep) {
+      // These 3 play ONLY their own audio+animation+bubble — no good-move/milestone feedback before them.
+      this.#character.playFeedback(specialThoughtStep);
+    } else if (this.#poppedCount === STAGE2_MILESTONE_POP_COUNT) {
+      this.#character.playFeedback(STAGE2_MILESTONE_STEP);
     } else {
-      this.#character.playFeedback(Phaser.Utils.Array.GetRandom(STAGE2_GOOD_MOVE_STEPS), onFeedbackDone);
+      this.#character.playFeedback(Phaser.Utils.Array.GetRandom(STAGE2_GOOD_MOVE_STEPS));
     }
   }
 

@@ -38,17 +38,17 @@ export const TEXT_STYLES = {
   // Text inside a bubble — thought-cloud-scene.js - scene 2
   BUBBLE: {
     fontFamily: FONT_FAMILY,
-    fontSize: '32px',
+    fontSize: '28px',
     color: '#000000',
     align: 'center',
     wordWrap: { width: 220, useAdvancedWrap: true },
   },
   BUBBLE_POPPED: {
     fontFamily: FONT_FAMILY,
-    fontSize: '32px',
+    fontSize: '28px',
     color: '#2EB000',
     align: 'center',
-    wordWrap: { width: 260, useAdvancedWrap: true },
+    wordWrap: { width: 270, useAdvancedWrap: true },
   },
   // Wobbling breath prompt (inhale/hold/exhale) — game-scene.js
   BREATH_PROMPT: {

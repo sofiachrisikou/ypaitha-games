@@ -6,6 +6,6 @@ export const THOUGHT_CLOUD_LIST = [
   { bad: 'ΚΙ ΑΝ ΑΠΟΤΥΧΩ;', good: 'ΞΑΝΑΠΡΟΣΠΑΘΩ' },
   { bad: 'ΔΕΝ ΜΠΟΡΩ', good: 'ΕΝΑ ΒΗΜΑ ΤΗ ΦΟΡΑ' },
   { bad: 'ΘΑ ΓΕΛΑΣΟΥΝ ΜΑΖΙ ΜΟΥ.', good: 'ΟΛΑ ΘΑ ΠΑΝΕ ΚΑΛΑ' },
-  { bad: 'ΘΑ ΚΑΝΩ ΛΑΘΟΣ.', good: 'ΕΙΜΑΙ ΠΡΟΕΤΟΙΜΑΣΜΕΝΟΣ' },
+  { bad: 'ΘΑ ΚΑΝΩ ΛΑΘΟΣ.', good: 'ΕΙΜΑΙ ΕΤΟΙΜΟΣ' },
   // TODO: add the rest of your real phrase list here
 ];

@@ -29,12 +29,12 @@ const STAGE1_POSITION_OUTRO = { cssClass: 'rive-stage--stg1-character', bubbleSc
 
 // animationParam: 1=intro, 4/5/6=tutorial steps, 7=ready-check (waits for the start button), 8/9/10=breathe in/hold/out
 const STAGE1_INTRO_STEPS = [
-  { animationParam: 1, audioKey: ASSET_KEYS.EZ_02, durationSeconds: 4, text: 'ΣΤΑΔΙΟ 1 — Η ανάσα μου' },
+  { animationParam: 1, audioKey: ASSET_KEYS.EZ_02, durationSeconds: 4.7, text: 'ΣΤΑΔΙΟ 1 — Η ανάσα μου' },
 ];
 const STAGE1_TUTORIAL_STEPS = [
-  { animationParam: 4, audioKey: ASSET_KEYS.EZ_03, durationSeconds: 6, text: '1. Σύρε προς τα ΠΑΝΩ και πάρε ανάσα' },
-  { animationParam: 5, audioKey: ASSET_KEYS.EZ_04, durationSeconds: 6, text: '2. ΚΡΑΤΑ 2 δευτερόλεπτα, μέχρι να πρασινίσει' },
-  { animationParam: 6, audioKey: ASSET_KEYS.EZ_05, durationSeconds: 7, text: '3. Σύρε προς τα ΚΑΤΩ και φύσα αργά' },
+  { animationParam: 4, audioKey: ASSET_KEYS.EZ_03, durationSeconds: 4.3, text: '1. Σύρε προς τα ΠΑΝΩ και πάρε ανάσα' },
+  { animationParam: 5, audioKey: ASSET_KEYS.EZ_04, durationSeconds: 4.5, text: '2. ΚΡΑΤΑ 2 δευτερόλεπτα, μέχρι να πρασινίσει' },
+  { animationParam: 6, audioKey: ASSET_KEYS.EZ_05, durationSeconds: 5.2, text: '3. Σύρε προς τα ΚΑΤΩ και φύσα αργά' },
   // waitForButton: no durationSeconds — spawns a Start button instead, advances on click. x/y here are also plain, adjustable numbers.
   { animationParam: 7, audioKey: ASSET_KEYS.EZ_06, text: 'ΠΑΜΕ!', waitForButton: { assetKey: ASSET_KEYS.BTN1, x: 540, y: 1632, scale: 0.45 } },
 ];
