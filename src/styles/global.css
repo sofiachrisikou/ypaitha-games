@@ -620,7 +620,7 @@ button {
 }
 /* Στάδιο 3: λίγο μεγαλύτερος ήρωας μέσα στην κάρτα νίκης. */
 .win-frame--m3 .popup-frame__hero {
-  transform: scale(1.28);
+  transform: scale(1.42);
 }
 .reward-overlay__emoji {
   font-size: 200px;
@@ -1290,9 +1290,9 @@ button {
   .hero-rive.is-idle .rive-canvas {
     animation: hero-hover 3.2s ease-in-out infinite;
   }
-  /* ΕΝΑΡΞΗ: φεύγει ΕΥΘΕΙΑ διαγώνια, τελείως εκτός οθόνης (πάνω-δεξιά). */
+  /* ΕΝΑΡΞΗ: απογειώνεται σε ΚΑΜΠΥΛΗ με κλίση (banking), φεύγει ψηλά. */
   .hero-rive.is-leaving .rive-canvas {
-    animation: hero-rive-out 0.85s cubic-bezier(0.45, 0.1, 0.9, 0.7) forwards;
+    animation: hero-rive-out 1s cubic-bezier(0.5, 0, 0.85, 0.55) forwards;
   }
 }
 @keyframes hero-rive-in {
@@ -1304,9 +1304,12 @@ button {
   50% { transform: translate(-50%, -16px); }
 }
 @keyframes hero-rive-out {
-  0% { transform: translate(-50%, 0); opacity: 1; }
-  85% { opacity: 1; }
-  100% { transform: translate(calc(-50% + 660px), -1500px) scale(0.72); opacity: 0; }
+  /* μικρό μάζεμα + γέρνει πίσω, μετά ανεβαίνει σε καμπύλη γέρνοντας μπροστά,
+     και φεύγει ψηλά (ελαφρώς δεξιά) με κλίση — σαν superhero takeoff. */
+  0% { transform: translate(-50%, 0) rotate(0deg); opacity: 1; }
+  18% { transform: translate(calc(-50% - 26px), 30px) rotate(-7deg); opacity: 1; }
+  55% { transform: translate(calc(-50% + 70px), -560px) rotate(12deg); opacity: 1; }
+  100% { transform: translate(calc(-50% + 240px), -1600px) rotate(20deg) scale(0.7); opacity: 0; }
 }
 .hh-float {
   position: absolute;
@@ -1592,6 +1595,16 @@ button {
   display: block;
   overflow: visible;
 }
+/* Τα GIF οδηγιών (στάδια 2 & 3) έχουν διάφανο περιθώριο — μεγαλύτερα ώστε ο
+   χαρακτήρας να δείχνει όσο και ο ήρωας του σταδίου 1. */
+.mission-intro__hero--gif {
+  width: 520px;
+}
+/* Στάδιο 1: ο ήρωας που δείχνει, λίγο πιο αριστερά. */
+.mission-intro__hero--m1 {
+  position: relative;
+  left: -46px;
+}
 /* HH-04: μικρή αναπήδηση όταν πατηθεί «Πάμε!» */
 .mission-intro__hero.is-jump {
   animation: hero-mini-jump 0.42s ease;
@@ -1793,6 +1806,14 @@ button {
   height: 100%;
   display: block;
 }
+/* HH-06: το αστέρι στο στήθος ΦΩΤΙΖΕΙ (παλμικό glow), δεν αναβοσβήνει. */
+.hero-react__star {
+  animation: star-glow 1.3s ease-in-out infinite;
+}
+@keyframes star-glow {
+  0%, 100% { filter: drop-shadow(0 0 1px rgba(255, 240, 170, 0.35)); }
+  50% { filter: drop-shadow(0 0 13px rgba(255, 232, 120, 1)); }
+}
 .mascot__bubble {
   position: absolute;
   right: 290px;
@@ -1808,26 +1829,27 @@ button {
   white-space: nowrap;
   animation: bubble-in 0.3s ease;
 }
+/* Το βελάκι στη ΔΕΞΙΑ πλευρά, δείχνει προς τη μασκότ (κάτω-δεξιά). */
 .mascot__bubble::after {
   content: '';
   position: absolute;
-  right: 46px;
-  bottom: -30px;
-  border-width: 32px 24px 0 0;
+  right: -26px;
+  bottom: 26px;
+  border-width: 16px 0 24px 28px;
   border-style: solid;
-  border-color: #ffd23f transparent transparent transparent;
+  border-color: transparent transparent transparent #ffd23f;
 }
 .mascot__bubble--correct {
   border-color: #34c759;
 }
 .mascot__bubble--correct::after {
-  border-top-color: #34c759;
+  border-left-color: #34c759;
 }
 .mascot__bubble--wrong {
   border-color: #ff6b5e;
 }
 .mascot__bubble--wrong::after {
-  border-top-color: #ff6b5e;
+  border-left-color: #ff6b5e;
 }
 @keyframes bubble-in {
   0% {

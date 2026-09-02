@@ -34,7 +34,7 @@ export default function Mission3Traps({ addScore, onProgress, onReaction, onNext
     if (kind === 'win') {
       playWin()
       // Το pop-up μένει όσο παίζει το VO· προχωράμε ΑΦΟΥ τελειώσει.
-      speak('HH-25', () => setTimeout(() => onNext && onNext(), 900))
+      speak('HH-25', () => setTimeout(() => onNext && onNext(), 1800))
     } else {
       setTimeout(() => onNext && onNext(), 1900)
     }

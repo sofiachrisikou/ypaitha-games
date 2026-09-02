@@ -71,7 +71,10 @@ export default function HeroReact({ type = 'hh06', className = '' }) {
     }
     if (type === 'hh06') {
       tf(c.headWink, c.headWinkTf)
-      showOnly([...c.base, c.headOpen])
+      // Το αστέρι μένει ΠΑΝΤΑ ορατό και «φωτίζει» (glow μέσω CSS) — δεν αναβοσβήνει.
+      const starEl = svg.children[c.star]
+      if (starEl) starEl.classList.add('hero-react__star')
+      showOnly([...c.base, c.headOpen, c.star])
     } else if (type === 'hh07') {
       tf(c.grin, c.grinTf)
       tf(c.laugh, c.laughTf)
@@ -96,10 +99,10 @@ export default function HeroReact({ type = 'hh06', className = '' }) {
     clear()
 
     if (type === 'hh06') {
-      // wink + λάμψη αστεριού
+      // wink· το αστέρι μένει ορατό (φωτίζει μέσω CSS glow), αλλάζει μόνο το κεφάλι
       const iv = setInterval(() => {
         showOnly([...c.base, c.headWink, c.star])
-        timers.current.push(setTimeout(() => showOnly([...c.base, c.headOpen]), 480))
+        timers.current.push(setTimeout(() => showOnly([...c.base, c.headOpen, c.star]), 480))
       }, 1500)
       timers.current.push(iv)
     } else if (type === 'hh07') {

@@ -30,11 +30,14 @@ export default function MissionIntro({ bg, text, voiceKey, onStart, stage }) {
           <img
             src={gifSrc}
             alt=""
-            className={`mission-intro__hero${jumping ? ' is-jump' : ''}`}
+            className={`mission-intro__hero mission-intro__hero--gif${jumping ? ' is-jump' : ''}`}
             draggable="false"
           />
         ) : (
-          <HeroPoint className={`mission-intro__hero${jumping ? ' is-jump' : ''}`} happy={jumping} />
+          <HeroPoint
+            className={`mission-intro__hero mission-intro__hero--${stage}${jumping ? ' is-jump' : ''}`}
+            happy={jumping}
+          />
         )}
         {/* Πλαίσιο οδηγιών του γραφίστα (κείμενο + κουμπί ΠΑΜΕ ζωγραφισμένα μέσα). */}
         <PopupFrame frame={`instr_${stage}`} onButton={handleStart} className="mission-intro__frame" />

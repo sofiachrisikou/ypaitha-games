@@ -12,8 +12,8 @@ import HealthyHero from './games/healthy-hero/HealthyHero.jsx'
 export default function App() {
   return (
     <Stage>
-      {/* Idle reset: 20 δευτ. αδράνειας -> επιστροφή στο homepage */}
-      <IdleReset timeout={20000} />
+      {/* Idle reset -> homepage. Ευζούλης 30s, Healthy Hero 20s (μέσα στο IdleReset). */}
+      <IdleReset />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/game/healthy-hero" element={<HealthyHero />} />

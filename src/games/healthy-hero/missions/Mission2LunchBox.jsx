@@ -94,7 +94,8 @@ export default function Mission2LunchBox({ addScore, onProgress, onReaction, onN
           onReaction('correct', () => {
             setDone(true)
             playWin()
-            speak('HH-18', () => onNext && onNext())
+            // Το pop-up μένει λίγο ακόμα αφού τελειώσει το VO, να προλάβει να το δει.
+            speak('HH-18', () => setTimeout(() => onNext && onNext(), 1500))
           })
       } else {
         onReaction && onReaction('correct')
