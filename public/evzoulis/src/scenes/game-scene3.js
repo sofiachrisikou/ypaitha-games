@@ -37,6 +37,8 @@ const STAGE3_RAISE_HANDS_STEP = { animationParam: 1, audioKey: ASSET_KEYS.EZ_31,
 const STAGE3_STRETCH_LEGS_STEP = { animationParam: 1, audioKey: ASSET_KEYS.EZ_32, durationSeconds: 3, text: 'Πόδια ανοιχτά— άγγιξε τον κύκλο' };
 const STAGE3_STRETCH_RIGHT_STEP = { animationParam: 1, audioKey: ASSET_KEYS.EZ_33, durationSeconds: 3, text: 'Τέντωμα δεξιά— άγγιξε τον κύκλο' };
 const STAGE3_STRETCH_LEFT_STEP = { animationParam: 1, audioKey: ASSET_KEYS.EZ_34, durationSeconds: 2.5, text: 'Τέντωμα αριστερά— άγγιξε τον κύκλο' };
+// Bad-move feedback — played when a limb gets bounced back out of a forbidden zone
+const STAGE3_BAD_MOVE_STEP = { animationParam: 1, audioKey: ASSET_KEYS.EZ_15, durationSeconds: 4, text: 'Ξανά, μαζί!' };
 
 // Played once by STAGE3_BODY_CHARACTER_CONFIG before moving on to outro-scene.js
 const STAGE3_CELEBRATION_STEP = { animationParam: 34, text: 'Το σώμα σου χαλάρωσε!', audioKey: ASSET_KEYS.EZ_38, durationSeconds: 6 };
@@ -45,7 +47,7 @@ const STAGE3_CELEBRATION_STEP = { animationParam: 34, text: 'Το σώμα σο�
 // on STAGE3_BODY_CHARACTER_CONFIG, same character as the celebration.
 const STAGE3_INTRO_STEPS = [
   { animationParam: 31, text: 'ΣΤΑΔΙΟ 3 — Τεντώνομαι', audioKey: ASSET_KEYS.EZ_29, durationSeconds: 5 },
-  { animationParam: 32, text: 'Άγγιξε τους κύκλους και τέντωσε μαζί μου!', audioKey: ASSET_KEYS.EZ_30, durationSeconds: 8 },
+  { animationParam: 32, text: 'Άγγιξε τους κύκλους και τέντωσε μαζί μου!', audioKey: ASSET_KEYS.EZ_30, durationSeconds: 7 },
 ];
 
 // Head animation indices: 0 idle, 1 talking, 2 wink, 3 laugh, 4 calm.
@@ -405,6 +407,7 @@ export class GameScene3 extends Phaser.Scene {
       this.#bounceLimbToAngle(limb, bounceTargetAngle);
 
       playWrongSound(this);
+      this.#character.playFeedback(STAGE3_BAD_MOVE_STEP);
 
       return;
     }
@@ -785,6 +788,7 @@ export class GameScene3 extends Phaser.Scene {
       if (this.#isLimbDone('RIGHT_ARM') && this.#isLimbDone('LEFT_ARM')) {
         this.#setLimbPromptText(LIMB_PROMPT_TEXT.LEG_IDLE);
         this.#enableLegs();
+        this.#inputLocked = false; // circles are grabbable the instant they appear, not after this guide clip too
         this.#character.playFeedback(STAGE3_STRETCH_LEGS_STEP, onComplete);
       } else {
         this.#setLimbPromptText(LIMB_PROMPT_TEXT.ARM_IDLE);
@@ -820,9 +824,9 @@ export class GameScene3 extends Phaser.Scene {
     if (this.#limbsStretchedCount >= this.#totalLimbsRequired) {
       this.#handleLevelComplete();
     } else {
-      // Lock input for the reaction + next-stretch-prompt pair so a second
-      // limb can't be grabbed mid-sequence; unlocked once both have played.
-      this.#inputLocked = true;
+      // Only lock for the arm->leg phase switch — same-phase (other limb of the pair) unlocks instantly, no wait.
+      const isArm = limb.key === 'RIGHT_ARM' || limb.key === 'LEFT_ARM';
+      this.#inputLocked = isArm && this.#isLimbDone('RIGHT_ARM') && this.#isLimbDone('LEFT_ARM');
       this.#character.playFeedback(Phaser.Utils.Array.GetRandom(STAGE3_LIMB_REACTION_STEPS), () => {
         this.#playNextStretchPrompt(limb, () => {
           this.#inputLocked = false;
