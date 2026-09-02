@@ -243,14 +243,6 @@ export class GameScene2 extends Phaser.Scene {
       TEXT_STYLES.DEFAULT,
     ).setDepth(1);
 
-    //timer start
-    this.#countdownTimerEvent = this.time.addEvent({
-      delay: 1000,
-      callback: this.#tickCountdown,
-      callbackScope: this,
-      loop: true,
-    });
-
     // Bubbles can't spawn above this Y — measured from the actual bottom
     // edge of your top UI (whichever is lower: the progress bar or the
     // text rows), so it stays correct automatically if you move/resize
@@ -275,6 +267,13 @@ export class GameScene2 extends Phaser.Scene {
       this.time.delayedCall(1000, () => {
         this.#character.setAnimationParam(0);
         this.#inputLocked = false;
+        // Timer starts here, not at level load — the player can't act until this point anyway.
+        this.#countdownTimerEvent = this.time.addEvent({
+          delay: 1000,
+          callback: this.#tickCountdown,
+          callbackScope: this,
+          loop: true,
+        });
       });
     });
   }
