@@ -54,6 +54,8 @@ const STAGE1_MILESTONE_STEP = { animationParam: 18, audioKey: ASSET_KEYS.EZ_16, 
 // Bad-move feedback: released/drifted out of the hold vs wrong swipe direction
 const STAGE1_BAD_MOVE_HOLD_STEP = { animationParam: 15, audioKey: ASSET_KEYS.EZ_14, durationSeconds: 4, text: 'Κράτα λίγο ακόμη' };
 const STAGE1_BAD_MOVE_DIRECTION_STEP = { animationParam: 16, audioKey: ASSET_KEYS.EZ_15, durationSeconds: 4, text: 'Ξανά, μαζί!' };
+// Exhale completed faster than STAGE1_MIN_EXHALE_DURATION_MS below — too fast to be a real swipe.
+const STAGE1_BAD_MOVE_TOO_FAST_STEP = { animationParam: 14, audioKey: ASSET_KEYS.EZ_13, durationSeconds: 2, text: 'Πιο αργά!' };
 
 // Wobbling breath prompt (replaces the old INHALE/EXHALE image) — moves between these two plain spots, guesses for now
 const STAGE1_POSITION_INHALE = { x: 850, y: 1450 };
@@ -112,11 +114,14 @@ export class GameScene extends Phaser.Scene {
   #swipeState;
   #currentBreathDirection;
   #lastSwipePointerY;
+  #swipeStartTimeMs;
   #holdTimerEvent;
   #swipeZoneRadius;
   #maxSwipeHorizontalDrift;
   #swipeBackslideTolerance;
   #swipeHoldDurationMs;
+  #minExhaleDurationMs;
+  #minInhaleSwipeDurationMs;
   #swipeIndicatorGO;
   #swipeIndicatorTween;
   #swipeArrowBaseScale;
@@ -166,6 +171,10 @@ export class GameScene extends Phaser.Scene {
     this.#maxSwipeHorizontalDrift = 110;
     this.#swipeBackslideTolerance = 40;
     this.#swipeHoldDurationMs = 2000;
+    // Exhale (OUT) has no hold — it counts the instant it reaches the end zone. Without a floor, a fast flick right after the hold ends could count as a full exhale.
+    this.#minExhaleDurationMs = 1250;
+    // Same floor, applied before the inhale (IN) swipe is allowed to start its 2s hold — a fast flick shouldn't reach the hold zone either.
+    this.#minInhaleSwipeDurationMs = 1250;
     // "after 2 seconds the flame comes back" (bumped from 1s — stay out at least a second longer)
     this.#candleRelightDelayMs = 2000;
     // Sizes are ratios, not pixels, so this stays correct regardless of the
@@ -460,6 +469,7 @@ export class GameScene extends Phaser.Scene {
 
     this.#swipeState = SWIPE_STATE.SWIPING;
     this.#lastSwipePointerY = pointer.y;
+    this.#swipeStartTimeMs = this.time.now;
     this.#stopIndicatorPulse();
     this.#character.cancelPendingFeedback();
     this.#character.hideBubble();
@@ -506,8 +516,16 @@ export class GameScene extends Phaser.Scene {
       if (this.#isWithinEndZone(pointer)) {
         // OUT counts the instant it reaches the target — no hold. IN still holds.
         if (this.#currentBreathDirection === BREATH_DIRECTION.OUT) {
+          if (this.time.now - this.#swipeStartTimeMs < this.#minExhaleDurationMs) {
+            this.#handleBreathFailed('completed the exhale swipe too fast', STAGE1_BAD_MOVE_TOO_FAST_STEP);
+            return;
+          }
           this.#handleBreathSuccess();
         } else {
+          if (this.time.now - this.#swipeStartTimeMs < this.#minInhaleSwipeDurationMs) {
+            this.#handleBreathFailed('completed the inhale swipe too fast', STAGE1_BAD_MOVE_TOO_FAST_STEP);
+            return;
+          }
           this.#startHold();
         }
       }
@@ -595,7 +613,7 @@ export class GameScene extends Phaser.Scene {
     this.#holdCountdownTimers = [];
   }
 
-  #handleBreathFailed(reason) {
+  #handleBreathFailed(reason, feedbackStep) {
     if (this.#swipeState === SWIPE_STATE.WAITING) {
       return;
     }
@@ -614,13 +632,16 @@ export class GameScene extends Phaser.Scene {
     // is no longer locked while this feedback plays — removed per pacing
     // request; arrow comes back immediately below instead of waiting for it.
     // this.#inputLocked = true;
-    // playFeedback resets to idle(0) when the bad-move clip ends — reverting
-    // to the in-progress breathing pose instead. Exhale failures go back to
-    // HOLD (not the breathe-out pose), same as a hold failure itself.
-    const resumeParam = wasHolding || this.#currentBreathDirection === BREATH_DIRECTION.OUT
+    // Resume pose is purely direction-based: the breath is only actually
+    // "taken" once a full inhale hold completes, so ANY inhale-side failure
+    // (mid-swipe-up or mid-hold) goes back to IDLE, not a breathing pose —
+    // there's nothing held yet to resume into. Exhale-side failures go back
+    // to HOLD, since a failed exhale swipe still started from a completed hold.
+    const resumeParam = this.#currentBreathDirection === BREATH_DIRECTION.OUT
       ? STAGE1_HOLD_PARAM
-      : STAGE1_BREATHE_IN_PARAM;
-    this.#character.playFeedback(wasHolding ? STAGE1_BAD_MOVE_HOLD_STEP : STAGE1_BAD_MOVE_DIRECTION_STEP, () => {
+      : STAGE1_IDLE_PARAM;
+    const step = feedbackStep ?? (wasHolding ? STAGE1_BAD_MOVE_HOLD_STEP : STAGE1_BAD_MOVE_DIRECTION_STEP);
+    this.#character.playFeedback(step, () => {
       this.#character.setAnimationParam(resumeParam);
     });
     this.#startIndicatorPulse();

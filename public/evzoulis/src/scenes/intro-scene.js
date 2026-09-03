@@ -2,7 +2,7 @@ import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from '../common/scene-keys.js';
 import { ASSET_KEYS } from '../common/assets.js';
 import { TEXT_STYLES } from '../common/sharedGameSettings.js';
-import { spawnRiveAnimation, removeRiveAnimation } from '../common/rive-stage.js';
+import { createAnimatedCharacter } from '../common/level-flow.js';
 
 // const speechBubbleTextStyleConfig = {
 //   fontSize: '32px',
@@ -13,8 +13,17 @@ import { spawnRiveAnimation, removeRiveAnimation } from '../common/rive-stage.js
 
 const CLOUD_ANIM_KEY = 'introCloudGrow';
 
-// Welcome bubble on the intro card — same shape as the other stages' position configs, plain absolute numbers.
-const INTRO_BUBBLE_POSITION = { bubbleScale: 0.30, bubbleX: 550, bubbleY: 1200, textStyle: TEXT_STYLES.SPEECH_BUBBLE };
+// Reuses RIVE_BEAR_Stg1 (same file Stage 1 loads) instead of a separate intro-only asset — one less file to load.
+const INTRO_CHARACTER_CONFIG = {
+  riveAssetKey: ASSET_KEYS.RIVE_BEAR_Stg1,
+  stateMachineName: 'Euzoulis_StateMachine',
+  animParamName: 'clipIndex',
+  idleParam: 0,
+};
+// Own position (left/top), scale (width/height) matched to .rive-stage--stg1-character-intro since that's the same RIVE_BEAR_Stg1 file at its correct size.
+const INTRO_CHARACTER_POSITION = { cssClass: 'rive-stage--intro', bubbleScale: 0.30, bubbleX: 550, bubbleY: 1230, textStyle: TEXT_STYLES.SPEECH_BUBBLE };
+// animationParam 2 = the animator's intro/welcome clip on the Stage 1 rive file.
+const INTRO_WELCOME_STEP = { animationParam: 2, audioKey: ASSET_KEYS.EZ_01, durationSeconds: 4.5, text: 'Γεια σου! Είμαι ο Ευζούλης.' };
 
 export class IntroScene extends Phaser.Scene {
   //DECOR ANIMATIONS
@@ -37,9 +46,7 @@ export class IntroScene extends Phaser.Scene {
   #levelButtonGO;
 
   //CHARACTER
-  #characterGO;
-  #riveInstance;
-  #welcomeVoiceover;
+  #character;
 
   constructor() {
     super({
@@ -106,7 +113,6 @@ export class IntroScene extends Phaser.Scene {
   }
 
   #handleShutdown() {
-    this.#welcomeVoiceover?.stop();
     this.#decorAnimationsActive = false;
     this.#decorObjects.forEach((gameObject) => this.tweens.killTweensOf(gameObject));
     if (this.#startButtonGO) {
@@ -116,8 +122,7 @@ export class IntroScene extends Phaser.Scene {
       this.#levelButtonGO.off(Phaser.Input.Events.POINTER_DOWN, this.#handleLevelButtonPressed, this);
     }
 
-     removeRiveAnimation(this.#riveInstance, 'rive-stage--intro'); // remove
-  this.#riveInstance = null;
+    this.#character?.destroy();
   }
 
   //#endregion
@@ -264,17 +269,6 @@ export class IntroScene extends Phaser.Scene {
 
   //#endregion
 
-  //#region Character
-
-  #createIntroCharacterAnimation()
-  {
-    this.#riveInstance = spawnRiveAnimation(
-      this.cache.binary.get(ASSET_KEYS.RIVE_BEAR_INTRO),
-      'Timeline_Bear_Intro',
-      'rive-stage--intro',
-    );
-  }
-
   //#endregion
 
   //#region Input
@@ -287,17 +281,16 @@ export class IntroScene extends Phaser.Scene {
   }
 
   #showCharacterPrompt() {
-    this.#createIntroCharacterAnimation();
-
-    const bubbleImage = this.add.image(0, 0, ASSET_KEYS.SPEECH_BUBBLE).setScale(INTRO_BUBBLE_POSITION.bubbleScale);
-    const bubbleText = this.add.text(0, -20, 'Γεια σου! Είμαι ο Ευζούλης.', INTRO_BUBBLE_POSITION.textStyle).setOrigin(0.5);
-    this.add.container(INTRO_BUBBLE_POSITION.bubbleX, INTRO_BUBBLE_POSITION.bubbleY, [bubbleImage, bubbleText]);
-    this.#welcomeVoiceover = this.sound.add(ASSET_KEYS.EZ_01);
-    this.#welcomeVoiceover.play();
+    // Rive loads asynchronously — wait for onReady before setting any animation param
+    this.#character = createAnimatedCharacter(this, INTRO_CHARACTER_CONFIG, INTRO_CHARACTER_POSITION, () => {
+      this.#character.setAnimationParam(0);
+      this.time.delayedCall(100, () => {
+        this.#character.playFeedback(INTRO_WELCOME_STEP);
+      });
+    });
 
     const levelButtonX = 280;
     const levelButtonY = 1760;
-
 
     this.#levelButtonGO = this.add
       .image(levelButtonX, levelButtonY, ASSET_KEYS.BTN1)
@@ -307,7 +300,7 @@ export class IntroScene extends Phaser.Scene {
   }
 
   #handleLevelButtonPressed() {
-    this.#welcomeVoiceover?.stop();
+    this.#character?.cancelPendingFeedback();
     this.scene.start(SCENE_KEYS.EUZOYLIS_GAME_SCENE1);
   }
 

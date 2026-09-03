@@ -113,7 +113,6 @@ export const ASSET_KEYS = Object.freeze({
   SFX_HAPPY_REALIZATION: 'SFX_HAPPY_REALIZATION',
   SFX_LAUGH: 'SFX_LAUGH',
   //RIVE
-  RIVE_BEAR_INTRO: 'RIVE_BEAR_INTRO',
   RIVE_BEAR_Stg1: 'RIVE_BEAR_Stg1',
   RIVE_BEAR_Stg2: 'RIVE_BEAR_Stg2',
   RIVE_BEAR_Stg3: 'RIVE_BEAR_Stg3',
@@ -421,10 +420,6 @@ export const AUDIO_ASSETS = [
 // Rive files, preloaded as raw binary and handed to Rive as a buffer at
 // spawn time — same load screen as everything else above, no per-scene fetch.
 export const RIVE_ASSETS = [
-  {
-    assetKey: ASSET_KEYS.RIVE_BEAR_INTRO,
-    path: 'assets/rive/Bear_Intro.riv',
-  },
    {
     assetKey: ASSET_KEYS.RIVE_BEAR_Stg1,
     path: 'assets/rive/Euzoulis_Mascot_Stage01.riv',

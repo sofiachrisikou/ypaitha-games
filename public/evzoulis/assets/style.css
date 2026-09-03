@@ -25,10 +25,13 @@ body,
   z-index: 1;
 }
 
+/* Intro screen's own position for RIVE_BEAR_Stg1. width/height matched to
+   .rive-stage--stg1-character-intro (same file, proven correct size there);
+   left/top stay this scene's own placement. */
 .rive-stage--intro {
-  width: 120%;
-  height: 120%;
-  left: 85%;
+  width: 80%;
+  height: 80%;
+  left: 80%;
   top:85%;
   transform: translate(-50%, -50%);
 }
