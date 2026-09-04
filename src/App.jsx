@@ -7,11 +7,13 @@ import Stats from './screens/Stats.jsx'
 import Evzoulis from './games/evzoulis/Evzoulis.jsx'
 import HealthyHero from './games/healthy-hero/HealthyHero.jsx'
 import useWakeLock from './hooks/useWakeLock.js'
+import useFullscreen from './hooks/useFullscreen.js'
 
 // Ρίζα της εφαρμογής. Όλα ζωγραφίζονται μέσα σε ένα Stage 1080x1920
 // που κλιμακώνεται ώστε να χωράει στην οθόνη του περιπτέρου.
 export default function App() {
   useWakeLock() // kiosk: κρατάει την οθόνη ξύπνια
+  useFullscreen() // kiosk: fullscreen με το πρώτο άγγιγμα
   return (
     <Stage>
       {/* Idle reset -> homepage. Ευζούλης 30s, Healthy Hero 20s (μέσα στο IdleReset). */}
