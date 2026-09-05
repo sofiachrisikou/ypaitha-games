@@ -6,7 +6,8 @@ import useIdleReset from '../hooks/useIdleReset.js'
 // Ανενεργό όταν είμαστε ήδη στο homepage.
 // Ο χρόνος εξαρτάται από το παιχνίδι: Ευζούλης 30s, Healthy Hero (& λοιπά) 20s.
 const IDLE_MS = {
-  '/game/evzoulis': 30000,
+  '/game/evzoulis': 60000,
+  '/game/healthy-hero': 60000,
 }
 const DEFAULT_IDLE_MS = 20000
 
