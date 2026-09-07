@@ -1,7 +1,7 @@
 import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from '../common/scene-keys.js';
-import { ASSET_KEYS } from '../common/assets.js';
-import { TEXT_STYLES } from '../common/sharedGameSettings.js';
+import { ASSET_KEYS, ensureBucketLoaded } from '../common/assets.js';
+import { TEXT_STYLES, debugLog } from '../common/sharedGameSettings.js';
 import { createAnimatedCharacter } from '../common/level-flow.js';
 
 // const speechBubbleTextStyleConfig = {
@@ -12,6 +12,9 @@ import { createAnimatedCharacter } from '../common/level-flow.js';
 // };
 
 const CLOUD_ANIM_KEY = 'introCloudGrow';
+// Grayed-out look for the Start button while INTRO_CHARACTER (the rive file
+// it needs) is still loading in the background.
+const BUTTON_DISABLED_TINT = 0x808080;
 
 // Reuses RIVE_BEAR_Stg1 (same file Stage 1 loads) instead of a separate intro-only asset — one less file to load.
 const INTRO_CHARACTER_CONFIG = {
@@ -84,7 +87,7 @@ export class IntroScene extends Phaser.Scene {
   }
 
   preload() {
-    console.log('preload called');
+    debugLog('preload called');
   }
 
   create() {
@@ -97,11 +100,14 @@ export class IntroScene extends Phaser.Scene {
 
     this.#logoGO = this.add.image(width * 0.5, height * 0.78, ASSET_KEYS.LOGO).setScale(0.55);
 
+    // Grayed out, not interactive — no presses are registered until the
+    // character's rive file (INTRO_CHARACTER) finishes loading in the
+    // background. #enableStartButton below reverts the tint and wires input.
     this.#startButtonGO = this.add
       .image(width * 0.5, height * 0.93, ASSET_KEYS.BTN1)
       .setScale(0.45)
-      .setInteractive({ useHandCursor: true });
-    this.#startButtonGO.on(Phaser.Input.Events.POINTER_DOWN, this.#handleStartButtonPressed, this);
+      .setTint(BUTTON_DISABLED_TINT);
+    ensureBucketLoaded('INTRO_CHARACTER').then(() => this.#enableStartButton());
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
   }
@@ -272,6 +278,17 @@ export class IntroScene extends Phaser.Scene {
   //#endregion
 
   //#region Input
+
+  /** Called once INTRO_CHARACTER finishes loading — reverts the gray tint and starts accepting presses. */
+  #enableStartButton() {
+    if (!this.#startButtonGO) {
+      // Scene already moved on (shouldn't normally happen — the level button
+      // that leads away from here only exists after this button is pressed).
+      return;
+    }
+    this.#startButtonGO.clearTint().setInteractive({ useHandCursor: true });
+    this.#startButtonGO.on(Phaser.Input.Events.POINTER_DOWN, this.#handleStartButtonPressed, this);
+  }
 
   #handleStartButtonPressed() {
     this.#logoGO.destroy();

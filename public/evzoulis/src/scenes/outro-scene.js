@@ -1,7 +1,7 @@
 import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from '../common/scene-keys.js';
-import { ASSET_KEYS } from '../common/assets.js';
-import { TEXT_STYLES } from '../common/sharedGameSettings.js';
+import { ASSET_KEYS, ensureBucketLoaded } from '../common/assets.js';
+import { TEXT_STYLES, debugLog } from '../common/sharedGameSettings.js';
 import { createAnimatedCharacter } from '../common/level-flow.js';
 
 // Same createAnimatedCharacter/clipIndex pattern as every other stage's
@@ -53,10 +53,11 @@ export class OutroScene extends Phaser.Scene {
   }
 
   preload() {
-    console.log('preload called');
+    debugLog('preload called');
   }
 
-  create() {
+  async create() {
+    await ensureBucketLoaded('OUTRO');
     const { width, height } = this.scale;
 
     // TODO: swap ASSET_KEYS.OUTRO_BACKGROUND for your real background

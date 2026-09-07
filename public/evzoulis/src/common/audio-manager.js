@@ -2,28 +2,8 @@ import { ASSET_KEYS } from './assets.js';
 
 //#region Feedback
 
-// "good move" pool (e.g. popping a bubble) — random pick each call.
-const GOOD_MOVE_FEEDBACK_KEYS = [
-  ASSET_KEYS.POS_FEEDBACK1,
-  ASSET_KEYS.POS_FEEDBACK2,
-  ASSET_KEYS.POS_FEEDBACK3,
-  ASSET_KEYS.POS_FEEDBACK4,
-];
-
 // "bad move" pool — random pick each call. Only one clip today.
 const BAD_MOVE_FEEDBACK_KEYS = [ASSET_KEYS.WRONGSOUND];
-
-// Fixed clip per level per outcome — not pools.
-const LEVEL_SUCCESS_FEEDBACK_KEYS = {
-  1: ASSET_KEYS.LVL1_SUCCESS_FEEDBACK,
-  2: ASSET_KEYS.LVL2_SUCCESS_FEEDBACK,
-  3: ASSET_KEYS.LVL3_SUCCESS_FEEDBACK,
-};
-const LEVEL_GAMEOVER_FEEDBACK_KEYS = {
-  1: ASSET_KEYS.LVL1_GAMEOVER_FEEDBACK,
-  2: ASSET_KEYS.LVL2_GAMEOVER_FEEDBACK,
-  3: ASSET_KEYS.LVL3_GAMEOVER_FEEDBACK,
-};
 
 // scene.sound is Phaser's single game-wide SoundManager, so it already
 // survives scene changes on its own. All 4 categories share one "current"
@@ -57,21 +37,14 @@ function playFeedbackFromPool(scene, pool) {
   return playFeedbackSound(scene, assetKey);
 }
 
-/** Stops the current feedback clip without starting a new one. */
-export function stopFeedback() {
-  if (currentFeedbackSound && currentFeedbackSound.isPlaying) {
-    currentFeedbackSound.stop();
-  }
-  currentFeedbackSound = null;
-}
-
-/**
- * @param {Phaser.Scene} scene
- * @returns {string} asset key picked
- */
-export function playGoodMoveFeedback(scene) {
-  return playFeedbackFromPool(scene, GOOD_MOVE_FEEDBACK_KEYS);
-}
+// Unused — no callers anywhere in the project right now, kept for reference.
+// /** Stops the current feedback clip without starting a new one. */
+// export function stopFeedback() {
+//   if (currentFeedbackSound && currentFeedbackSound.isPlaying) {
+//     currentFeedbackSound.stop();
+//   }
+//   currentFeedbackSound = null;
+// }
 
 /**
  * @param {Phaser.Scene} scene
@@ -79,24 +52,6 @@ export function playGoodMoveFeedback(scene) {
  */
 export function playBadMoveFeedback(scene) {
   return playFeedbackFromPool(scene, BAD_MOVE_FEEDBACK_KEYS);
-}
-
-/**
- * @param {Phaser.Scene} scene
- * @param {1|2|3} levelNumber
- * @returns {string} asset key played
- */
-export function playLevelSuccessFeedback(scene, levelNumber) {
-  return playFeedbackSound(scene, LEVEL_SUCCESS_FEEDBACK_KEYS[levelNumber]);
-}
-
-/**
- * @param {Phaser.Scene} scene
- * @param {1|2|3} levelNumber
- * @returns {string} asset key played
- */
-export function playLevelGameOverFeedback(scene, levelNumber) {
-  return playFeedbackSound(scene, LEVEL_GAMEOVER_FEEDBACK_KEYS[levelNumber]);
 }
 
 //#endregion

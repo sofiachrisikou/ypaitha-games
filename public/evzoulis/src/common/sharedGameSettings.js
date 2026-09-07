@@ -67,6 +67,27 @@ export const TEXT_STYLES = {
 
 };
 
+//#region Debug
+// Single switch — flip to false before a kiosk build ships. Silences every
+// scene's tuning chatter and the loading start/finished logs. Does NOT
+// affect console.warn calls elsewhere (font failures, missing Rive inputs,
+// failed asset loads) — those are real problems and always show.
+export const DEBUG = false;
+
+/**
+ * No-op when DEBUG is false. Pass a function instead of a plain value to
+ * skip building the message entirely when debugging is off.
+ * @param {...(*|(() => *))} args
+ */
+export function debugLog(...args) {
+  if (!DEBUG) {
+    return;
+  }
+  console.log(...args.map((arg) => (typeof arg === 'function' ? arg() : arg)));
+}
+
+//#endregion
+
 //#region Fonts
 
 export async function loadFont(fontFamilyName, fontFilePath) {

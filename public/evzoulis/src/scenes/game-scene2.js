@@ -1,9 +1,9 @@
 import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from '../common/scene-keys.js';
-import { ASSET_KEYS } from '../common/assets.js';
+import { ASSET_KEYS, ensureBucketLoaded } from '../common/assets.js';
 import { THOUGHT_CLOUD_LIST } from '../common/thought-cloud-data.js';
 import { ProgressBar } from '../common/progress-bar.js';
-import { TEXT_STYLES } from '../common/sharedGameSettings.js';
+import { TEXT_STYLES, debugLog } from '../common/sharedGameSettings.js';
 import { createAnimatedCharacter } from '../common/level-flow.js';
 import { playBadMoveFeedback, playBubblePopSound } from '../common/audio-manager.js';
 
@@ -100,7 +100,6 @@ export class GameScene2 extends Phaser.Scene {
   #poppedCount;
   #score;
   #inputLocked;
-  #debug;
 
   //TIMER
   #remainingSeconds;
@@ -159,15 +158,14 @@ export class GameScene2 extends Phaser.Scene {
     this.#remainingSeconds = this.#gameDurationSeconds;
     this.#isLevelComplete = false;
     this.#isGameOver = false;
-    // logs pop events + overlap-placement fallbacks — flip to false once tuned
-    this.#debug = true;
   }
 
   preload() {
-    console.log('preload called');
+    debugLog('preload called');
   }
 
-  create() {
+  async create() {
+    await ensureBucketLoaded('STAGE2');
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
     this.#showIntroBackground();
     // Rive loads asynchronously — wait for onReady before setting any animation param
@@ -433,9 +431,7 @@ export class GameScene2 extends Phaser.Scene {
     this.#progressTextGO.setText(`${this.#poppedCount} / ${this.#totalBubbles}`);
     //this.#levelProgressBar.setProgress(this.#poppedCount / this.#totalBubbles);
 
-    if (this.#debug) {
-      console.log(`bubble popped (${this.#poppedCount}/${this.#totalBubbles})`);
-    }
+    debugLog(() => `bubble popped (${this.#poppedCount}/${this.#totalBubbles})`);
 
     if (this.#poppedCount >= this.#totalBubbles) {
       this.#handleLevelComplete();

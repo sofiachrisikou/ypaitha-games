@@ -1,8 +1,8 @@
 import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from '../common/scene-keys.js';
-import { ASSET_KEYS } from '../common/assets.js';
+import { ASSET_KEYS, ensureBucketLoaded } from '../common/assets.js';
 import { ProgressBar } from '../common/progress-bar.js';
-import { TEXT_STYLES } from '../common/sharedGameSettings.js';
+import { TEXT_STYLES, DEBUG, debugLog } from '../common/sharedGameSettings.js';
 import { createAnimatedCharacter } from '../common/level-flow.js';
 import { playCorrectSound, playWrongSound, playBreathInSound, playBreathOutSound } from '../common/audio-manager.js';
 
@@ -133,7 +133,6 @@ export class GameScene extends Phaser.Scene {
   #requiredBreathCycles;
   #maxFailedBreaths;
   #inputLocked;
-  #debug;
 
   //TIMER
   #remainingSeconds;
@@ -205,9 +204,6 @@ export class GameScene extends Phaser.Scene {
     this.#remainingSeconds = 60;
 
     this.#isGameOver = false;
-    // on while you're tuning the gesture feel — draws the start/end zones
-    // and logs why each failed attempt failed. Flip to false for the build.
-    this.#debug = true;
 
     // TODO: add FLOWER1/FLOWER2/FLOWER3 to assets.js. A "cycle" = one IN +
     // one OUT breath, so it only advances on breath-OUT success (that's
@@ -220,10 +216,11 @@ export class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    console.log('preload called');
+    debugLog('preload called');
   }
 
-  create() {
+  async create() {
+    await ensureBucketLoaded('STAGE1');
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
     this.#showIntroBackground();
     // Rive loads asynchronously — wait for onReady before setting any animation param
@@ -324,7 +321,7 @@ export class GameScene extends Phaser.Scene {
   #showGameplayUI() {
     const { height } = this.scale;
 
-    if (this.#debug) {
+    if (DEBUG) {
       this.#targetCirclesGO = this.add.graphics();
       this.#targetCirclesGO.lineStyle(2, 0x00ff00, 0.8);
       this.#targetCirclesGO.strokeCircle(this.#candleX, this.#candleBottomY, this.#swipeZoneRadius);
@@ -617,9 +614,7 @@ export class GameScene extends Phaser.Scene {
     if (this.#swipeState === SWIPE_STATE.WAITING) {
       return;
     }
-    if (this.#debug) {
-      console.log(`Breath failed (${this.#currentBreathDirection}): ${reason}`);
-    }
+    debugLog(() => `Breath failed (${this.#currentBreathDirection}): ${reason}`);
     // capture before resetting below — was the failure during the hold, or during the swipe itself?
     const wasHolding = this.#swipeState === SWIPE_STATE.HOLDING;
     this.#stopHoldTimer();
@@ -685,9 +680,7 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
-    if (this.#debug) {
-      console.log(`Breath succeeded (${this.#currentBreathDirection}) — cycles completed: ${this.#cyclesCompleted}`);
-    }
+    debugLog(() => `Breath succeeded (${this.#currentBreathDirection}) — cycles completed: ${this.#cyclesCompleted}`);
 
     // flip direction for the NEXT breath before re-showing the prompt, so
     // the arrow/zones/bar all reflect where the player needs to go next

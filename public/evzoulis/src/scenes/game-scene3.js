@@ -1,8 +1,8 @@
 import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from '../common/scene-keys.js';
-import { ASSET_KEYS } from '../common/assets.js';
+import { ASSET_KEYS, ensureBucketLoaded } from '../common/assets.js';
 import { ProgressBar } from '../common/progress-bar.js';
-import { TEXT_STYLES } from '../common/sharedGameSettings.js';
+import { TEXT_STYLES, debugLog } from '../common/sharedGameSettings.js';
 import { createAnimatedCharacter } from '../common/level-flow.js';
 import { playCorrectSound, playWrongSound } from '../common/audio-manager.js';
 
@@ -123,7 +123,6 @@ export class GameScene3 extends Phaser.Scene {
   #gameDurationSeconds;
   #totalLimbsRequired;
   #inputLocked;
-  #debug;
 
   //TIMER
   #remainingSeconds;
@@ -178,15 +177,14 @@ export class GameScene3 extends Phaser.Scene {
     this.#limbsStretchedCount = 0;
     this.#isLevelComplete = false;
     this.#isGameOver = false;
-    // logs grabs/reaches to the console — flip to false once tuned
-    this.#debug = true;
   }
 
   preload() {
-    console.log('preload called');
+    debugLog('preload called');
   }
 
-  create() {
+  async create() {
+    await ensureBucketLoaded('STAGE3');
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
     this.#showIntroBackground();
     // Rive loads asynchronously — wait for onReady before setting any animation param
@@ -384,9 +382,7 @@ export class GameScene3 extends Phaser.Scene {
     this.#showCurrentTargetMarker(closestLimb);
     this.#updateLimbPromptForGrab(closestLimb);
 
-    if (this.#debug) {
-      console.log(`${closestLimb.key}: grabbed`);
-    }
+    debugLog(() => `${closestLimb.key}: grabbed`);
   }
 
   #handlePointerMove(pointer) {
@@ -399,9 +395,7 @@ export class GameScene3 extends Phaser.Scene {
     const rawAngleDeg = Phaser.Math.RadToDeg(rawAngleRad);
 
     if (this.#isNearForbiddenZone(limb, rawAngleDeg)) {
-      if (this.#debug) {
-        console.log(`${limb.key}: dropped — approaching forbidden zone`);
-      }
+      debugLog(() => `${limb.key}: dropped — approaching forbidden zone`);
       const bounceTargetAngle = this.#computeBounceTargetAngle(limb);
       this.#releaseLimb(limb, bounceTargetAngle);
       this.#bounceLimbToAngle(limb, bounceTargetAngle);
@@ -748,9 +742,7 @@ export class GameScene3 extends Phaser.Scene {
       });
     }
 
-    if (this.#debug) {
-      console.log(`${limb.key}: target reached (${limb.targetAnglesDeg.length} left)`);
-    }
+    debugLog(() => `${limb.key}: target reached (${limb.targetAnglesDeg.length} left)`);
 
     this.#updateLimbPromptForGrab(limb);
     playCorrectSound(this);
