@@ -2,7 +2,7 @@ import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from '../common/scene-keys.js';
 import { ASSET_KEYS, ensureBucketLoaded } from '../common/assets.js';
 import { ProgressBar } from '../common/progress-bar.js';
-import { TEXT_STYLES, DEBUG, debugLog } from '../common/sharedGameSettings.js';
+import { TEXT_STYLES, debugLog } from '../common/sharedGameSettings.js';
 import { createAnimatedCharacter } from '../common/level-flow.js';
 import { playCorrectSound, playWrongSound, playBreathInSound, playBreathOutSound } from '../common/audio-manager.js';
 
@@ -321,12 +321,12 @@ export class GameScene extends Phaser.Scene {
   #showGameplayUI() {
     const { height } = this.scale;
 
-    if (DEBUG) {
-      this.#targetCirclesGO = this.add.graphics();
-      this.#targetCirclesGO.lineStyle(2, 0x00ff00, 0.8);
-      this.#targetCirclesGO.strokeCircle(this.#candleX, this.#candleBottomY, this.#swipeZoneRadius);
-      this.#targetCirclesGO.strokeCircle(this.#candleX, this.#candleTopY, this.#swipeZoneRadius);
-    }
+    // Always drawn, independent of DEBUG — this is a permanent gameplay/tuning
+    // visual, not dev-only chatter.
+    this.#targetCirclesGO = this.add.graphics();
+    this.#targetCirclesGO.lineStyle(2, 0x00ff00, 0.8);
+    this.#targetCirclesGO.strokeCircle(this.#candleX, this.#candleBottomY, this.#swipeZoneRadius);
+    this.#targetCirclesGO.strokeCircle(this.#candleX, this.#candleTopY, this.#swipeZoneRadius);
 
     this.#swipeIndicatorGO = this.add.image(this.#candleX, this.#candleBottomY, ASSET_KEYS.ARROW_UP).setOrigin(0.5, 0.5);
     this.#swipeArrowBaseScale = this.#scaleImageToHeight(this.#swipeIndicatorGO, height * this.#swipeArrowHeightRatio);
