@@ -156,7 +156,7 @@ export const GAMEPLAY_SHARED_ASSETS = {
 
 export const INTRO_ASSETS = {
   images: [
-    { assetKey: ASSET_KEYS.BACKGROUND_INTRO, path: 'assets/images/Classroom_Unhappy.png' },
+    { assetKey: ASSET_KEYS.BACKGROUND_INTRO, path: 'assets/images/Classroom_Unhappy.jpg' },
     { assetKey: ASSET_KEYS.LOGO, path: 'assets/images/logo.png' },
     { assetKey: ASSET_KEYS.EMOJI1, path: 'assets/images/Emoji01.png' },
     { assetKey: ASSET_KEYS.EMOJI2, path: 'assets/images/Emoji02.png' },
@@ -284,7 +284,7 @@ export const STAGE3_ASSETS = {
 };
 
 export const OUTRO_ASSETS = {
-  images: [{ assetKey: ASSET_KEYS.BACKGROUND_OUTRO, path: 'assets/images/outroBG.png' }],
+  images: [{ assetKey: ASSET_KEYS.BACKGROUND_OUTRO, path: 'assets/images/outroBG.jpg' }],
   audio: [
     { assetKey: ASSET_KEYS.EZ_39, path: 'assets/audio/Outro/EZ-39.mp3' },
     { assetKey: ASSET_KEYS.EZ_40, path: 'assets/audio/Outro/EZ-40.mp3' },
