@@ -61,7 +61,9 @@ export class OutroScene extends Phaser.Scene {
     const { width, height } = this.scale;
 
     // TODO: swap ASSET_KEYS.OUTRO_BACKGROUND for your real background
-    this.add.image(width / 2, height / 2, ASSET_KEYS.BACKGROUND_OUTRO).setScale(0.55);
+    // No .setScale() needed anymore — outroBG.jpg is already 1080x1920 (was
+    // 1977x3512 as a PNG; .setScale(0.55) used to compensate for that).
+    this.add.image(width / 2, height / 2, ASSET_KEYS.BACKGROUND_OUTRO);
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.#handleShutdown, this);
 
