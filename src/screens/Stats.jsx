@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getStats } from '../services/votes.js'
+import { fetchAllVotes } from '../services/firebase.js'
+import { getAllVotes } from '../services/db.js'
 
 const GAME_NAMES = {
   'healthy-hero': 'Healthy Hero',
@@ -12,10 +14,60 @@ const GAME_NAMES = {
 export default function Stats() {
   const navigate = useNavigate()
   const [stats, setStats] = useState(null)
+  const [exporting, setExporting] = useState(false)
+  const [note, setNote] = useState('')
 
   useEffect(() => {
     getStats().then(setStats).catch(() => setStats({ total: 0, perGame: {} }))
   }, [])
+
+  const handleExport = async () => {
+    setExporting(true)
+    setNote('')
+    try {
+      // Προτίμησε το Firestore (ΟΛΕΣ οι οθόνες)· fallback στα τοπικά αυτής της συσκευής.
+      let votes = await fetchAllVotes()
+      let source = 'όλες οι οθόνες'
+      if (!votes) {
+        votes = await getAllVotes()
+        source = 'μόνο αυτή η συσκευή'
+      }
+      if (!votes || votes.length === 0) {
+        setNote('Δεν υπάρχουν ψήφοι για εξαγωγή.')
+        return
+      }
+      votes.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
+
+      const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`
+      const rows = [['Παιχνίδι', 'Βαθμολογία (1-4)', 'Ημερομηνία', 'Ώρα']]
+      for (const v of votes) {
+        const d = v.timestamp ? new Date(v.timestamp) : null
+        rows.push([
+          GAME_NAMES[v.game] || v.game || '',
+          v.rating ?? '',
+          d ? d.toLocaleDateString('el-GR') : '',
+          d ? d.toLocaleTimeString('el-GR') : '',
+        ])
+      }
+      // BOM + sep hint ώστε το Excel να ανοίξει σωστά (ελληνικά + διαχωριστικό).
+      const csv = '﻿' + 'sep=,\r\n' + rows.map((r) => r.map(q).join(',')).join('\r\n')
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      const today = new Date().toISOString().slice(0, 10)
+      a.href = url
+      a.download = `ypaitha-votes-${today}.csv`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+      setNote(`Έγινε εξαγωγή ${votes.length} ψήφων (${source}).`)
+    } catch {
+      setNote('Η εξαγωγή απέτυχε. Δοκίμασε από υπολογιστή (όχι kiosk).')
+    } finally {
+      setExporting(false)
+    }
+  }
 
   return (
     <div className="screen stats">
@@ -48,6 +100,11 @@ export default function Stats() {
           )}
         </>
       )}
+
+      <button type="button" className="big-button" onClick={handleExport} disabled={exporting}>
+        {exporting ? 'Εξαγωγή…' : '⬇️ Εξαγωγή σε Excel'}
+      </button>
+      {note && <p className="stats__note">{note}</p>}
 
       <button type="button" className="big-button big-button--neutral" onClick={() => navigate('/')}>
         ← Πίσω

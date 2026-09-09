@@ -1,7 +1,7 @@
 // Firebase Firestore — προαιρετικό. Αν λείπουν τα env vars, το app
 // συνεχίζει offline-first μόνο με IndexedDB (χωρίς σφάλματα).
 import { initializeApp } from 'firebase/app'
-import { getFirestore, collection, addDoc } from 'firebase/firestore'
+import { getFirestore, collection, addDoc, getDocs } from 'firebase/firestore'
 
 const config = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -27,4 +27,17 @@ export async function pushVote(vote) {
   if (!d) return false
   await addDoc(collection(d, 'votes'), vote)
   return true
+}
+
+// Διαβάζει ΟΛΕΣ τις ψήφους από το Firestore (όλες οι οθόνες μαζί) — για export.
+// Επιστρέφει null αν το Firebase δεν είναι ενεργό ή αν οι κανόνες δεν επιτρέπουν ανάγνωση.
+export async function fetchAllVotes() {
+  const d = getDb()
+  if (!d) return null
+  try {
+    const snap = await getDocs(collection(d, 'votes'))
+    return snap.docs.map((doc) => doc.data())
+  } catch {
+    return null
+  }
 }
